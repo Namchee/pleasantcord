@@ -1,11 +1,10 @@
 {
-  "name": "namchee-boilerplate",
+  "name": "pleasant-cord",
   "version": "1.0.0",
   "description": "A simple boilerplate with namchee's style",
   "main": "index.js",
   "scripts": {
-    "test": "ECHO: Do not test this, duh",
-    "refresh": "rm -rf node_modules/ dist/ build/ && npm i"
+    "test": "jest"
   },
   "keywords": [
     "boilerplate",
@@ -16,6 +15,7 @@
   "license": "MIT",
   "devDependencies": {
     "@types/eslint": "^6.1.8",
+    "@types/jest": "^26.0.12",
     "@typescript-eslint/eslint-plugin": "^2.24.0",
     "@typescript-eslint/parser": "^2.24.0",
     "cross-env": "^7.0.2",
@@ -23,9 +23,18 @@
     "eslint-config-google": "^0.14.0",
     "eslint-plugin-babel": "^5.3.0",
     "eslint-plugin-jsdoc": "^22.1.0",
+    "jest": "^26.4.2",
+    "nodemon": "^2.0.4",
     "rimraf": "^3.0.2",
+    "ts-jest": "^26.3.0",
     "ts-node": "^8.7.0",
     "typescript": "^3.8.3",
     "typesync": "^0.6.1"
+  },
+  "dependencies": {
+    "@tensorflow/tfjs-node": "^2.3.0",
+    "axios": "^0.20.0",
+    "discord.js": "^12.3.1",
+    "nsfwjs": "^2.2.0"
   }
 }
