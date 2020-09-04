@@ -4,7 +4,7 @@
   "description": "A simple boilerplate with namchee's style",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test:unit": "cross-env NODE_ENV=test jest"
   },
   "keywords": [
     "boilerplate",
@@ -19,6 +19,7 @@
     "@typescript-eslint/eslint-plugin": "^2.24.0",
     "@typescript-eslint/parser": "^2.24.0",
     "cross-env": "^7.0.2",
+    "dotenv": "^8.2.0",
     "eslint": "^6.8.0",
     "eslint-config-google": "^0.14.0",
     "eslint-plugin-babel": "^5.3.0",
@@ -32,9 +33,7 @@
     "typesync": "^0.6.1"
   },
   "dependencies": {
-    "@tensorflow/tfjs-node": "^2.3.0",
     "axios": "^0.20.0",
-    "discord.js": "^12.3.1",
-    "nsfwjs": "^2.2.0"
+    "discord.js": "^12.3.1"
   }
 }

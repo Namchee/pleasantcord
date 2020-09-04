@@ -1,41 +1,139 @@
-import { NSFWClassifier } from './nsfw';
-import { node } from '@tensorflow/tfjs-node';
-import { NSFWJS } from 'nsfwjs';
 import axios from 'axios';
+import { isNSFW } from './nsfw';
+import { SFWVerdict } from '@/common/types';
+import apiConfig from '@/config/api';
 
 jest.mock('axios');
-jest.mock('@tensorflow/tfjs-node');
-jest.mock('nsfwjs');
 
-describe('NSFWClassifier', () => {
-  const dummyArray = new Uint8Array();
+describe('isNSFW', () => {
+  it('should return a SFW verdict', async () => {
+    const axiosMock = axios.get as jest.Mock;
+    axiosMock.mockImplementationOnce(() => ({
+      data: {
+        outputs: {
+          data: {
+            concepts: [
+              {
+                'name': 'nsfw',
+                'value': 0.84,
+              },
+            ],
+          },
+        },
+      },
+    }));
 
-  let classifier: NSFWClassifier;
-  let axiosMock: jest.Mock;
-  let decodeMock: jest.Mock;
-  let disposeMock: jest.Mock;
+    const result: SFWVerdict = await isNSFW('test');
 
-  beforeAll(() => {
-    const model = new NSFWJS('', {});
-    classifier = new NSFWClassifier(model);
+    expect(result.isSFW).toBe(true);
+    expect(axiosMock).toHaveBeenCalledTimes(1);
 
-
-    axiosMock = axios.get as jest.Mock;
-    axiosMock.mockImplementation(jest.fn(() => dummyArray));
-    decodeMock = node.decodeImage as jest.Mock;
-    disposeMock = jest.fn();
-    decodeMock.mockImplementation(jest.fn(() => ({ dispose: disposeMock })));
+    expect(axiosMock).toHaveBeenCalledWith(
+      `${apiConfig.url}/${apiConfig.modelId}/outputs`,
+      {
+        headers: {
+          'Authorization': 'Key key',
+          'Content-type': 'application/json',
+        },
+        data: {
+          inputs: {
+            data: {
+              image: {
+                url: 'test',
+              },
+            },
+          },
+        },
+      },
+    );
   });
 
-  it('should return SFW verdict', async () => {
-    const verdict = await classifier.isSFW('', 0.84);
+  it('should return a NSFW verdict', async () => {
+    const axiosMock = axios.get as jest.Mock;
+    axiosMock.mockImplementationOnce(() => ({
+      data: {
+        outputs: {
+          data: {
+            concepts: [
+              {
+                'name': 'nsfw',
+                'value': 0.86,
+              },
+            ],
+          },
+        },
+      },
+    }));
 
-    expect(verdict.isSFW).toBe(true);
+    const result: SFWVerdict = await isNSFW('test');
 
-    expect(decodeMock).toBeCalledWith(dummyArray, 3);
-    expect(disposeMock).toBeCalledTimes(1);
-    expect(axiosMock).toBeCalledWith('', { responseType: 'arraybuffer' });
+    expect(result.isSFW).toBe(false);
+    expect(result.confidence).toBe(0.86);
+    expect(axiosMock).toHaveBeenCalledTimes(1);
+
+    expect(axiosMock).toHaveBeenCalledWith(
+      `${apiConfig.url}/${apiConfig.modelId}/outputs`,
+      {
+        headers: {
+          'Authorization': 'Key key',
+          'Content-type': 'application/json',
+        },
+        data: {
+          inputs: {
+            data: {
+              image: {
+                url: 'test',
+              },
+            },
+          },
+        },
+      },
+    );
   });
+
+  it(
+    'should return a SFW verdict if "nsfw" category is not present',
+    async () => {
+      const axiosMock = axios.get as jest.Mock;
+      axiosMock.mockImplementationOnce(() => ({
+        data: {
+          outputs: {
+            data: {
+              concepts: [
+                {
+                  'name': 'sfw',
+                  'value': 0.84,
+                },
+              ],
+            },
+          },
+        },
+      }));
+
+      const result: SFWVerdict = await isNSFW('test');
+
+      expect(result.isSFW).toBe(true);
+      expect(axiosMock).toHaveBeenCalledTimes(1);
+
+      expect(axiosMock).toHaveBeenCalledWith(
+        `${apiConfig.url}/${apiConfig.modelId}/outputs`,
+        {
+          headers: {
+            'Authorization': 'Key key',
+            'Content-type': 'application/json',
+          },
+          data: {
+            inputs: {
+              data: {
+                image: {
+                  url: 'test',
+                },
+              },
+            },
+          },
+        },
+      );
+    });
 
   afterEach(() => {
     jest.resetAllMocks();
