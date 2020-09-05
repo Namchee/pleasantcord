@@ -7,7 +7,7 @@ function loadEnv(fileName: string): void {
   });
 
   if (result.error) {
-    throw new Error('Environment files doesn\'t exist');
+    throw new Error('Environment variables doesn\'t exist');
   }
 }
 
