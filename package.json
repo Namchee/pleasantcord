@@ -4,7 +4,8 @@
   "description": "A simple boilerplate with namchee's style",
   "main": "index.js",
   "scripts": {
-    "test:unit": "cross-env NODE_ENV=test jest"
+    "test:unit": "cross-env NODE_ENV=test jest",
+    "dev": "nodemon"
   },
   "keywords": [
     "boilerplate",
