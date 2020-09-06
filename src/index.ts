@@ -11,6 +11,10 @@ const events = readdirSync(
 const client = new Client();
 
 events.forEach((filename) => {
+  if (/\.(spec|test)\./.test(filename)) {
+    return;
+  }
+
   const file = require(
     `${process.cwd()}\\src\\events\\${filename}`,
   );

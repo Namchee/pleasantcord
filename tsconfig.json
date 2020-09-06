@@ -2,7 +2,8 @@
   "compilerOptions": {
     "target": "es2017",
     "lib": [
-      "ES2019.Array"
+      "ES2019.Array",
+      "ES2020.Promise",
     ],
     "module": "commonjs",
     "allowJs": true,

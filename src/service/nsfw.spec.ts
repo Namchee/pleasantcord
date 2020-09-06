@@ -7,10 +7,10 @@ jest.mock('axios');
 
 describe('isNSFW', () => {
   it('should return a SFW verdict', async () => {
-    const axiosMock = axios.get as jest.Mock;
+    const axiosMock = axios.post as jest.Mock;
     axiosMock.mockImplementationOnce(() => ({
       data: {
-        outputs: {
+        outputs: [{
           data: {
             concepts: [
               {
@@ -19,7 +19,7 @@ describe('isNSFW', () => {
               },
             ],
           },
-        },
+        }],
       },
     }));
 
@@ -31,61 +31,65 @@ describe('isNSFW', () => {
     expect(axiosMock).toHaveBeenCalledWith(
       `${apiConfig.url}/${apiConfig.modelId}/outputs`,
       {
-        headers: {
-          'Authorization': 'Key key',
-          'Content-type': 'application/json',
-        },
-        data: {
-          inputs: {
+        inputs: [
+          {
             data: {
               image: {
                 url: 'test',
               },
             },
           },
+        ],
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Key key`,
         },
       },
     );
   });
 
   it('should return a NSFW verdict', async () => {
-    const axiosMock = axios.get as jest.Mock;
+    const axiosMock = axios.post as jest.Mock;
     axiosMock.mockImplementationOnce(() => ({
       data: {
-        outputs: {
+        outputs: [{
           data: {
             concepts: [
               {
                 'name': 'nsfw',
-                'value': 0.86,
+                'value': 0.85,
               },
             ],
           },
-        },
+        }],
       },
     }));
 
     const result: SFWVerdict = await isNSFW('test');
 
     expect(result.isSFW).toBe(false);
-    expect(result.confidence).toBe(0.86);
+    expect(result.confidence).toBe(0.85);
     expect(axiosMock).toHaveBeenCalledTimes(1);
 
     expect(axiosMock).toHaveBeenCalledWith(
       `${apiConfig.url}/${apiConfig.modelId}/outputs`,
       {
-        headers: {
-          'Authorization': 'Key key',
-          'Content-type': 'application/json',
-        },
-        data: {
-          inputs: {
+        inputs: [
+          {
             data: {
               image: {
                 url: 'test',
               },
             },
           },
+        ],
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Key key`,
         },
       },
     );
@@ -94,19 +98,19 @@ describe('isNSFW', () => {
   it(
     'should return a SFW verdict if "nsfw" category is not present',
     async () => {
-      const axiosMock = axios.get as jest.Mock;
+      const axiosMock = axios.post as jest.Mock;
       axiosMock.mockImplementationOnce(() => ({
         data: {
-          outputs: {
+          outputs: [{
             data: {
               concepts: [
                 {
-                  'name': 'sfw',
+                  'name': 'nsfw',
                   'value': 0.84,
                 },
               ],
             },
-          },
+          }],
         },
       }));
 
@@ -118,18 +122,20 @@ describe('isNSFW', () => {
       expect(axiosMock).toHaveBeenCalledWith(
         `${apiConfig.url}/${apiConfig.modelId}/outputs`,
         {
-          headers: {
-            'Authorization': 'Key key',
-            'Content-type': 'application/json',
-          },
-          data: {
-            inputs: {
+          inputs: [
+            {
               data: {
                 image: {
                   url: 'test',
                 },
               },
             },
+          ],
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Key key`,
           },
         },
       );

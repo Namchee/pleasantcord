@@ -5,26 +5,28 @@ import env from '@/config/env';
 import apiConfig from '@/config/api';
 
 export async function isNSFW(url: string): Promise<SFWVerdict> {
-  const { data } = await axios.get(
+  const { data } = await axios.post(
     `${apiConfig.url}/${apiConfig.modelId}/outputs`,
     {
-      headers: {
-        'Authorization': `Key ${env.CLARIFAI_KEY}`,
-        'Content-type': 'application/json',
-      },
-      data: {
-        inputs: {
+      inputs: [
+        {
           data: {
             image: {
               url,
             },
           },
         },
+      ],
+    },
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Key ${env.CLARIFAI_KEY}`,
       },
     },
   );
 
-  const concepts = data.outputs.data.concepts;
+  const concepts = data.outputs[0].data.concepts;
 
   for (const concept of concepts) {
     if (concept.name === apiConfig.conceptName &&
