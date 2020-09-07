@@ -1,5 +1,6 @@
-import { Message, DMChannel, Constants } from 'discord.js';
-import { isNSFW } from '@/service/nsfw';
+import { Message } from 'discord.js';
+import { isNSFW } from '@/service/nsfw.classifier';
+import { fetchImage } from '@/service/image.downloader';
 
 export default {
   event: 'message',
@@ -16,31 +17,35 @@ export default {
         const { isSFW } = await isNSFW(url);
 
         if (!isSFW) {
-          msg.delete({
-            reason: 'NSFW image',
-          });
-
           /* eslint-disable */
 
-          const mods = msg.channel.send(
-            `Moderation message: ${msg.author} just sent this in the channel`
+          const image = await fetchImage(attachment[1].url);
+
+          const moderation = msg.channel.send(
+            '_The following is an auto moderation message by `pleasantcord`. Attachment is possibly a NSFW content._',
           );
 
           const warning = msg.channel.send(
-            '**WARNING ⚠️: Contains NSFW image, only click on the spoiler if you know what are you doing**'
+            '**WARNING ⚠️: Only click the attachment if you know what are you doing!**',
           );
 
-          const contents = msg.channel.send(
-            msg.content,
+          const originalMessage = msg.channel.send(
+            `Sent by ${msg.author}: ${msg.content}`,
             {
               files: [{
-                attachment: attachment[1].url,
-                name: `SPOILER_${attachment[1].name}`
-              }],
+                attachment: image,
+                name: `SPOILER_${attachment[1].name}`,
+              }]
             },
           );
 
-          await Promise.allSettled([mods, warning, contents]);
+          const del = msg.delete({
+            reason: 'Possible NSFW content',
+          });
+
+          /* eslint-enable */
+
+          await Promise.all([moderation, warning, originalMessage, del]);
 
           return;
         }
