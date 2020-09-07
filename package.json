@@ -1,15 +1,19 @@
 {
   "name": "pleasant-cord",
-  "version": "1.0.0",
-  "description": "A simple boilerplate with namchee's style",
-  "main": "index.js",
+  "version": "0.9.0",
+  "description": "🤖 NSFW image moderation bot for Discord",
+  "main": "dist/index.js",
   "scripts": {
     "test": "cross-env NODE_ENV=test jest",
-    "dev": "nodemon"
+    "dev": "nodemon",
+    "build": "tsc",
+    "start": "node dist/index.js"
   },
   "keywords": [
-    "boilerplate",
-    "eslint",
+    "discord.js",
+    "bot",
+    "moderation",
+    "nsfw",
     "typescript"
   ],
   "author": "Namchee",

@@ -1,37 +1,52 @@
-# Namchee's Boilerplate
+# Pleasantcord
 
-[![Code Style: Google](https://img.shields.io/badge/code%20style-google-blueviolet.svg)](https://github.com/google/gts) [![devDependencies](https://img.shields.io/david/dev/namchee/namchee-boilerplate)](https://david-dm.org/namchee/namchee-boilerplate?type=dev)
+[![Code Style: Google](https://img.shields.io/badge/code%20style-google-blueviolet.svg)](https://github.com/google/gts)
 
-Sebuah _boilerplate_ sederhana untuk project _backend_ NodeJS dengan menggunakan Typescript dan ESLint
+Pleasantcord is a simple NSFW image moderation bot 🤖 for Discord.
 
-## Fitur
+![Pleasantcord Demo](docs/demo-pleasantcord.png)
 
-1. Config Typescript _all-in-one_, tinggal pakai
-2. Config ESLint dengan [_preset_ Google](https://github.com/google/gts), namun tidak terlalu _strict_ dan di _fine-tune_ lebih lanjut
-3. Update _dependency_ berkala
-4. [TypeSync](https://github.com/jeffijoe/typesync) untuk mempermudah instalasi _types_ yang dibutuhkan TypeScript
+It uses [Clarifai](https://www.clarifai.com/) to classify any message attachments sent on a server. Once the attachment is classified as a possible NSFW content, Pleasantcord will delete the original message and repost it with a warning and spoiler tag.
 
-## Instalasi
+Currently, it only has minimal features. Probably will be developed further in the future.
 
-1. Clone repo ini atau eksekusi `git clone https://github.com/Namchee/namchee-boilerplate.git` di terminal. Untuk pengguna GitHub, dapat juga menggunakan repo ini sebagai _template_ repo untuk mempermudah _development_
-2. Ketik `npm install` atau `yarn` pada terminal anda
-3. Install _dependencies_ lain yang anda butuhkan dalam proses _development_
-4. Atur [tsconfig](tsconfig.json) sesuai kebutuhan, termasuk `include` dan `exclude` supaya tidak bermasalah pada proses _build_
+## Requirements
 
-## FAQ
+1. NodeJS Version 10.x or above
+2. [Clarifai](https://www.clarifai.com/) Account (possibly changed)
+3. Discord Developer Account
 
-### Mengapa tidak menggunakan `webpack`?
+## Installation
 
-Karena _server-side_ JavaScript tidak membutuhkan _bundling_. `webpack` masuk akal pada _front-end_ karena browser tidak memiliki _module_, sedangkan NodeJS memiliki `require` sebagai _module system_ mereka.
+> Currently, you **MUST** self-host this bot yourself
 
-### Mengapa tidak menggunakan `babel`?
+1. Clone the repository
+2. Navigate to your freshly cloned git directory
+3. Execute `npm install` from your terminal
+4. Create a new `.env` on the root folder and fill it according to [the sample file](.env.sample)
+5. Build the bot by executing `npm run build` in your terminal
+6. Run the bot by executing:
+    1. Production Mode: `npm run start` from your terminal
+    2. Development Mode: `npm run dev` from your terminal. You can skip step 5 by doing this.
 
-Karena _server-side_ JavaScript tidak memerlukan _transpile_. Developerlah yang seharusnya mengontrol versi Node yang digunakan sesuai kebutuhan aplikasi.
+## Configuration
 
-### Seberapa sering _update_ dependency dilakukan?
+NSFW probability limit can be configured in `src/config/api.ts`. The default value is 0.85 [per Clarifai's suggestion](https://www.clarifai.com/models/nsfw-image-recognition-model-e9576d86d2004ed1a38ba0cf39ecb4b1), however you can customize it as you wish.
 
-Sesering yang saya bisa, setidaknya 2 minggu sekali.
+Example:
 
-## Lisensi
+```js
+export default {
+  // ...
+  confidence: 0.50, // If Clarifai has 50% or better confidence that it's a NSFW image, it will be moderated
+};
+```
 
-_Boilerplate_ ini menggunakan lisensi [MIT](LICENSE)
+## Motivation
+
+Discord has [NSFW Channel System](https://support.discord.com/hc/en-us/articles/115000084051-NSFW-Channels-and-Content). Unfortunately, it can't prevent NSFW content to be posted
+on SFW channels and still requires manual moderation. This bot aims to fix that.
+
+## License
+
+This project is licensed under [MIT License](LICENSE)
