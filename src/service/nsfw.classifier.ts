@@ -1,8 +1,8 @@
 import axios from 'axios';
 
-import { SFWVerdict } from '@/common/types';
-import env from '@/config/env';
-import apiConfig from '@/config/api';
+import { SFWVerdict } from './../common/types';
+import env from './../config/env';
+import apiConfig from './../config/api';
 
 /**
  * Classify an image based on it's safe-for-work value

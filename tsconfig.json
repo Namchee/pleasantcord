@@ -7,7 +7,7 @@
     ],
     "module": "commonjs",
     "allowJs": true,
-    "outDir": "./build",
+    "outDir": "./dist",
     "preserveConstEnums": true,
     "removeComments": true,
     "strict": true,
@@ -19,12 +19,16 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
     "resolveJsonModule": true,
     "baseUrl": "./",
     "paths": {
       "@/*": ["src/*"]
     }
   },
+  "include": [
+    "./src/**/*"
+  ],
   "exclude": [
     "node_modules"
   ]

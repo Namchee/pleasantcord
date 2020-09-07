@@ -1,6 +1,6 @@
 import { Message } from 'discord.js';
-import { isNSFW } from '@/service/nsfw.classifier';
-import { fetchImage } from '@/service/image.downloader';
+import { isNSFW } from './../service/nsfw.classifier';
+import { fetchImage } from './../service/image.downloader';
 
 export default {
   event: 'message',

@@ -47,6 +47,8 @@ export default {
 Discord has [NSFW Channel System](https://support.discord.com/hc/en-us/articles/115000084051-NSFW-Channels-and-Content). Unfortunately, it can't prevent NSFW content to be posted
 on SFW channels and still requires manual moderation. This bot aims to fix that.
 
+> Disclaimer: Due to limited time and ideas, the bot can only cover the NSFW contents in spoiler tags
+
 ## License
 
 This project is licensed under [MIT License](LICENSE)

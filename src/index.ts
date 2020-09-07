@@ -2,7 +2,7 @@
 import { Client } from 'discord.js';
 import { readdirSync } from 'fs';
 import { DiscordEventCallback } from './common/types';
-import env from '@/config/env';
+import env from './config/env';
 
 const events = readdirSync(
   `${process.cwd()}\\src\\events`,
