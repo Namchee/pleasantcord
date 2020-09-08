@@ -1,51 +1,75 @@
-import { Message } from 'discord.js';
+import { Message, MessageEmbed, TextChannel } from 'discord.js';
 import { isNSFW } from './../service/nsfw.classifier';
 import { fetchImage } from './../service/image.downloader';
 
 export default {
   event: 'message',
   fn: async (msg: Message): Promise<void> => {
-    if (msg.author.bot ||
-      msg.attachments.size === 0) {
+    const { author, attachments, content } = msg;
+    const channel = msg.channel as TextChannel;
+
+    if (author.bot || attachments.size === 0) {
       return;
     }
 
-    for (const attachment of msg.attachments) {
+    for (const attachment of attachments) {
       const { url } = attachment[1];
 
       if (/\.(jpg|png|jpeg)$/.test(url)) {
-        const { isSFW } = await isNSFW(url);
+        const verdict = await isNSFW(url);
 
-        if (!isSFW) {
-          /* eslint-disable */
-
+        if (!verdict.isSFW) {
           const image = await fetchImage(attachment[1].url);
+          const confidence = verdict.confidence as number;
 
-          const moderation = msg.channel.send(
-            '_The following is an auto moderation message by `pleasantcord`. Attachment is possibly a NSFW content._',
-          );
-
-          const warning = msg.channel.send(
-            '**WARNING ⚠️: Only click the attachment if you know what are you doing!**',
-          );
-
-          const originalMessage = msg.channel.send(
-            `Sent by ${msg.author}: ${msg.content}`,
+          const fields = [
             {
-              files: [{
-                attachment: image,
-                name: `SPOILER_${attachment[1].name}`,
-              }]
+              name: 'Original Author',
+              value: author.toString(),
+              inline: true,
             },
+            {
+              name: 'Reason',
+              value: 'Potentially NSFW attachment',
+              inline: true,
+            },
+            {
+              name: 'Accuracy',
+              value: `${(confidence * 100).toFixed(2)}%`,
+              inline: true,
+            },
+          ];
+
+          if (content) {
+            fields.push(
+              { name: 'Original Content', value: content, inline: false },
+            );
+          }
+
+          const moderationMessage = channel.send(
+            new MessageEmbed({
+              author: {
+                name: 'pleasantcord',
+                icon_url: 'https://images.unsplash.com/photo-1592205644721-2fe5214762ae?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=667&q=80',
+              },
+              title: `Auto moderation message on #${channel.name}`,
+              fields,
+              description: '**⚠️ Potentially NSFW ⚠️**',
+              color: '#E53E3E',
+              files: [
+                {
+                  attachment: image,
+                  name: `SPOILER_${attachment[1].name}`,
+                },
+              ],
+            }),
           );
 
           const del = msg.delete({
             reason: 'Possible NSFW content',
           });
 
-          /* eslint-enable */
-
-          await Promise.all([moderation, warning, originalMessage, del]);
+          await Promise.allSettled([moderationMessage, del]);
 
           return;
         }
