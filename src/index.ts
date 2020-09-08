@@ -25,7 +25,11 @@ events.forEach((filename) => {
 
   const cb = file.default as DiscordEventCallback;
 
-  client.on(cb.event, cb.fn);
+  if (cb.once) {
+    client.once(cb.event, cb.fn.bind(null, client));
+  } else {
+    client.on(cb.event, cb.fn.bind(null, client));
+  }
 });
 
 client.login(env.DISCORD_TOKEN);
