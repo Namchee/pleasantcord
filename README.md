@@ -18,7 +18,7 @@ Currently, it only has minimal features. Probably will be developed further in t
 
 ## Installation
 
-> Currently, you **MUST** self-host this bot yourself
+> Currently, you **MUST** self-host this bot yourself. In the future, I'll create the public version
 
 1. Clone the repository
 2. Navigate to your freshly cloned git directory
@@ -31,7 +31,7 @@ Currently, it only has minimal features. Probably will be developed further in t
 
 ## Configuration
 
-NSFW probability limit can be configured in `src/config/api.ts`. The default value is 0.85 [per Clarifai's suggestion](https://www.clarifai.com/models/nsfw-image-recognition-model-e9576d86d2004ed1a38ba0cf39ecb4b1), however you can customize it as you wish.
+NSFW probability limit can be configured in `src/config/api.ts`. The default value is `0.85` (85%) [per Clarifai's suggestion](https://www.clarifai.com/models/nsfw-image-recognition-model-e9576d86d2004ed1a38ba0cf39ecb4b1), however you can customize it as you wish.
 
 Example:
 
@@ -48,6 +48,10 @@ Discord has [NSFW Channel System](https://support.discord.com/hc/en-us/articles/
 on SFW channels and still requires manual moderation. This bot aims to fix that.
 
 > Disclaimer: Due to limited time and ideas, the bot can only cover the NSFW contents in spoiler tags
+
+## Acknowledgements
+
+- Profile image is taken from [this Unsplash image](https://unsplash.com/photos/6F2k0tqNuG4) by [Hongru Wang](https://unsplash.com/@hongru_wang)
 
 ## License
 
