@@ -1,4 +1,4 @@
-import { Message } from 'discord.js';
+import { Message, Client } from 'discord.js';
 
 export interface SFWVerdict {
   isSFW: boolean;
@@ -7,5 +7,6 @@ export interface SFWVerdict {
 
 export interface DiscordEventCallback {
   event: string;
-  fn: () => Promise<Message | void>;
+  once?: boolean;
+  fn: (client: Client) => Promise<Message | void>;
 }
