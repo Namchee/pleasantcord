@@ -8,7 +8,7 @@ export default {
     const { author, attachments, content } = msg;
     const channel = msg.channel as TextChannel;
 
-    if (author.bot || attachments.size === 0) {
+    if (author.bot || attachments.size === 0 || channel.nsfw) {
       return;
     }
 
