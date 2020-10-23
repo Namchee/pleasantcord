@@ -1,10 +1,11 @@
-import { Message, MessageEmbed, TextChannel, Client } from 'discord.js';
+import { Message, MessageEmbed, TextChannel } from 'discord.js';
 import { isNSFW } from './../service/nsfw.classifier';
 import { fetchImage } from './../service/image.downloader';
+import { BotContext } from './../common/types';
 
 export default {
   event: 'message',
-  fn: async (_: Client, msg: Message): Promise<void> => {
+  fn: async (_: BotContext, msg: Message): Promise<void> => {
     const { author, attachments, content } = msg;
     const channel = msg.channel as TextChannel;
 

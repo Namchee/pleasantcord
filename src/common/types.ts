@@ -5,8 +5,19 @@ export interface SFWVerdict {
   confidence?: number;
 }
 
-export interface DiscordEventCallback {
+export interface BotContext {
+  client: Client;
+  repository: BotRepository;
+}
+
+export interface EventHandler {
   event: string;
   once?: boolean;
-  fn: (client: Client) => Promise<Message | void>;
+  fn: (ctx: BotContext) => Promise<Message | void>;
+}
+
+export interface BotRepository {
+  getWarn: (id: string) => Promise<number>;
+  addWarn: (id: string) => Promise<boolean>;
+  clearWarn: (id: string) => Promise<boolean>;
 }

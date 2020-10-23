@@ -1,35 +1,41 @@
 // Entry point goes here
+import Redis from 'ioredis';
 import { Client } from 'discord.js';
+import { resolve } from 'path';
 import { readdirSync } from 'fs';
-import { DiscordEventCallback } from './common/types';
+import { RedisRepository } from './repository/redis';
+import { BotContext, EventHandler } from './common/types';
 import env from './config/env';
 
-const path = process.env.NODE_ENV === 'production' ?
-  'dist' :
-  'src';
+const events = readdirSync(resolve(__dirname, 'events'));
 
-const events = readdirSync(
-  `${process.cwd()}\\${path}\\events`,
+const discordClient = new Client();
+const redisClient = new Redis(
+  Number(env.REDIS_PORT),
+  env.REDIS_HOST,
+  { password: env.REDIS_PASSWORD },
 );
-
-const client = new Client();
+const repository = new RedisRepository(redisClient);
+const ctx: BotContext = {
+  client: discordClient,
+  repository,
+};
 
 events.forEach((filename) => {
   if (/\.(spec|test)\./.test(filename)) {
     return;
   }
 
-  const file = require(
-    `${process.cwd()}\\${path}\\events\\${filename}`,
-  );
+  const file = require(resolve(__dirname, 'events', filename));
 
-  const cb = file.default as DiscordEventCallback;
+  const handler = file.default as EventHandler;
+  const fn = handler.fn.bind(null, ctx);
 
-  if (cb.once) {
-    client.once(cb.event, cb.fn.bind(null, client));
+  if (handler.once) {
+    discordClient.once(handler.event, fn);
   } else {
-    client.on(cb.event, cb.fn.bind(null, client));
+    discordClient.on(handler.event, fn);
   }
 });
 
-client.login(env.DISCORD_TOKEN);
+discordClient.login(env.DISCORD_TOKEN);
