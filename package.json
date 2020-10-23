@@ -4,6 +4,7 @@
   "description": "🤖 NSFW image moderation bot for Discord",
   "main": "dist/index.js",
   "scripts": {
+    "lint": "eslint ./src/**.ts",
     "test": "cross-env NODE_ENV=test jest --verbose",
     "dev": "nodemon",
     "build": "rm -rf dist/ && tsc",
