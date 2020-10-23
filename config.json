@@ -1,5 +1,8 @@
 {
+  "name": "pleasantcord",
+  "imageUrl": "https://images.unsplash.com/photo-1592205644721-2fe5214762ae?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=667&q=80",
   "confidence": 0.85,
+  "deleteNSFW": false,
   "warn": {
     "count": 3,
     "refreshPeriod": 3600
