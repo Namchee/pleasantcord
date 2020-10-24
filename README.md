@@ -42,7 +42,7 @@ Key | Description
 `confidence` | Threshold for NSFW content prediction. Any content will be moderated if the NSFW probability is higher than this value.
 `deleteNSFW` | Determine if the bot should repost the NSFW content.
 `warn.count` | Determine how many times should a member be warned when commiting a NSFW violation before being banned / kicked
-`warn.refreshPeriod` | Determine expiration time for member's violation in seconds.
+`warn.refreshPeriod` | Determine expiration time for member's violation in seconds. Set as `-1` if violation should remain permanent.
 `ban` | Determine if excess violators should be banned instead of kicked.
 
 > This bot **DOES NOT** provide an `unban` command.
