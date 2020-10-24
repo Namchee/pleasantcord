@@ -19,12 +19,22 @@ export class RedisRepository implements BotRepository {
 
   public addWarn = async (id: string): Promise<boolean> => {
     const { count } = await this.getWarn(id);
+    const expirationTime = Number(botConfig.warn.refreshPeriod);
 
-    const result = await this.client.setex(
-      id,
-      Number(botConfig.warn.refreshPeriod),
-      count + 1,
-    );
+    let result: string | null;
+
+    if (expirationTime === -1) {
+      result = await this.client.setex(
+        id,
+        expirationTime,
+        count + 1,
+      );
+    } else {
+      result = await this.client.set(
+        id,
+        count + 1,
+      );
+    }
 
     return result === 'OK';
   }
