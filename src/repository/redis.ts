@@ -1,23 +1,29 @@
 import { Redis } from 'ioredis';
-import { BotRepository } from './../common/types';
+import { BotRepository, Warning } from './../common/types';
 import botConfig from './../../config.json';
 
 export class RedisRepository implements BotRepository {
   public constructor(private readonly client: Redis) {}
 
-  public getWarn = async (id: string): Promise<number> => {
-    const warnCount = await this.client.get(id);
+  public getWarn = async (id: string): Promise<Warning> => {
+    const [warnCount, ttl] = await this.client.multi()
+      .get(id)
+      .ttl(id)
+      .exec();
 
-    return Number(warnCount) || 0;
+    return {
+      count: Number(warnCount[1]) || 0,
+      expiration: Number(ttl[1]) || -1,
+    };
   }
 
   public addWarn = async (id: string): Promise<boolean> => {
-    const prevWarn = await this.getWarn(id);
+    const { count } = await this.getWarn(id);
 
     const result = await this.client.setex(
       id,
       Number(botConfig.warn.refreshPeriod),
-      prevWarn + 1,
+      count + 1,
     );
 
     return result === 'OK';

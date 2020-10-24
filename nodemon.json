@@ -2,7 +2,9 @@
   "restartable": "rs",
   "verbose": true,
   "watch": [
-    "src/**/*.ts"
+    "config.json",
+    "src/**/*.ts",
+    "src/**/*.json"
   ],
   "ignore": [
     ".git",

@@ -9,14 +9,14 @@ export async function moderateUser(
 ): Promise<void> {
   try {
     const { id, nickname, displayName } = member;
-    const warningCount = await repository.getWarn(id);
+    const { count } = await repository.getWarn(id);
     let name = nickname;
 
     if (!name) {
       name = displayName;
     }
 
-    if (warningCount >= config.warn.count) {
+    if (count >= config.warn.count) {
       if (config.ban) {
         await member.ban({
           reason: 'Repeated NSFW content violation',
@@ -31,18 +31,16 @@ export async function moderateUser(
       );
     } else {
       await repository.addWarn(id);
-      const warnCount = await repository.getWarn(id);
+      const newCount = await repository.getWarn(id);
 
       const fields = [
         {
           name: 'Member',
           value: member.id,
-          inline: true,
         },
         {
           name: 'Warn Count',
-          value: warnCount,
-          inline: true,
+          value: newCount,
         },
       ];
 
@@ -52,9 +50,9 @@ export async function moderateUser(
           icon_url: config.imageUrl,
         },
         title: '[WARN] Server Member NSFW Warning',
-        color: '#E53E3E',
+        color: '#FFDE03',
         fields,
-        description: warnCount === config.warn.count ? '**⚠️ LAST WARNING ⚠️**' : '',
+        description: count === config.warn.count ? '**⚠️ LAST WARNING ⚠️**' : '',
       });
 
       await channel.send(embed);

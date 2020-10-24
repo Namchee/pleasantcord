@@ -2,7 +2,7 @@
 import Redis from 'ioredis';
 import { Client } from 'discord.js';
 import { resolve } from 'path';
-import { readdirSync } from 'fs';
+import { readdirSync, lstatSync } from 'fs';
 import { RedisRepository } from './repository/redis';
 import { BotContext, EventHandler } from './common/types';
 import env from './config/env';
@@ -22,11 +22,13 @@ const ctx: BotContext = {
 };
 
 events.forEach((filename) => {
-  if (/\.(spec|test)\./.test(filename)) {
+  const path = resolve(__dirname, 'events', filename);
+
+  if (/\.(spec|test)\./.test(filename) || lstatSync(path).isDirectory()) {
     return;
   }
 
-  const file = require(resolve(__dirname, 'events', filename));
+  const file = require(path);
 
   const handler = file.default as EventHandler;
   const fn = handler.fn.bind(null, ctx);

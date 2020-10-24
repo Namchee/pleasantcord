@@ -1,18 +1,41 @@
 import { Message, MessageEmbed, TextChannel } from 'discord.js';
+import { resolve } from 'path';
+import { readdirSync } from 'fs';
 import { isNSFW } from './../service/nsfw.classifier';
 import { fetchImage } from './../service/image.downloader';
-import { BotContext } from './../common/types';
+import { BotContext, CommandFunction, CommandHandler } from './../common/types';
 import { moderateUser } from './../service/moderation';
 import config from './../../config.json';
 
+const commandMap = new Map<string, CommandFunction>();
+const commands = readdirSync(resolve(__dirname, 'commands'));
+
+commands.forEach((command: string) => {
+  const file = require(resolve(__dirname, 'commands', command));
+  const handler = file.default as CommandHandler;
+
+  commandMap.set(handler.command, handler.fn);
+});
+
 export default {
   event: 'message',
-  fn: async (ctx: BotContext, msg: Message): Promise<void> => {
+  fn: async (ctx: BotContext, msg: Message): Promise<Message | void> => {
     const { author, attachments, content } = msg;
+    const prefix = config.commandPrefix;
     const channel = msg.channel as TextChannel;
 
-    if (!msg.guild || author.bot || attachments.size === 0 || channel.nsfw) {
+    if (!msg.guild || author.bot || channel.nsfw) {
       return;
+    }
+
+
+    if (content.startsWith(prefix)) {
+      const args = content.slice(prefix.length).trim().split(/ +/);
+      const commandHandler = commandMap.get(args[0]);
+
+      if (commandHandler) {
+        return commandHandler(ctx, msg);
+      }
     }
 
     for (const attachment of attachments) {
