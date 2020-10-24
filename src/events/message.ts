@@ -1,15 +1,41 @@
-import { Message, MessageEmbed, TextChannel, Client } from 'discord.js';
+import { Message, MessageEmbed, TextChannel } from 'discord.js';
+import { resolve } from 'path';
+import { readdirSync } from 'fs';
 import { isNSFW } from './../service/nsfw.classifier';
 import { fetchImage } from './../service/image.downloader';
+import { BotContext, CommandFunction, CommandHandler } from './../common/types';
+import { moderateUser } from './../service/moderation';
+import config from './../../config.json';
+
+const commandMap = new Map<string, CommandFunction>();
+const commands = readdirSync(resolve(__dirname, 'commands'));
+
+commands.forEach((command: string) => {
+  const file = require(resolve(__dirname, 'commands', command));
+  const handler = file.default as CommandHandler;
+
+  commandMap.set(handler.command, handler.fn);
+});
 
 export default {
   event: 'message',
-  fn: async (_: Client, msg: Message): Promise<void> => {
+  fn: async (ctx: BotContext, msg: Message): Promise<Message | void> => {
     const { author, attachments, content } = msg;
+    const prefix = config.commandPrefix;
     const channel = msg.channel as TextChannel;
 
-    if (author.bot || attachments.size === 0 || channel.nsfw) {
+    if (!msg.guild || author.bot || channel.nsfw) {
       return;
+    }
+
+
+    if (content.startsWith(prefix)) {
+      const args = content.slice(prefix.length).trim().split(/ +/);
+      const commandHandler = commandMap.get(args[0]);
+
+      if (commandHandler) {
+        return commandHandler(ctx, msg);
+      }
     }
 
     for (const attachment of attachments) {
@@ -46,30 +72,44 @@ export default {
             );
           }
 
-          const moderationMessage = channel.send(
-            new MessageEmbed({
-              author: {
-                name: 'pleasantcord',
-                icon_url: 'https://images.unsplash.com/photo-1592205644721-2fe5214762ae?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=667&q=80',
-              },
-              title: `Auto moderation message on #${channel.name}`,
-              fields,
-              description: '**⚠️ Potentially NSFW ⚠️**',
-              color: '#E53E3E',
-              files: [
-                {
-                  attachment: image,
-                  name: `SPOILER_${attachment[1].name}`,
+          const messages = [];
+
+          if (!config.deleteNSFW) {
+            const blurredContent = channel.send(
+              new MessageEmbed({
+                author: {
+                  name: config.name,
+                  icon_url: config.imageUrl,
                 },
-              ],
-            }),
-          );
+                title: `Auto moderation message on #${channel.name}`,
+                fields,
+                description: '**⚠️ Potentially NSFW ⚠️**',
+                color: '#E53E3E',
+                files: [
+                  {
+                    attachment: image,
+                    name: `SPOILER_${attachment[1].name}`,
+                  },
+                ],
+              }),
+            );
+
+            messages.push(blurredContent);
+          }
 
           const del = msg.delete({
             reason: 'Possible NSFW content',
           });
 
-          await Promise.allSettled([moderationMessage, del]);
+          messages.push(del);
+
+          await Promise.allSettled(messages);
+
+          const member = msg.guild.member(author);
+
+          if (member) {
+            await moderateUser(ctx, channel, member);
+          }
 
           return;
         }

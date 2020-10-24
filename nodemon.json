@@ -2,7 +2,9 @@
   "restartable": "rs",
   "verbose": true,
   "watch": [
-    "src/**/*.ts"
+    "config.json",
+    "src/**/*.ts",
+    "src/**/*.json"
   ],
   "ignore": [
     ".git",
@@ -11,6 +13,6 @@
   "env": {
     "NODE_ENV": "development"
   },
-  "exec": "ts-node -r tsconfig-paths/register ./src/index.ts",
+  "exec": "node -r ts-node/register ./src/index.ts",
   "ext": "ts"
 }

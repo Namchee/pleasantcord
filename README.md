@@ -6,48 +6,57 @@ Pleasantcord is a simple NSFW image moderation bot 🤖 for Discord.
 
 ![Pleasantcord Demo](docs/demo-pleasantcord.png)
 
-It uses [Clarifai](https://www.clarifai.com/) to classify any message attachments sent on a server. Once the attachment is classified as a possible NSFW content, Pleasantcord will delete the original message and repost it with a warning and spoiler tag.
+It uses [Clarifai](https://www.clarifai.com/) to classify any message attachments sent on a server. Once the attachment is classified as a possible NSFW content, this bot will delete the original message and repost it with a warning and spoiler tag.
 
-Currently, it only has minimal features. Probably will be developed further in the future.
+The bot behavior's can be controlled from the config file.
 
 ## Requirements
 
-1. NodeJS Version 10.x or above
+1. Working Docker installation
 2. [Clarifai](https://www.clarifai.com/) Account (possibly changed)
 3. Discord Developer Account
 
 ## Installation
 
-> Currently, you **MUST** self-host this bot yourself. In the future, I'll create the public version
+> You **MUST** self-host this bot yourself.
 
 1. Clone the repository
 2. Navigate to your freshly cloned git directory
-3. Execute `npm install` from your terminal
-4. Create a new `.env` on the root folder and fill it according to [the sample file](.env.sample)
-5. Build the bot by executing `npm run build` in your terminal
-6. Run the bot by executing:
-    1. Production Mode: `npm run start` from your terminal
-    2. Development Mode: `npm run dev` from your terminal. You can skip step 5 by doing this.
+3. Create a new `.env` file in the current directory
+4. Fill the new `.env` file with the instructions on `.env.sample` file
+5. Execute `docker-compose up` from your favorite terminal.
+
+## Deployment
+
+TBD
 
 ## Configuration
 
-NSFW probability limit can be configured in `src/config/api.ts`. The default value is `0.85` (85%) [per Clarifai's suggestion](https://www.clarifai.com/models/nsfw-image-recognition-model-e9576d86d2004ed1a38ba0cf39ecb4b1), however you can customize it as you wish.
+Below is the list of possible configuration for the bot
 
-Example:
+Key | Description
+--- | -----------
+`name` | Discord's bot name
+`imageUrl` | Image to be shown on rich message embeds. Should be same as the bot display picture from Discord's Developer Portal.
+`commandPrefix` | Prefix for various commands for the bot.
+`confidence` | Threshold for NSFW content prediction. Any content will be moderated if the NSFW probability is higher than this value.
+`deleteNSFW` | Determine if the bot should repost the NSFW content.
+`warn.count` | Determine how many times should a member be warned when commiting a NSFW violation before being banned / kicked
+`warn.refreshPeriod` | Determine expiration time for member's violation in seconds. Set as `-1` if violation should remain permanent.
+`ban` | Determine if excess violators should be banned instead of kicked.
 
-```js
-export default {
-  // ...
-  confidence: 0.50, // If Clarifai has 50% or better confidence that it's a NSFW image, it will be moderated
-};
-```
+> This bot **DOES NOT** provide an `unban` command.
+
+## Commands
+
+Command | Description
+------- | -----------
+`warnings` | Count how many NSFW violation you've made.
 
 ## Motivation
 
 Discord has [NSFW Channel System](https://support.discord.com/hc/en-us/articles/115000084051-NSFW-Channels-and-Content). Unfortunately, it can't prevent NSFW content to be posted
 on SFW channels and still requires manual moderation. This bot aims to fix that.
-
-> Disclaimer: Due to limited time and ideas, the bot can only cover the NSFW contents in spoiler tags
 
 ## Acknowledgements
 
