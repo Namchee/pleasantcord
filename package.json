@@ -43,7 +43,7 @@
     "typesync": "^0.6.1"
   },
   "dependencies": {
-    "axios": "^0.20.0",
+    "axios": "^0.21.1",
     "discord.js": "^12.3.1",
     "ioredis": "^4.17.3",
     "luxon": "^1.25.0",
