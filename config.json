@@ -4,6 +4,7 @@
   "commandPrefix": "!",
   "confidence": 0.85,
   "deleteNSFW": false,
+  "embedColor": "#2674C2",
   "warn": {
     "count": 3,
     "refreshPeriod": 3600

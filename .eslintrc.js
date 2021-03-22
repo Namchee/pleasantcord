@@ -32,7 +32,7 @@ module.exports = {
     ],
     'linebreak-style': [ // change this accordingly
       'warn',
-      'windows',
+      'unix',
     ],
     'object-curly-spacing': [
       'error',

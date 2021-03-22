@@ -1,10 +1,14 @@
 import { Message, MessageEmbed } from 'discord.js';
+import { resolve } from 'path';
 import { DateTime } from 'luxon';
 import { BotContext } from '../../common/types';
-import config from '../../../config.json';
+
+const config = require(
+  resolve(process.cwd(), 'config.json'),
+);
 
 export default {
-  command: 'warnings',
+  command: 'strike',
   fn: async ({ repository }: BotContext, msg: Message): Promise<Message> => {
     const { author } = msg;
 
@@ -23,7 +27,7 @@ export default {
         value: author.toString(),
       },
       {
-        name: 'Warnings',
+        name: 'Strikes',
         value: count,
       },
       {
@@ -36,10 +40,10 @@ export default {
       new MessageEmbed({
         author: {
           name: config.name,
-          icon_url: config.imageUrl,
+          iconURL: config.embedColor,
         },
         title: `[INFO] ${config.name}'s warning report`,
-        color: '#03A9F4',
+        color: config.embedColor,
         fields,
       }),
     );
