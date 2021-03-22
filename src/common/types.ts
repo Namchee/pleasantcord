@@ -23,6 +23,7 @@ export type CommandFunction = (
 
 export interface CommandHandler {
   command: string;
+  description: string;
   fn: CommandFunction;
 }
 

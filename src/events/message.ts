@@ -20,8 +20,6 @@ commands.forEach((command: string) => {
 
   const handler = file.default as CommandHandler;
 
-  console.log(handler.command);
-
   commandMap.set(handler.command, handler.fn);
 });
 
@@ -29,12 +27,13 @@ export default {
   event: 'message',
   fn: async (ctx: BotContext, msg: Message): Promise<Message | void> => {
     const { author, attachments, content } = msg;
-    const prefix = config.commandPrefix;
-    const channel = msg.channel as TextChannel;
+    const { prefix } = config;
 
-    if (!msg.guild || author.bot) {
+    if (!msg.guild || !msg.channel.isText() || author.bot) {
       return;
     }
+
+    const channel = msg.channel as TextChannel;
 
     if (content.startsWith(prefix)) {
       const args = content.slice(prefix.length).trim().split(/ +/);
@@ -43,7 +42,10 @@ export default {
       if (commandHandler) {
         return commandHandler(ctx, msg);
       } else {
-        return msg.reply('wtf');
+        return channel.send(
+          // eslint-disable-next-line max-len
+          `Whoops, I don't recognize that command. Try **${config.prefix}help**`,
+        );
       }
     }
 

@@ -8,6 +8,7 @@ const config = require(
 
 export default {
   command: 'strikes',
+  description: 'Get all active strikes on the current server',
   fn: async ({ repository }: BotContext, msg: Message): Promise<Message> => {
     const { guild } = msg;
 
@@ -17,7 +18,7 @@ export default {
 
     if (!strikes.length) {
       // eslint-disable-next-line max-len
-      contents += '\nWohoo! Everyone in this server is posting safe contents!';
+      contents += '\nNone! Everyone in this server is posting safe contents!';
     } else {
       strikes.forEach((strike: Strike) => {
         const { id, count } = strike;

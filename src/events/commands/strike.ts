@@ -9,6 +9,7 @@ const config = require(
 
 export default {
   command: 'strike',
+  description: 'Get the sender strike count on the current server',
   fn: async ({ repository }: BotContext, msg: Message): Promise<Message> => {
     const { author } = msg;
 
