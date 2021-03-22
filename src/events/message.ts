@@ -14,8 +14,13 @@ const commandMap = new Map<string, CommandFunction>();
 const commands = readdirSync(resolve(__dirname, 'commands'));
 
 commands.forEach((command: string) => {
-  const file = require(resolve(__dirname, 'commands', command));
+  const file = require(
+    resolve(__dirname, 'commands', command),
+  );
+
   const handler = file.default as CommandHandler;
+
+  console.log(handler.command);
 
   commandMap.set(handler.command, handler.fn);
 });
@@ -27,10 +32,9 @@ export default {
     const prefix = config.commandPrefix;
     const channel = msg.channel as TextChannel;
 
-    if (!msg.guild || author.bot || channel.nsfw) {
+    if (!msg.guild || author.bot) {
       return;
     }
-
 
     if (content.startsWith(prefix)) {
       const args = content.slice(prefix.length).trim().split(/ +/);
@@ -38,7 +42,13 @@ export default {
 
       if (commandHandler) {
         return commandHandler(ctx, msg);
+      } else {
+        return msg.reply('wtf');
       }
+    }
+
+    if (channel.nsfw) {
+      return;
     }
 
     for (const attachment of attachments) {
