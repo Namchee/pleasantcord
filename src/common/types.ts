@@ -23,16 +23,19 @@ export type CommandFunction = (
 
 export interface CommandHandler {
   command: string;
+  description: string;
   fn: CommandFunction;
 }
 
-export interface Warning {
+export interface Strike {
+  id: string;
   count: number;
   expiration: number;
 }
 
 export interface BotRepository {
-  getWarn: (id: string) => Promise<Warning>;
+  getStrikes: () => Promise<Strike[]>;
+  getUserStrike: (id: string) => Promise<Strike>;
   addWarn: (id: string) => Promise<boolean>;
   clearWarn: (id: string) => Promise<boolean>;
 }

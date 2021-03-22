@@ -9,10 +9,11 @@ const config = require(
 
 export default {
   command: 'strike',
+  description: 'Get the sender strike count on the current server',
   fn: async ({ repository }: BotContext, msg: Message): Promise<Message> => {
     const { author } = msg;
 
-    const { count, expiration } = await repository.getWarn(author.id);
+    const { count, expiration } = await repository.getUserStrike(author.id);
 
     let expirationTime = '-';
 
@@ -28,7 +29,7 @@ export default {
         value: author.toString(),
       },
       {
-        name: 'Strikes',
+        name: 'Current Strikes',
         value: count,
       },
       {
@@ -43,7 +44,7 @@ export default {
           name: config.name,
           iconURL: config.imageUrl,
         },
-        title: `${author.username}'s Strikes`,
+        title: `${author.username}'s Strikes on ${msg.guild?.name}`,
         color: config.embedColor,
         fields,
       }),

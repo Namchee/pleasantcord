@@ -8,6 +8,7 @@ const config = require(
 
 export default {
   command: 'ping',
+  description: 'Show the bot status',
   fn: async (_: BotContext, msg: Message): Promise<Message> => {
     const time = new Date().getTime() - msg.createdTimestamp;
 

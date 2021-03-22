@@ -14,7 +14,10 @@ const commandMap = new Map<string, CommandFunction>();
 const commands = readdirSync(resolve(__dirname, 'commands'));
 
 commands.forEach((command: string) => {
-  const file = require(resolve(__dirname, 'commands', command));
+  const file = require(
+    resolve(__dirname, 'commands', command),
+  );
+
   const handler = file.default as CommandHandler;
 
   commandMap.set(handler.command, handler.fn);
@@ -24,13 +27,13 @@ export default {
   event: 'message',
   fn: async (ctx: BotContext, msg: Message): Promise<Message | void> => {
     const { author, attachments, content } = msg;
-    const prefix = config.commandPrefix;
-    const channel = msg.channel as TextChannel;
+    const { prefix } = config;
 
-    if (!msg.guild || author.bot || channel.nsfw) {
+    if (!msg.guild || !msg.channel.isText() || author.bot) {
       return;
     }
 
+    const channel = msg.channel as TextChannel;
 
     if (content.startsWith(prefix)) {
       const args = content.slice(prefix.length).trim().split(/ +/);
@@ -38,7 +41,16 @@ export default {
 
       if (commandHandler) {
         return commandHandler(ctx, msg);
+      } else {
+        return channel.send(
+          // eslint-disable-next-line max-len
+          `Whoops, I don't recognize that command. Try **${config.prefix}help**`,
+        );
       }
+    }
+
+    if (channel.nsfw) {
+      return;
     }
 
     for (const attachment of attachments) {

@@ -9,7 +9,7 @@ export async function moderateUser(
 ): Promise<void> {
   try {
     const { id, nickname, displayName } = member;
-    const { count } = await repository.getWarn(id);
+    const { count } = await repository.getUserStrike(id);
     let name = nickname;
 
     if (!name) {
@@ -31,7 +31,7 @@ export async function moderateUser(
       );
     } else {
       await repository.addWarn(id);
-      const newCount = await repository.getWarn(id);
+      const newCount = await repository.getUserStrike(id);
 
       const fields = [
         {
