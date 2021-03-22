@@ -15,6 +15,7 @@ export default {
     const { count, expiration } = await repository.getWarn(author.id);
 
     let expirationTime = '-';
+
     if (expiration > -1) {
       expirationTime = DateTime.local()
         .plus({ seconds: expiration })
@@ -40,9 +41,9 @@ export default {
       new MessageEmbed({
         author: {
           name: config.name,
-          iconURL: config.embedColor,
+          iconURL: config.imageUrl,
         },
-        title: `[INFO] ${config.name}'s warning report`,
+        title: `${author.username}'s Strikes`,
         color: config.embedColor,
         fields,
       }),

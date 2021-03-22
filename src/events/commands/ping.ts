@@ -1,3 +1,4 @@
+import { BotContext } from '@/common/types';
 import { Message, MessageEmbed } from 'discord.js';
 import { resolve } from 'path';
 
@@ -7,7 +8,7 @@ const config = require(
 
 export default {
   command: 'ping',
-  fn: async (msg: Message): Promise<Message> => {
+  fn: async (_: BotContext, msg: Message): Promise<Message> => {
     const time = new Date().getTime() - msg.createdTimestamp;
 
     const responseMessage: MessageEmbed = new MessageEmbed({
@@ -15,15 +16,15 @@ export default {
         name: config.name,
         iconURL: config.imageUrl,
       },
-      title: `[${config.name}] Status Report`,
+      title: 'Status Report',
       fields: [
         {
-          name: 'Ping',
+          name: 'Response Time',
           value: `${time} ms`,
           inline: false,
         },
       ],
-      hexColor: config.embedColor,
+      color: config.embedColor,
     });
 
     return msg.channel.send(responseMessage);
