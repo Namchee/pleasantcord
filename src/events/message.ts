@@ -5,7 +5,10 @@ import { isNSFW } from './../service/nsfw.classifier';
 import { fetchImage } from './../service/image.downloader';
 import { BotContext, CommandFunction, CommandHandler } from './../common/types';
 import { moderateUser } from './../service/moderation';
-import config from './../../config.json';
+
+const config = require(
+  resolve(process.cwd(), 'config.json'),
+);
 
 const commandMap = new Map<string, CommandFunction>();
 const commands = readdirSync(resolve(__dirname, 'commands'));

@@ -1,16 +1,21 @@
 import { Message, MessageEmbed } from 'discord.js';
+import { resolve } from 'path';
 import { DateTime } from 'luxon';
 import { BotContext } from '../../common/types';
-import config from '../../../config.json';
+
+const config = require(
+  resolve(process.cwd(), 'config.json'),
+);
 
 export default {
-  command: 'warnings',
+  command: 'strike',
   fn: async ({ repository }: BotContext, msg: Message): Promise<Message> => {
     const { author } = msg;
 
     const { count, expiration } = await repository.getWarn(author.id);
 
     let expirationTime = '-';
+
     if (expiration > -1) {
       expirationTime = DateTime.local()
         .plus({ seconds: expiration })
@@ -23,7 +28,7 @@ export default {
         value: author.toString(),
       },
       {
-        name: 'Warnings',
+        name: 'Strikes',
         value: count,
       },
       {
@@ -36,10 +41,10 @@ export default {
       new MessageEmbed({
         author: {
           name: config.name,
-          icon_url: config.imageUrl,
+          iconURL: config.imageUrl,
         },
-        title: `[INFO] ${config.name}'s warning report`,
-        color: '#03A9F4',
+        title: `${author.username}'s Strikes`,
+        color: config.embedColor,
         fields,
       }),
     );
