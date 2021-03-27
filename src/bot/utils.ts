@@ -3,10 +3,8 @@ import { resolve } from 'path';
 import { Constants, DiscordAPIError, MessageEmbed } from 'discord.js';
 
 import { BotConfig, CommandHandler, EventHandler } from './types';
-import config from './../config/env';
 import { DBException } from '../exceptions/db';
 
-const { bot } = config;
 
 export function getCommands(): CommandHandler[] {
   const basePath = resolve(__dirname, 'events', 'commands');
@@ -19,7 +17,7 @@ export function getCommands(): CommandHandler[] {
     const { command, description, fn } = file.default as CommandHandler;
 
     return {
-      command: `\`${bot.prefix}${command}\``,
+      command,
       description,
       fn,
     };
@@ -66,7 +64,7 @@ export function errorHandler(config: BotConfig, err: Error): MessageEmbed {
       errorMessage.setTitle('Insufficient Permissions');
       errorMessage.setDescription(
         // eslint-disable-next-line max-len
-        `${config.name.toUpperCase()} lacks required permissions to perform its duties. Make sure that ${config.name.toUpperCase()} has sufficient permissions as stated in the documentation to manage this server`,
+        `${config.name} lacks required permissions to perform its duties. Make sure that ${config.name} has sufficient permissions as stated in the documentation to manage this server`,
       );
     } else {
       errorMessage.setTitle(err.name);

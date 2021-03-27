@@ -1,6 +1,6 @@
 import { Message, MessageEmbed } from 'discord.js';
 
-import { BotContext } from '../../types';
+import { BotContext, CommandHandler } from '../../types';
 import { getCommands } from '../../utils';
 
 export default {
@@ -9,7 +9,11 @@ export default {
   fn: ({ config }: BotContext, msg: Message): Promise<Message> => {
     const { channel } = msg;
 
-    const commands = getCommands();
+    const rawCommands = getCommands();
+
+    const commands = rawCommands.map((command: CommandHandler) => {
+      return `${config.prefix}${command.command} — ${command.description}`;
+    });
 
     return channel.send(
       new MessageEmbed({
@@ -17,7 +21,7 @@ export default {
           name: config.name,
           iconURL: config.imageUrl,
         },
-        title: `About ${config.name.toUpperCase()}`,
+        title: `About ${config.name}`,
         fields: [
           {
             name: 'Who Am I?',
