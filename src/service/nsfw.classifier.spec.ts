@@ -1,6 +1,5 @@
 import axios from 'axios';
-import { isNSFW } from './nsfw.classifier';
-import { SFWVerdict } from './../common/types';
+import { isNSFW, SFWVerdict } from './nsfw.classifier';
 import apiConfig from './../config/api';
 
 jest.mock('axios');

@@ -1,8 +1,8 @@
-import { config } from 'dotenv';
+import { config as parseEnv } from 'dotenv';
 import { resolve } from 'path';
 
 function loadEnv(fileName: string): void {
-  const result = config({
+  const result = parseEnv({
     path: resolve(process.cwd(), fileName),
   });
 
@@ -20,5 +20,12 @@ if (process.env.NODE_ENV === 'test') {
 }
 
 export default {
-  ...process.env,
+  env: {
+    ...process.env,
+  },
+  bot: {
+    ...require(
+      resolve(process.cwd(), 'config.json'),
+    ),
+  },
 };

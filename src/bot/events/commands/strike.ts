@@ -1,7 +1,7 @@
 import { Message, MessageEmbed } from 'discord.js';
 import { resolve } from 'path';
 import { DateTime } from 'luxon';
-import { BotContext } from '../../common/types';
+import { BotContext } from '../../types';
 
 const config = require(
   resolve(process.cwd(), 'config.json'),
@@ -11,15 +11,16 @@ export default {
   command: 'strike',
   description: 'Get the sender strike count on the current server',
   fn: async ({ repository }: BotContext, msg: Message): Promise<Message> => {
-    const { author } = msg;
+    const { guild, author } = msg;
 
-    const { count, expiration } = await repository.getUserStrike(author.id);
+    let expirationTime = '';
 
-    let expirationTime = '-';
+    const strike = await repository
+      .getStrike(guild?.id as string, author.id);
 
-    if (expiration > -1) {
-      expirationTime = DateTime.local()
-        .plus({ seconds: expiration })
+    if (strike) {
+      expirationTime = DateTime.fromJSDate(strike.lastUpdated)
+        .plus({ seconds: config.warn.refreshPeriod })
         .toRelative() as string;
     }
 
@@ -30,11 +31,11 @@ export default {
       },
       {
         name: 'Current Strikes',
-        value: count,
+        value: strike ? strike.count : 0,
       },
       {
         name: 'Expiration Time',
-        value: expirationTime,
+        value: expirationTime || '—',
       },
     ];
 

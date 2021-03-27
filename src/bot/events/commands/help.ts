@@ -1,4 +1,4 @@
-import { BotContext, CommandHandler } from '@/common/types';
+import { BotContext, CommandHandler } from './../../types';
 import { Message, MessageEmbed } from 'discord.js';
 import { readdirSync } from 'fs';
 import { resolve } from 'path';
@@ -38,7 +38,7 @@ export default {
           name: config.name,
           iconURL: config.imageUrl,
         },
-        title: `About ${config.name}`,
+        title: `About ${config.name.toUppercase()}`,
         fields: [
           {
             name: 'Who Am I?',

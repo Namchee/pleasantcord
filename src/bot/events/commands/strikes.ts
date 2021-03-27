@@ -1,6 +1,8 @@
-import { BotContext, Strike } from '@/common/types';
 import { resolve } from 'path';
 import { Message, MessageEmbed } from 'discord.js';
+
+import { Strike } from '../../../models/strike';
+import { BotContext } from '../../types';
 
 const config = require(
   resolve(process.cwd(), 'config.json'),
@@ -12,7 +14,7 @@ export default {
   fn: async ({ repository }: BotContext, msg: Message): Promise<Message> => {
     const { guild } = msg;
 
-    const strikes = await repository.getStrikes();
+    const strikes = await repository.getStrikes(guild?.id as string);
 
     let contents = '';
 
@@ -21,10 +23,10 @@ export default {
       contents += '\nNone! Everyone in this server is posting safe contents!';
     } else {
       strikes.forEach((strike: Strike) => {
-        const { id, count } = strike;
+        const { userId, count } = strike;
 
         // eslint-disable-next-line max-len
-        contents += `\n**${guild?.members.cache.get(id)}** — ${count} strikes`;
+        contents += `\n**${guild?.members.cache.get(userId)}** — ${count} strikes`;
       });
     }
 
