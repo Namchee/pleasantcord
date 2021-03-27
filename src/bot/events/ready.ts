@@ -1,14 +1,9 @@
-import { resolve } from 'path';
 import { BotContext } from '../types';
-
-const config = require(
-  resolve(process.cwd(), 'config.json'),
-);
 
 export default {
   event: 'ready',
   once: true,
-  fn: async ({ client }: BotContext): Promise<void> => {
+  fn: async ({ client, config }: BotContext): Promise<void> => {
     if (process.env.NODE_ENV === 'development') {
       console.log(`${config.name} is now ready to moderate servers`);
     }

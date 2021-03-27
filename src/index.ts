@@ -1,16 +1,14 @@
 import { Client } from 'discord.js';
-import { resolve } from 'path';
-import { readdirSync, lstatSync } from 'fs';
 
-import config from './config/env';
 import { BotContext, EventHandler } from './bot/types';
 import { getDBConnection } from './config/db';
 import { MongoRepository } from './repository/mongo';
+import { getEvents } from './bot/utils';
 
-const { env } = config;
+import config from './config/env';
 
-const basePath = resolve(__dirname, 'bot', 'events');
-const events = readdirSync(basePath);
+const { env, bot } = config;
+
 
 (async (): Promise<void> => {
   const discordClient = new Client();
@@ -18,27 +16,21 @@ const events = readdirSync(basePath);
 
   const repository = new MongoRepository(dbConnection);
 
-  const ctx: BotContext = {
+  const context: BotContext = {
     client: discordClient,
+    config: bot,
     repository,
   };
 
-  events.forEach((filename) => {
-    const path = resolve(basePath, filename);
+  const eventHandlers = getEvents();
 
-    if (/\.(spec|test)\./.test(filename) || lstatSync(path).isDirectory()) {
-      return;
-    }
+  eventHandlers.forEach(({ event, once, fn }: EventHandler) => {
+    const handler = fn.bind(null, context);
 
-    const file = require(path);
-
-    const handler = file.default as EventHandler;
-    const fn = handler.fn.bind(null, ctx);
-
-    if (handler.once) {
-      discordClient.once(handler.event, fn);
+    if (once) {
+      discordClient.once(event, handler);
     } else {
-      discordClient.on(handler.event, fn);
+      discordClient.on(event, handler);
     }
   });
 

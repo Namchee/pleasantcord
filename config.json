@@ -5,7 +5,7 @@
   "confidence": 0.85,
   "deleteNSFW": false,
   "embedColor": "#2674C2",
-  "warn": {
+  "strike": {
     "count": 3,
     "refreshPeriod": 3600
   },

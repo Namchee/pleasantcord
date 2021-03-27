@@ -1,34 +1,24 @@
 import { Message, MessageEmbed, TextChannel } from 'discord.js';
-import { resolve } from 'path';
-import { readdirSync } from 'fs';
 
 import { isNSFW } from '../../service/nsfw.classifier';
 import { fetchImage } from '../../service/image.downloader';
 import { moderateUser } from '../../service/moderation';
-import { CommandFunction, CommandHandler, BotContext } from '../types';
+import { CommandHandler, BotContext } from '../types';
+import { getCommands } from '../utils';
 
-const config = require(
-  resolve(process.cwd(), 'config.json'),
-);
 
-const commandMap = new Map<string, CommandFunction>();
-const commands = readdirSync(resolve(__dirname, 'commands'));
+const commandMap: Record<string, Function> = {};
+const commandHandlers = getCommands();
 
-commands.forEach((command: string) => {
-  const file = require(
-    resolve(__dirname, 'commands', command),
-  );
-
-  const handler = file.default as CommandHandler;
-
-  commandMap.set(handler.command, handler.fn);
+commandHandlers.forEach((handler: CommandHandler) => {
+  commandMap[handler.command] = handler.fn;
 });
 
 export default {
   event: 'message',
   fn: async (ctx: BotContext, msg: Message): Promise<Message | void> => {
     const { author, attachments, content } = msg;
-    const { prefix } = config;
+    const { prefix, deleteNSFW, name, imageUrl } = ctx.config;
 
     if (!msg.guild || !msg.channel.isText() || author.bot) {
       return;
@@ -38,14 +28,14 @@ export default {
 
     if (content.startsWith(prefix)) {
       const args = content.slice(prefix.length).trim().split(/ +/);
-      const commandHandler = commandMap.get(args[0]);
+      const commandHandler = commandMap[args[0]];
 
       if (commandHandler) {
         return commandHandler(ctx, msg);
       } else {
         return channel.send(
           // eslint-disable-next-line max-len
-          `Whoops, I don't recognize that command. Try **${config.prefix}help**`,
+          `Whoops, I don't recognize that command. Try **${prefix}help**`,
         );
       }
     }
@@ -90,12 +80,12 @@ export default {
 
           const messages = [];
 
-          if (!config.deleteNSFW) {
+          if (!deleteNSFW) {
             const blurredContent = channel.send(
               new MessageEmbed({
                 author: {
-                  name: config.name,
-                  icon_url: config.imageUrl,
+                  name: name,
+                  iconURL: imageUrl,
                 },
                 title: `NSFW Moderation on #${channel.name}`,
                 fields,

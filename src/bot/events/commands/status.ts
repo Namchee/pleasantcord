@@ -1,15 +1,11 @@
 import { Message, MessageEmbed } from 'discord.js';
-import { resolve } from 'path';
+
 import { BotContext } from '../../types';
 
-const config = require(
-  resolve(process.cwd(), 'config.json'),
-);
-
 export default {
-  command: 'ping',
+  command: 'status',
   description: 'Show the bot status',
-  fn: async (_: BotContext, msg: Message): Promise<Message> => {
+  fn: async ({ config }: BotContext, msg: Message): Promise<Message> => {
     const time = new Date().getTime() - msg.createdTimestamp;
 
     const fields = [

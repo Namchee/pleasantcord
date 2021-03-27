@@ -1,36 +1,15 @@
-import { BotContext, CommandHandler } from './../../types';
 import { Message, MessageEmbed } from 'discord.js';
-import { readdirSync } from 'fs';
-import { resolve } from 'path';
 
-const config = require(
-  resolve(process.cwd(), 'config.json'),
-);
-
-const commands = readdirSync(__dirname);
-
-let commandText = commands.map((command: string) => {
-  if (command === 'help.ts') {
-    return;
-  }
-
-  const file = require(
-    resolve(__dirname, command),
-  );
-
-  const handler = file.default as CommandHandler;
-
-  return `\`${config.prefix}${handler.command}\` — ${handler.description}`;
-}).join('\n');
-
-// Avoid circular dependency
-commandText += `\n\`${config.prefix}help\` — Show the help message`;
+import { BotContext } from '../../types';
+import { getCommands } from '../../utils';
 
 export default {
   command: 'help',
   description: 'Show the help message',
-  fn: (_: BotContext, msg: Message): Promise<Message> => {
+  fn: ({ config }: BotContext, msg: Message): Promise<Message> => {
     const { channel } = msg;
+
+    const commands = getCommands();
 
     return channel.send(
       new MessageEmbed({
@@ -38,7 +17,7 @@ export default {
           name: config.name,
           iconURL: config.imageUrl,
         },
-        title: `About ${config.name.toUppercase()}`,
+        title: `About ${config.name.toUpperCase()}`,
         fields: [
           {
             name: 'Who Am I?',
@@ -47,7 +26,7 @@ export default {
           },
           {
             name: 'Available Commands',
-            value: commandText,
+            value: commands,
           },
           {
             name: 'Contribution',

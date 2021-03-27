@@ -1,17 +1,15 @@
-import { resolve } from 'path';
 import { Message, MessageEmbed } from 'discord.js';
 
 import { Strike } from '../../../models/strike';
 import { BotContext } from '../../types';
 
-const config = require(
-  resolve(process.cwd(), 'config.json'),
-);
-
 export default {
   command: 'strikes',
   description: 'Get all active strikes on the current server',
-  fn: async ({ repository }: BotContext, msg: Message): Promise<Message> => {
+  fn: async (
+    { config, repository }: BotContext,
+    msg: Message,
+  ): Promise<Message> => {
     const { guild } = msg;
 
     const strikes = await repository.getStrikes(guild?.id as string);
