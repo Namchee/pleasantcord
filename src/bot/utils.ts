@@ -36,12 +36,14 @@ export function getEvents(): EventHandler[] {
       return !statSync(resolve(basePath, eventFile)).isDirectory();
     })
     .map((eventFile: string) => {
-      const file = require(resolve(basePath, eventFile)) as EventHandler;
+      const file = require(resolve(basePath, eventFile));
+
+      const { event, once, fn } = file.default as EventHandler;
 
       return {
-        event: file.event,
-        once: file.once || false,
-        fn: file.fn,
+        event,
+        once: once || false,
+        fn,
       };
     });
 

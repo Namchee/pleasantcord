@@ -11,7 +11,7 @@ export default {
     await client.user?.setPresence({
       status: 'online',
       activity: {
-        name: 'all possible NSFW contents ⚖️',
+        name: 'for NSFW contents ⚖️',
         type: 'WATCHING',
       },
     });

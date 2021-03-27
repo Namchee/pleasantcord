@@ -7,7 +7,7 @@ const { env, bot } = config;
 
 export interface SFWVerdict {
   isSFW: boolean;
-  confidence?: number;
+  confidence: number;
 }
 
 /**
@@ -53,5 +53,6 @@ export async function isNSFW(url: string): Promise<SFWVerdict> {
 
   return {
     isSFW: true,
+    confidence: 1,
   };
 }

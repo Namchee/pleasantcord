@@ -9,7 +9,6 @@ import config from './config/env';
 
 const { env, bot } = config;
 
-
 (async (): Promise<void> => {
   const discordClient = new Client();
   const dbConnection = await getDBConnection();
