@@ -1,15 +1,22 @@
 // In this file you can configure migrate-mongo
+const { config } = require('dotenv');
+
+if (process.env.NODE_ENV === 'development') {
+  config();
+}
+
+const { env } = process;
 
 module.exports = {
   mongodb: {
     // TODO Change (or review) the url to your MongoDB:
-    url: 'mongodb://localhost:27017',
+    url: `mongodb://${env.MONGO_USER}:${env.MONGO_password}@${env.MONGO_HOST}:${env.MONGO_PORT}`,
 
-    // TODO Change this to your database name:
-    databaseName: 'pleasantcord',
+    databaseName: process.env.MONGO_DBNAME,
 
     options: {
       useNewUrlParser: true, // removes a deprecation warning when connecting
+      useUnifiedTopology: true,
       //   connectTimeoutMS: 3600000, // increase connection timeout to 1 hour
       //   socketTimeoutMS: 3600000, // increase socket timeout to 1 hour
     },

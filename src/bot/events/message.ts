@@ -1,10 +1,11 @@
 import { Message, MessageEmbed, TextChannel } from 'discord.js';
 import { resolve } from 'path';
 import { readdirSync } from 'fs';
-import { isNSFW } from './../service/nsfw.classifier';
-import { fetchImage } from './../service/image.downloader';
-import { BotContext, CommandFunction, CommandHandler } from './../common/types';
-import { moderateUser } from './../service/moderation';
+
+import { isNSFW } from '../../service/nsfw.classifier';
+import { fetchImage } from '../../service/image.downloader';
+import { moderateUser } from '../../service/moderation';
+import { CommandFunction, CommandHandler, BotContext } from '../types';
 
 const config = require(
   resolve(process.cwd(), 'config.json'),
@@ -96,7 +97,7 @@ export default {
                   name: config.name,
                   icon_url: config.imageUrl,
                 },
-                title: `Auto moderation message on #${channel.name}`,
+                title: `Auto Moderation on #${channel.name}`,
                 fields,
                 description: '**⚠️ Potentially NSFW ⚠️**',
                 color: '#E53E3E',
@@ -123,7 +124,7 @@ export default {
           const member = msg.guild.member(author);
 
           if (member) {
-            await moderateUser(ctx, channel, member);
+            await moderateUser(ctx, msg, member);
           }
 
           return;

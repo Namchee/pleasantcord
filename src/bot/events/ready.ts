@@ -1,5 +1,5 @@
-import { BotContext } from './../common/types';
 import { resolve } from 'path';
+import { BotContext } from '../types';
 
 const config = require(
   resolve(process.cwd(), 'config.json'),

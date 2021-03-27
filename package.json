@@ -24,9 +24,9 @@
   "license": "MIT",
   "devDependencies": {
     "@types/eslint": "^6.1.8",
-    "@types/ioredis": "^4.17.6",
     "@types/jest": "^26.0.12",
     "@types/luxon": "^1.25.0",
+    "@types/mongodb": "^3.6.10",
     "@typescript-eslint/eslint-plugin": "^2.24.0",
     "@typescript-eslint/parser": "^2.24.0",
     "cross-env": "^7.0.2",
@@ -47,11 +47,9 @@
   "dependencies": {
     "axios": "^0.21.1",
     "discord.js": "^12.5.1",
-    "ioredis": "^4.17.3",
     "luxon": "^1.25.0",
     "migrate-mongo": "^8.2.2",
     "mongo": "^0.1.0",
-    "pm2": "^4.5.0",
-    "redis": "^3.0.2"
+    "pm2": "^4.5.0"
   }
 }

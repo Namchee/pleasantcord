@@ -1,19 +1,38 @@
-import { GuildMember, MessageEmbed, TextChannel } from 'discord.js';
-import { BotContext } from './../common/types';
-import config from './../../config.json';
+import { GuildMember, Message, MessageEmbed } from 'discord.js';
+import { DateTime } from 'luxon';
+import { resolve } from 'path';
+
+import { BotContext } from '../bot/types';
+import { DBException } from '../exceptions/db';
+
+const config = require(
+  resolve(process.cwd(), 'config.json'),
+);
 
 export async function moderateUser(
   { repository }: BotContext,
-  channel: TextChannel,
+  msg: Message,
   member: GuildMember,
 ): Promise<void> {
   try {
-    const { id, nickname, displayName } = member;
-    const { count } = await repository.getUserStrike(id);
+    const { guild, createdAt, channel, author } = msg;
+    const { nickname, displayName, id } = member;
+
     let name = nickname;
 
     if (!name) {
       name = displayName;
+    }
+
+    let count = 0;
+
+    const strike = await repository.getStrike(
+      guild?.id as string,
+      id,
+    );
+
+    if (strike) {
+      count = strike.count;
     }
 
     if (count >= config.warn.count) {
@@ -25,26 +44,52 @@ export async function moderateUser(
         await member.kick('Repeated NSFW content violation');
       }
 
-      await channel.send(
-        /* eslint-disable max-len */
-        `Member \`${name}\` has been ${config.ban ? 'banned' : 'kicked'} due to repeated NSFW violation`,
-      );
+      const moderationEmbed = new MessageEmbed({
+        author: {
+          name: config.name,
+          iconURL: config.imageUrl,
+        },
+        title: `${config.name} Server Moderation`,
+        // eslint-disable-next-line max-len
+        description: `Member \`${name}\` has been ${config.ban ? 'banned' : 'kicked'} due to repeated NSFW violation`,
+        fields: [
+          {
+            name: 'Reason',
+            value: 'Repeated NSFW content violation',
+            inline: true,
+          },
+          {
+            name: 'Action',
+            value: config.ban ? 'Ban' : 'Kick',
+            inline: true,
+          },
+          {
+            name: 'Effective Date',
+            value: DateTime.now().toString(),
+          },
+        ],
+      });
+
+      await channel.send(moderationEmbed);
     } else {
-      await repository.addWarn(id);
-      const newCount = await repository.getUserStrike(id);
+      const strike = await repository.addStrike(
+        guild?.id as string,
+        id,
+        createdAt,
+      );
 
       const fields = [
         {
           name: 'Member',
-          value: member.id,
+          value: author.username,
         },
         {
-          name: 'Warn Count',
-          value: newCount,
+          name: 'Strikes',
+          value: strike.count,
         },
       ];
 
-      const embed = new MessageEmbed({
+      const warningEmbed = new MessageEmbed({
         author: {
           name: config.name,
           icon_url: config.imageUrl,
@@ -52,14 +97,18 @@ export async function moderateUser(
         title: '[WARN] Server Member NSFW Warning',
         color: '#FFDE03',
         fields,
-        description: count === config.warn.count ? '**⚠️ LAST WARNING ⚠️**' : '',
+        description: count === config.warn.count ?
+          '**⚠️ LAST WARNING ⚠️**' :
+          '',
       });
 
-      await channel.send(embed);
+      await channel.send(warningEmbed);
+    }
+  } catch (err) {
+    if (err instanceof DBException) {
+      console.error(err.message);
     }
 
-    return;
-  } catch (err) {
     if (process.env.NODE_ENV === 'development') {
       console.error('Insufficient permissions when trying to moderate users.');
     }

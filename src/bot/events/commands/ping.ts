@@ -1,6 +1,6 @@
-import { BotContext } from '@/common/types';
 import { Message, MessageEmbed } from 'discord.js';
 import { resolve } from 'path';
+import { BotContext } from '../../types';
 
 const config = require(
   resolve(process.cwd(), 'config.json'),

@@ -1,9 +1,14 @@
 import axios from 'axios';
 
-import { SFWVerdict } from './../common/types';
-import env from './../config/env';
+import config from './../config/env';
 import apiConfig from './../config/api';
-import config from './../../config.json';
+
+const { env, bot } = config;
+
+export interface SFWVerdict {
+  isSFW: boolean;
+  confidence?: number;
+}
 
 /**
  * Classify an image based on it's safe-for-work value
@@ -37,7 +42,7 @@ export async function isNSFW(url: string): Promise<SFWVerdict> {
 
   for (const concept of concepts) {
     if (concept.name === apiConfig.conceptName &&
-      concept.value >= config.confidence
+      concept.value >= bot.confidence
     ) {
       return {
         isSFW: false,
