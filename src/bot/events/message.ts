@@ -163,7 +163,7 @@ export default {
                       name: botName,
                       iconURL: botImage,
                     },
-                    title: `NSFW Moderation on #${channel.name}`,
+                    title: 'Possible NSFW Contents Detected',
                     fields,
                     color: '#E53E3E',
                     files: [

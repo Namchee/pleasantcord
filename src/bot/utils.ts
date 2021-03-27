@@ -1,6 +1,6 @@
 import { readdirSync, statSync } from 'fs';
 import { resolve } from 'path';
-import { Constants, DiscordAPIError, Message, MessageEmbed } from 'discord.js';
+import { Constants, DiscordAPIError, MessageEmbed } from 'discord.js';
 
 import { BotConfig, CommandHandler, EventHandler } from './types';
 import config from './../config/env';
