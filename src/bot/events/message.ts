@@ -97,9 +97,8 @@ export default {
                   name: config.name,
                   icon_url: config.imageUrl,
                 },
-                title: `Auto Moderation on #${channel.name}`,
+                title: `NSFW Moderation on #${channel.name}`,
                 fields,
-                description: '**⚠️ Potentially NSFW ⚠️**',
                 color: '#E53E3E',
                 files: [
                   {

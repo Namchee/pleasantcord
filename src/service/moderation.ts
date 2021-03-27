@@ -15,7 +15,7 @@ export async function moderateUser(
   member: GuildMember,
 ): Promise<void> {
   try {
-    const { guild, createdAt, channel, author } = msg;
+    const { guild, createdAt, channel } = msg;
     const { nickname, displayName, id } = member;
 
     let name = nickname;
@@ -72,37 +72,11 @@ export async function moderateUser(
 
       await channel.send(moderationEmbed);
     } else {
-      const strike = await repository.addStrike(
+      await repository.addStrike(
         guild?.id as string,
         id,
         createdAt,
       );
-
-      const fields = [
-        {
-          name: 'Member',
-          value: author.username,
-        },
-        {
-          name: 'Strikes',
-          value: strike.count,
-        },
-      ];
-
-      const warningEmbed = new MessageEmbed({
-        author: {
-          name: config.name,
-          icon_url: config.imageUrl,
-        },
-        title: '[WARN] Server Member NSFW Warning',
-        color: '#FFDE03',
-        fields,
-        description: count === config.warn.count ?
-          '**⚠️ LAST WARNING ⚠️**' :
-          '',
-      });
-
-      await channel.send(warningEmbed);
     }
   } catch (err) {
     if (err instanceof DBException) {
