@@ -1,8 +1,10 @@
 import { readdirSync, statSync } from 'fs';
 import { resolve } from 'path';
+import { Constants, DiscordAPIError, Message, MessageEmbed } from 'discord.js';
 
-import { CommandHandler, EventHandler } from './types';
+import { BotConfig, CommandHandler, EventHandler } from './types';
 import config from './../config/env';
+import { DBException } from '../exceptions/db';
 
 const { bot } = config;
 
@@ -48,4 +50,48 @@ export function getEvents(): EventHandler[] {
     });
 
   return events;
+}
+
+export function errorHandler(config: BotConfig, err: Error): MessageEmbed {
+  const errorMessage = new MessageEmbed({
+    author: {
+      name: config.name,
+      iconURL: config.imageUrl,
+    },
+    color: '#E53E3E',
+  });
+
+  if (err instanceof DiscordAPIError) {
+    if (err.code === Constants.APIErrors.MISSING_PERMISSIONS) {
+      errorMessage.setTitle('Insufficient Permissions');
+      errorMessage.setDescription(
+        // eslint-disable-next-line max-len
+        `${config.name.toUpperCase()} lacks required permissions to perform its duties. Make sure that ${config.name.toUpperCase()} has sufficient permissions as stated in the documentation to manage this server`,
+      );
+    } else {
+      errorMessage.setTitle(err.name);
+      errorMessage.setAuthor(err.message);
+    }
+  } else {
+    if (err instanceof DBException) {
+      errorMessage.setTitle('Data Management Error');
+      errorMessage.setDescription(
+        // eslint-disable-next-line max-len
+        'There\'s an error on data management. Please contact the developer immediately',
+      );
+    } else {
+      errorMessage.setTitle('Uncaught Exceptions Thrown');
+      errorMessage.setDescription(
+        // eslint-disable-next-line max-len
+        'There\'s an unexpected error throw by the bot. Please contact the developer immediately',
+      );
+    }
+
+    errorMessage.addField(
+      'Stacktrace',
+      err.stack,
+    );
+  }
+
+  return errorMessage;
 }

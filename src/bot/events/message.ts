@@ -9,9 +9,8 @@ import {
 import { isNSFW } from '../../service/nsfw.classifier';
 import { fetchImage } from '../../service/image.downloader';
 import { CommandHandler, BotContext } from '../types';
-import { getCommands } from '../utils';
+import { errorHandler, getCommands } from '../utils';
 import { DateTime } from 'luxon';
-import { DBException } from '../../exceptions/db';
 
 const commandMap: Record<string, Function> = {};
 const commandHandlers = getCommands();
@@ -25,78 +24,68 @@ async function moderateMember(
   msg: Message,
   member: GuildMember,
 ): Promise<void> {
-  try {
-    const { guild, createdAt, channel } = msg;
-    const { nickname, displayName, id } = member;
+  const { guild, createdAt, channel } = msg;
+  const { nickname, displayName, id } = member;
 
-    let name = nickname;
+  let name = nickname;
 
-    if (!name) {
-      name = displayName;
+  if (!name) {
+    name = displayName;
+  }
+
+  let count = 0;
+
+  const strike = await repository.getStrike(
+    guild?.id as string,
+    id,
+  );
+
+  if (strike) {
+    count = strike.count;
+  }
+
+  if (count >= config.strike.count) {
+    if (config.ban) {
+      await member.ban({
+        reason: 'Repeated NSFW content violation',
+      });
+    } else {
+      await member.kick('Repeated NSFW content violation');
     }
 
-    let count = 0;
+    const moderationEmbed = new MessageEmbed({
+      author: {
+        name: config.name,
+        iconURL: config.imageUrl,
+      },
+      title: `${config.name} Server Moderation`,
+      // eslint-disable-next-line max-len
+      description: `Member \`${name}\` has been ${config.ban ? 'banned' : 'kicked'} due to repeated NSFW violation`,
+      fields: [
+        {
+          name: 'Reason',
+          value: 'Repeated NSFW content violation',
+          inline: true,
+        },
+        {
+          name: 'Action',
+          value: config.ban ? 'Ban' : 'Kick',
+          inline: true,
+        },
+        {
+          name: 'Effective Date',
+          value: DateTime.now().toString(),
+        },
+      ],
+    });
 
-    const strike = await repository.getStrike(
+    await channel.send(moderationEmbed);
+  } else {
+    await repository.addStrike(
       guild?.id as string,
       id,
+      createdAt,
     );
-
-    if (strike) {
-      count = strike.count;
-    }
-
-    if (count >= config.strike.count) {
-      if (config.ban) {
-        await member.ban({
-          reason: 'Repeated NSFW content violation',
-        });
-      } else {
-        await member.kick('Repeated NSFW content violation');
-      }
-
-      const moderationEmbed = new MessageEmbed({
-        author: {
-          name: config.name,
-          iconURL: config.imageUrl,
-        },
-        title: `${config.name} Server Moderation`,
-        // eslint-disable-next-line max-len
-        description: `Member \`${name}\` has been ${config.ban ? 'banned' : 'kicked'} due to repeated NSFW violation`,
-        fields: [
-          {
-            name: 'Reason',
-            value: 'Repeated NSFW content violation',
-            inline: true,
-          },
-          {
-            name: 'Action',
-            value: config.ban ? 'Ban' : 'Kick',
-            inline: true,
-          },
-          {
-            name: 'Effective Date',
-            value: DateTime.now().toString(),
-          },
-        ],
-      });
-
-      await channel.send(moderationEmbed);
-    } else {
-      await repository.addStrike(
-        guild?.id as string,
-        id,
-        createdAt,
-      );
-    }
-  } catch (err) {
-    if (err instanceof DBException) {
-      console.error(err.message);
-    }
-
-    if (process.env.NODE_ENV === 'development') {
-      console.error('Insufficient permissions when trying to moderate users.');
-    }
   }
 }
 
@@ -130,82 +119,88 @@ export default {
       return;
     }
 
-    const { name: botName, imageUrl: botImage } = ctx.config;
+    try {
+      const { name: botName, imageUrl: botImage } = ctx.config;
 
-    const moderations = attachments.map(
-      async ({ url, name }: MessageAttachment) => {
-        if (/\.(jpg|png|jpeg)$/.test(url)) {
-          const { isSFW, confidence } = await isNSFW(url);
+      const moderations = attachments.map(
+        async ({ url, name }: MessageAttachment) => {
+          if (/\.(jpg|png|jpeg)$/.test(url)) {
+            const { isSFW, confidence } = await isNSFW(url);
 
-          if (!isSFW) {
-            const image = await fetchImage(url);
+            if (!isSFW) {
+              const image = await fetchImage(url);
 
-            const fields = [
-              {
-                name: 'Original Author',
-                value: author.toString(),
-                inline: true,
-              },
-              {
-                name: 'Reason',
-                value: 'Potentially NSFW attachment',
-                inline: true,
-              },
-              {
-                name: 'Accuracy',
-                value: `${(confidence * 100).toFixed(2)}%`,
-                inline: true,
-              },
-            ];
+              const fields = [
+                {
+                  name: 'Original Author',
+                  value: author.toString(),
+                  inline: true,
+                },
+                {
+                  name: 'Reason',
+                  value: 'Potentially NSFW attachment',
+                  inline: true,
+                },
+                {
+                  name: 'Accuracy',
+                  value: `${(confidence * 100).toFixed(2)}%`,
+                  inline: true,
+                },
+              ];
 
-            if (content) {
-              fields.push(
-                { name: 'Original Content', value: content, inline: false },
-              );
-            }
+              if (content) {
+                fields.push(
+                  { name: 'Original Content', value: content, inline: false },
+                );
+              }
 
-            const req = [];
+              const req = [];
 
-            if (!deleteNSFW) {
-              const blurredMessage = channel.send(
-                new MessageEmbed({
-                  author: {
-                    name: botName,
-                    iconURL: botImage,
-                  },
-                  title: `NSFW Moderation on #${channel.name}`,
-                  fields,
-                  color: '#E53E3E',
-                  files: [
-                    {
-                      attachment: image,
-                      name: `SPOILER_${name}`,
+              if (!deleteNSFW) {
+                const blurredMessage = channel.send(
+                  new MessageEmbed({
+                    author: {
+                      name: botName,
+                      iconURL: botImage,
                     },
-                  ],
-                }),
-              );
+                    title: `NSFW Moderation on #${channel.name}`,
+                    fields,
+                    color: '#E53E3E',
+                    files: [
+                      {
+                        attachment: image,
+                        name: `SPOILER_${name}`,
+                      },
+                    ],
+                  }),
+                );
 
-              req.push(blurredMessage);
-            }
+                req.push(blurredMessage);
+              }
 
-            if (msg.deletable) {
-              req.push(msg.delete({
-                reason: 'Possible NSFW content',
-              }));
-            }
+              if (msg.deletable) {
+                req.push(
+                  msg.delete({
+                    reason: 'Possible NSFW content',
+                  }),
+                );
+              }
 
-            await Promise.allSettled(req);
+              await Promise.allSettled(req);
 
-            const member = msg.guild?.member(author);
+              const member = msg.guild?.member(author);
 
-            if (member) {
-              await moderateMember(ctx, msg, member);
+              if (member) {
+                await moderateMember(ctx, msg, member);
+              }
             }
           }
-        }
-      },
-    );
+        },
+      );
 
-    await Promise.allSettled(moderations);
+      await Promise.allSettled(moderations);
+    } catch (err) {
+      return channel.send(errorHandler(ctx.config, err));
+    }
   },
 };
