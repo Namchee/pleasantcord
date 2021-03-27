@@ -49,6 +49,10 @@ export default {
             name: 'Available Commands',
             value: commandText,
           },
+          {
+            name: 'Contribution',
+            value: 'GitHub — https://github.com/Namchee/pleasantcord',
+          },
         ],
         color: config.embedColor,
       }),
