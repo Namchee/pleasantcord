@@ -11,7 +11,10 @@
     "start": "pm2-runtime start dist/index.js",
     "postuninstall": "npm prune",
     "migration:init": "migrate-mongo init",
-    "migration:create": "sh -c 'migrate-mongo create $0'"
+    "migration:create": "sh -c 'migrate-mongo create $0'",
+    "migration:up": "migrate-mongo up",
+    "migration:down": "migrate-mongo down",
+    "migration:status": "migrate-mongo status"
   },
   "keywords": [
     "discord.js",

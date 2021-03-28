@@ -3,21 +3,30 @@ services:
   mongo:
     image: mongo:latest
     ports:
-      - 127.0.0.1:27017:27017
+      - 27017:27017
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
     volumes: 
       - mongo-volume:/data/db
+    networks:
+      - backend
   bot:
     build:
       context: .
       dockerfile: Dockerfile
+    environment: 
+      - NODE_ENV=development
     volumes:
       - ./:/usr/src/app
     depends_on:
       - mongo
+    networks:
+      - backend
 
 volumes:
   mongo-volume:
     driver: local
+
+networks: 
+  backend:

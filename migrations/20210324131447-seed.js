@@ -7,25 +7,25 @@ module.exports = {
         $jsonSchema: {
           bsonType: 'object',
           required: [
-            'server_id',
-            'user_id',
-            'strike_count',
-            'last_strike',
+            'serverId',
+            'userId',
+            'count',
+            'lastUpdated',
           ],
           properties: {
-            server_id: {
+            serverId: {
               bsonType: 'string',
               description: 'Discord server ID',
             },
-            user_id: {
+            userId: {
               bsonType: 'string',
               description: 'Server member ID',
             },
-            strike_count: {
+            count: {
               bsonType: 'int',
               description: 'How many strikes in the current cycle',
             },
-            last_strike: {
+            lastUpdated: {
               bsonType: 'date',
               description: 'Last strike time. Used on moderation logic',
             },
@@ -38,9 +38,6 @@ module.exports = {
       {
         server_id: 1,
         user_id: 1,
-      },
-      {
-        unique: true,
       },
     );
   },
