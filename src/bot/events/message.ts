@@ -10,7 +10,6 @@ import { isNSFW } from '../../service/nsfw.classifier';
 import { fetchImage } from '../../service/image.downloader';
 import { CommandHandler, BotContext } from '../types';
 import { errorHandler, getCommands } from '../utils';
-import { DateTime } from 'luxon';
 
 const commandMap: Record<string, Function> = {};
 const commandHandlers = getCommands();
@@ -34,6 +33,7 @@ async function moderateMember(
   }
 
   let count = 0;
+  let hasExpired = false;
 
   const strike = await repository.getStrike(
     guild?.id as string,
@@ -42,9 +42,12 @@ async function moderateMember(
 
   if (strike) {
     count = strike.count;
+
+    const now = new Date();
+    hasExpired = strike.hasExpired(now, config.strike.refreshPeriod);
   }
 
-  if (count >= config.strike.count) {
+  if (count >= config.strike.count && !hasExpired) {
     if (config.ban) {
       await member.ban({
         reason: 'Repeated NSFW content violation',
@@ -74,13 +77,22 @@ async function moderateMember(
         },
         {
           name: 'Effective Date',
-          value: DateTime.now().toString(),
+          value: createdAt.toISOString(),
         },
       ],
     });
 
-    await channel.send(moderationEmbed);
+    const ops: Promise<any>[] = [
+      channel.send(moderationEmbed),
+      repository.clearStrike(guild?.id as string, id),
+    ];
+
+    await Promise.all(ops);
   } else {
+    if (strike && hasExpired) {
+      await repository.clearStrike(guild?.id as string, id);
+    }
+
     await repository.addStrike(
       guild?.id as string,
       id,
@@ -195,7 +207,7 @@ export default {
                 );
               }
 
-              await Promise.allSettled(req);
+              await Promise.all(req);
 
               const member = msg.guild?.member(author);
 
@@ -207,7 +219,7 @@ export default {
         },
       );
 
-      await Promise.allSettled(moderations);
+      await Promise.all(moderations);
     } catch (err) {
       return channel.send(errorHandler(ctx.config, err));
     }

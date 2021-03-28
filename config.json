@@ -7,7 +7,7 @@
   "embedColor": "#2674C2",
   "strike": {
     "count": 3,
-    "refreshPeriod": 3600
+    "refreshPeriod": 300
   },
-  "ban": true
+  "ban": false
 }
