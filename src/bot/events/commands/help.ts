@@ -1,36 +1,19 @@
-import { BotContext, CommandHandler } from './../../types';
 import { Message, MessageEmbed } from 'discord.js';
-import { readdirSync } from 'fs';
-import { resolve } from 'path';
 
-const config = require(
-  resolve(process.cwd(), 'config.json'),
-);
-
-const commands = readdirSync(__dirname);
-
-let commandText = commands.map((command: string) => {
-  if (command === 'help.ts') {
-    return;
-  }
-
-  const file = require(
-    resolve(__dirname, command),
-  );
-
-  const handler = file.default as CommandHandler;
-
-  return `\`${config.prefix}${handler.command}\` — ${handler.description}`;
-}).join('\n');
-
-// Avoid circular dependency
-commandText += `\n\`${config.prefix}help\` — Show the help message`;
+import { BotContext, CommandHandler } from '../../types';
+import { getCommands } from '../../utils';
 
 export default {
   command: 'help',
   description: 'Show the help message',
-  fn: (_: BotContext, msg: Message): Promise<Message> => {
+  fn: ({ config }: BotContext, msg: Message): Promise<Message> => {
     const { channel } = msg;
+
+    const rawCommands = getCommands();
+
+    const commands = rawCommands.map((command: CommandHandler) => {
+      return `\`${config.prefix}${command.command}\` — ${command.description}`;
+    });
 
     return channel.send(
       new MessageEmbed({
@@ -38,7 +21,7 @@ export default {
           name: config.name,
           iconURL: config.imageUrl,
         },
-        title: `About ${config.name.toUppercase()}`,
+        title: `About ${config.name}`,
         fields: [
           {
             name: 'Who Am I?',
@@ -47,7 +30,11 @@ export default {
           },
           {
             name: 'Available Commands',
-            value: commandText,
+            value: commands,
+          },
+          {
+            name: 'Contribution',
+            value: 'GitHub — https://github.com/Namchee/pleasantcord',
           },
         ],
         color: config.embedColor,

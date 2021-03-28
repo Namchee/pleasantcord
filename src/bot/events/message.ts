@@ -1,34 +1,99 @@
-import { Message, MessageEmbed, TextChannel } from 'discord.js';
-import { resolve } from 'path';
-import { readdirSync } from 'fs';
+import {
+  GuildMember,
+  Message,
+  MessageAttachment,
+  MessageEmbed,
+  TextChannel,
+} from 'discord.js';
 
 import { isNSFW } from '../../service/nsfw.classifier';
 import { fetchImage } from '../../service/image.downloader';
-import { moderateUser } from '../../service/moderation';
-import { CommandFunction, CommandHandler, BotContext } from '../types';
+import { CommandHandler, BotContext } from '../types';
+import { errorHandler, getCommands } from '../utils';
+import { DateTime } from 'luxon';
 
-const config = require(
-  resolve(process.cwd(), 'config.json'),
-);
+const commandMap: Record<string, Function> = {};
+const commandHandlers = getCommands();
 
-const commandMap = new Map<string, CommandFunction>();
-const commands = readdirSync(resolve(__dirname, 'commands'));
+commandHandlers.forEach((handler: CommandHandler) => {
+  commandMap[handler.command] = handler.fn;
+});
 
-commands.forEach((command: string) => {
-  const file = require(
-    resolve(__dirname, 'commands', command),
+async function moderateMember(
+  { config, repository }: BotContext,
+  msg: Message,
+  member: GuildMember,
+): Promise<void> {
+  const { guild, createdAt, channel } = msg;
+  const { nickname, displayName, id } = member;
+
+  let name = nickname;
+
+  if (!name) {
+    name = displayName;
+  }
+
+  let count = 0;
+
+  const strike = await repository.getStrike(
+    guild?.id as string,
+    id,
   );
 
-  const handler = file.default as CommandHandler;
+  if (strike) {
+    count = strike.count;
+  }
 
-  commandMap.set(handler.command, handler.fn);
-});
+  if (count >= config.strike.count) {
+    if (config.ban) {
+      await member.ban({
+        reason: 'Repeated NSFW content violation',
+      });
+    } else {
+      await member.kick('Repeated NSFW content violation');
+    }
+
+    const moderationEmbed = new MessageEmbed({
+      author: {
+        name: config.name,
+        iconURL: config.imageUrl,
+      },
+      title: `${config.name} Server Moderation`,
+      // eslint-disable-next-line max-len
+      description: `Member \`${name}\` has been ${config.ban ? 'banned' : 'kicked'} due to repeated NSFW violation`,
+      fields: [
+        {
+          name: 'Reason',
+          value: 'Repeated NSFW content violation',
+          inline: true,
+        },
+        {
+          name: 'Action',
+          value: config.ban ? 'Ban' : 'Kick',
+          inline: true,
+        },
+        {
+          name: 'Effective Date',
+          value: DateTime.now().toString(),
+        },
+      ],
+    });
+
+    await channel.send(moderationEmbed);
+  } else {
+    await repository.addStrike(
+      guild?.id as string,
+      id,
+      createdAt,
+    );
+  }
+}
 
 export default {
   event: 'message',
   fn: async (ctx: BotContext, msg: Message): Promise<Message | void> => {
     const { author, attachments, content } = msg;
-    const { prefix } = config;
+    const { prefix, deleteNSFW } = ctx.config;
 
     if (!msg.guild || !msg.channel.isText() || author.bot) {
       return;
@@ -38,15 +103,24 @@ export default {
 
     if (content.startsWith(prefix)) {
       const args = content.slice(prefix.length).trim().split(/ +/);
-      const commandHandler = commandMap.get(args[0]);
+      const commandHandler = commandMap[args[0]];
 
       if (commandHandler) {
         return commandHandler(ctx, msg);
       } else {
-        return channel.send(
-          // eslint-disable-next-line max-len
-          `Whoops, I don't recognize that command. Try **${config.prefix}help**`,
-        );
+        const unknownEmbed = new MessageEmbed({
+          author: {
+            name: ctx.config.name,
+            iconURL: ctx.config.imageUrl,
+          },
+          color: '#E53E3E',
+          title: 'Unknown Command',
+          description:
+            // eslint-disable-next-line max-len
+            `**${ctx.config.name}** doesn't recognize the command that have been just sent.\nPlease refer to **${prefix}help** to show all available **${ctx.config.name}'s** commands.`,
+        });
+
+        return channel.send(unknownEmbed);
       }
     }
 
@@ -54,81 +128,88 @@ export default {
       return;
     }
 
-    for (const attachment of attachments) {
-      const { url } = attachment[1];
+    try {
+      const { name: botName, imageUrl: botImage } = ctx.config;
 
-      if (/\.(jpg|png|jpeg)$/.test(url)) {
-        const verdict = await isNSFW(url);
+      const moderations = attachments.map(
+        async ({ url, name }: MessageAttachment) => {
+          if (/\.(jpg|png|jpeg)$/.test(url)) {
+            const { isSFW, confidence } = await isNSFW(url);
 
-        if (!verdict.isSFW) {
-          const image = await fetchImage(attachment[1].url);
-          const confidence = verdict.confidence as number;
+            if (!isSFW) {
+              const image = await fetchImage(url);
 
-          const fields = [
-            {
-              name: 'Original Author',
-              value: author.toString(),
-              inline: true,
-            },
-            {
-              name: 'Reason',
-              value: 'Potentially NSFW attachment',
-              inline: true,
-            },
-            {
-              name: 'Accuracy',
-              value: `${(confidence * 100).toFixed(2)}%`,
-              inline: true,
-            },
-          ];
-
-          if (content) {
-            fields.push(
-              { name: 'Original Content', value: content, inline: false },
-            );
-          }
-
-          const messages = [];
-
-          if (!config.deleteNSFW) {
-            const blurredContent = channel.send(
-              new MessageEmbed({
-                author: {
-                  name: config.name,
-                  icon_url: config.imageUrl,
+              const fields = [
+                {
+                  name: 'Original Author',
+                  value: author.toString(),
+                  inline: true,
                 },
-                title: `NSFW Moderation on #${channel.name}`,
-                fields,
-                color: '#E53E3E',
-                files: [
-                  {
-                    attachment: image,
-                    name: `SPOILER_${attachment[1].name}`,
-                  },
-                ],
-              }),
-            );
+                {
+                  name: 'Reason',
+                  value: 'Potentially NSFW attachment',
+                  inline: true,
+                },
+                {
+                  name: 'Accuracy',
+                  value: `${(confidence * 100).toFixed(2)}%`,
+                  inline: true,
+                },
+              ];
 
-            messages.push(blurredContent);
+              if (content) {
+                fields.push(
+                  { name: 'Original Content', value: content, inline: false },
+                );
+              }
+
+              const req = [];
+
+              if (!deleteNSFW) {
+                const blurredMessage = channel.send(
+                  new MessageEmbed({
+                    author: {
+                      name: botName,
+                      iconURL: botImage,
+                    },
+                    title: 'Possible NSFW Contents Detected',
+                    fields,
+                    color: '#E53E3E',
+                    files: [
+                      {
+                        attachment: image,
+                        name: `SPOILER_${name}`,
+                      },
+                    ],
+                  }),
+                );
+
+                req.push(blurredMessage);
+              }
+
+              if (msg.deletable) {
+                req.push(
+                  msg.delete({
+                    reason: 'Possible NSFW content',
+                  }),
+                );
+              }
+
+              await Promise.allSettled(req);
+
+              const member = msg.guild?.member(author);
+
+              if (member) {
+                await moderateMember(ctx, msg, member);
+              }
+            }
           }
+        },
+      );
 
-          const del = msg.delete({
-            reason: 'Possible NSFW content',
-          });
-
-          messages.push(del);
-
-          await Promise.allSettled(messages);
-
-          const member = msg.guild.member(author);
-
-          if (member) {
-            await moderateUser(ctx, msg, member);
-          }
-
-          return;
-        }
-      }
+      await Promise.allSettled(moderations);
+    } catch (err) {
+      return channel.send(errorHandler(ctx.config, err));
     }
   },
 };

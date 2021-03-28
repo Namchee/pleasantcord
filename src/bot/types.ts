@@ -1,8 +1,23 @@
 import { Client, Message } from 'discord.js';
 import { BotRepository } from '../repository/bot';
 
+export interface BotConfig {
+  name: string;
+  imageUrl: string;
+  prefix: string;
+  confidence: number;
+  deleteNSFW: boolean;
+  embedColor: string;
+  strike: {
+    count: number;
+    refreshPeriod: number;
+  };
+  ban: boolean;
+}
+
 export interface BotContext {
   client: Client;
+  config: BotConfig;
   repository: BotRepository;
 }
 
@@ -12,13 +27,11 @@ export interface EventHandler {
   fn: (ctx: BotContext) => Promise<Message | void>;
 }
 
-export type CommandFunction = (
-  ctx: BotContext,
-  msg: Message,
-) => Promise<Message | void>;
-
 export interface CommandHandler {
   command: string;
   description: string;
-  fn: CommandFunction;
+  fn: (
+    ctx: BotContext,
+    msg: Message,
+  ) => Promise<Message | void>;
 }
