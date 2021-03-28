@@ -12,7 +12,7 @@ export default {
     const rawCommands = getCommands();
 
     const commands = rawCommands.map((command: CommandHandler) => {
-      return `${config.prefix}${command.command} — ${command.description}`;
+      return `\`${config.prefix}${command.command}\` — ${command.description}`;
     });
 
     return channel.send(

@@ -6,7 +6,13 @@ module.exports = {
       validator: {
         $jsonSchema: {
           bsonType: 'object',
-          required: ['server_id', 'user_id', 'strike_count', 'last_strike'],
+          required: [
+            'server_id',
+            'user_id',
+            'strike_count',
+            'last_strike',
+            'obsolete',
+          ],
           properties: {
             server_id: {
               bsonType: 'string',

@@ -108,10 +108,19 @@ export default {
       if (commandHandler) {
         return commandHandler(ctx, msg);
       } else {
-        return channel.send(
-          // eslint-disable-next-line max-len
-          `Whoops, I don't recognize that command. Try **${prefix}help**`,
-        );
+        const unknownEmbed = new MessageEmbed({
+          author: {
+            name: ctx.config.name,
+            iconURL: ctx.config.imageUrl,
+          },
+          color: '#E53E3E',
+          title: 'Unknown Command',
+          description:
+            // eslint-disable-next-line max-len
+            `**${ctx.config.name}** doesn't recognize the command that have been just sent.\nPlease refer to **${prefix}help** to show all available **${ctx.config.name}'s** commands.`,
+        });
+
+        return channel.send(unknownEmbed);
       }
     }
 
