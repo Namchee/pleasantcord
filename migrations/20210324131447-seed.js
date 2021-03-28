@@ -11,7 +11,6 @@ module.exports = {
             'user_id',
             'strike_count',
             'last_strike',
-            'obsolete',
           ],
           properties: {
             server_id: {
