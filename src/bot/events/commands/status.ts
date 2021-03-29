@@ -17,13 +17,14 @@ export default {
 
     if (/^[^\d]/.test(packageVersion)) {
       packageVersion = packageVersion.slice(1);
+      packageVersion = `v${packageVersion}`;
     }
 
     const fields = [
       {
         name: 'Bot Environment',
         // eslint-disable-next-line max-len
-        value: `**NodeJS Version**: ${process.version.slice(1)}\n**Framework**: DiscordJS@${packageVersion}`,
+        value: `**NodeJS Version**: ${process.version.slice(1)}\n**Framework**: DiscordJS ${packageVersion}`,
       },
       {
         name: 'Response Time',

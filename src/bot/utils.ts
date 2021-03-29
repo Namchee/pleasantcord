@@ -63,12 +63,17 @@ export function errorHandler(config: BotConfig, err: Error): MessageEmbed {
     if (err.code === Constants.APIErrors.MISSING_PERMISSIONS) {
       errorMessage.setTitle('Insufficient Permissions');
       errorMessage.setDescription(
+        `${config.name} lacks the required permissions to perform its duties`,
+      );
+
+      errorMessage.addField(
+        'Solution',
         // eslint-disable-next-line max-len
-        `${config.name} lacks required permissions to perform its duties. Make sure that ${config.name} has sufficient permissions as stated in the documentation to manage this server`,
+        `Please make sure that ${config.name} has sufficient permissions as stated in the documentation to manage this server`,
       );
     } else {
       errorMessage.setTitle(err.name);
-      errorMessage.setAuthor(err.message);
+      errorMessage.setDescription(err.message);
     }
   } else {
     if (err instanceof DBException) {

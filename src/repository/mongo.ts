@@ -1,6 +1,6 @@
 import { Collection, Db } from 'mongodb';
 import { DBException } from '../exceptions/db';
-import { Strike } from '../models/strike';
+import { Strike, StrikeDocument } from '../models/strike';
 import { BotRepository } from './bot';
 
 export class MongoRepository implements BotRepository {
@@ -8,23 +8,29 @@ export class MongoRepository implements BotRepository {
     public readonly db: Db,
   ) { }
 
-  private get collection(): Collection<Strike> {
-    return this.db.collection<Strike>('strikes');
+  private get collection(): Collection<StrikeDocument> {
+    return this.db.collection<StrikeDocument>('strikes');
   }
 
   public async getStrikes(serverId: string): Promise<Strike[]> {
-    return this.collection
+    const documents = await this.collection
       .find({ serverId })
-      .project({ userId: 1, count: 1 })
+      .project({ userId: 1, lastUpdated: 1, count: 1, deleted: 1 })
       .toArray();
+
+    return documents.map(doc => Strike.fromDocument(doc));
   }
 
   public async getStrike(
     serverId: string,
     userId: string,
   ): Promise<Strike | null> {
-    return this.collection
-      .findOne({ serverId, userId });
+    const document = await this.collection
+      .findOne({ serverId, userId, deleted: false });
+
+    return document ?
+      Strike.fromDocument(document) :
+      null;
   }
 
   public async addStrike(
@@ -36,22 +42,30 @@ export class MongoRepository implements BotRepository {
       const strike = await this.getStrike(serverId, userId);
 
       if (!strike) {
-        const newStrike = await this.collection
-          .insertOne({ serverId, userId, count: 1, lastUpdated: date });
+        const newStrike = new Strike(
+          serverId,
+          userId,
+          1,
+          date,
+          false,
+        );
 
-        return newStrike.ops[0];
+        const insertResult = await this.collection
+          .insertOne(newStrike);
+
+        return Strike.fromDocument(insertResult.ops[0]);
       } else {
         const updatedStrike = await this.collection
           .findOneAndUpdate(
-            { serverId, userId },
+            { serverId, userId, deleted: false },
             {
               $inc: { count: 1 },
-              $set: { lastUpdated: new Date() },
+              $set: { lastUpdated: date, deleted: false },
             },
             { returnOriginal: false },
           );
 
-        return updatedStrike.value as Strike;
+        return Strike.fromDocument(updatedStrike.value as StrikeDocument);
       }
     } catch (err) {
       const { message } = err as Error;
@@ -62,10 +76,13 @@ export class MongoRepository implements BotRepository {
 
   public async clearStrike(serverId: string, userId: string): Promise<boolean> {
     try {
-      const deleteResult = await this.collection
-        .deleteOne({ serverId, userId });
+      const flaggingResult = await this.collection
+        .findOneAndUpdate(
+          { serverId, userId, deleted: false },
+          { $set: { deleted: true } },
+        );
 
-      return deleteResult.result.ok === 1;
+      return flaggingResult.ok === 1;
     } catch (err) {
       const { message } = err as Error;
 

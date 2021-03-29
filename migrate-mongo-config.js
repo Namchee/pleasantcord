@@ -10,7 +10,7 @@ const { env } = process;
 module.exports = {
   mongodb: {
     // TODO Change (or review) the url to your MongoDB:
-    url: `mongodb://${env.MONGO_USER}:${env.MONGO_password}@${env.MONGO_HOST}:${env.MONGO_PORT}`,
+    url: `mongodb://${env.MONGO_USER}:${env.MONGO_PASSWORD}@${env.MONGO_HOST}:${env.MONGO_PORT}`,
 
     databaseName: process.env.MONGO_DBNAME,
 

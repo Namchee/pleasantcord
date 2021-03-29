@@ -9,10 +9,11 @@ export default {
   fn: async (
     { config, repository }: BotContext,
     msg: Message,
-  ): Promise<Message> => {
+  ): Promise<void> => {
     const { guild } = msg;
 
     const strikes = await repository.getStrikes(guild?.id as string);
+    const invalidStrikes: { serverId: string; userId: string }[] = [];
 
     let contents = '';
 
@@ -21,12 +22,26 @@ export default {
       contents += '\nNone! Everyone in this server is posting safe contents!';
     } else {
       strikes.forEach((strike: Strike) => {
-        const { userId, count } = strike;
+        const { serverId, userId, count } = strike;
+        const now = new Date();
 
-        // eslint-disable-next-line max-len
-        contents += `\n**${guild?.members.cache.get(userId)}** — ${count} strikes`;
+        if (
+          !strike.hasExpired(now, config.strike.refreshPeriod) &&
+          guild?.members.cache.has(strike.userId)
+        ) {
+          // eslint-disable-next-line max-len
+          contents += `\n**${guild?.members.cache.get(userId)}** — ${count} strikes`;
+        } else {
+          invalidStrikes.push({ serverId, userId });
+        }
       });
     }
+
+    const ops = [];
+
+    invalidStrikes.forEach(({ serverId, userId }) => {
+      ops.push(repository.clearStrike(serverId, userId));
+    });
 
     const messageEmbed = new MessageEmbed({
       author: {
@@ -42,11 +57,13 @@ export default {
         },
         {
           name: 'Strikers Count',
-          value: strikes.length,
+          value: strikes.length - invalidStrikes.length,
         },
       ],
     });
 
-    return msg.channel.send(messageEmbed);
+    ops.push(msg.channel.send(messageEmbed));
+
+    await Promise.all(ops);
   },
 };

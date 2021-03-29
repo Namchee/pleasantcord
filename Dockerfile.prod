@@ -1,4 +1,4 @@
-FROM node:latest
+FROM node:14.16.0-apline3.13
 
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
@@ -9,4 +9,6 @@ RUN yarn install --frozen-lockfile
 
 COPY . .
 
-CMD ["yarn", "dev"]
+RUN yarn build
+
+CMD ["yarn", "start"]

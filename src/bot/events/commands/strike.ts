@@ -9,7 +9,7 @@ export default {
   fn: async (
     { config, repository }: BotContext,
     msg: Message,
-  ): Promise<Message> => {
+  ): Promise<void> => {
     const { guild, author } = msg;
 
     let expirationTime = '';
@@ -17,10 +17,15 @@ export default {
     const strike = await repository
       .getStrike(guild?.id as string, author.id);
 
-    if (strike) {
+    const now = new Date();
+    let hasExpired = true;
+
+    if (strike && !strike.hasExpired(now, config.strike.refreshPeriod)) {
       expirationTime = DateTime.fromJSDate(strike.lastUpdated)
         .plus({ seconds: config.strike.refreshPeriod })
         .toRelative() as string;
+
+      hasExpired = false;
     }
 
     const fields = [
@@ -30,15 +35,23 @@ export default {
       },
       {
         name: 'Current Strikes',
-        value: strike ? strike.count : 0,
+        value: strike && !hasExpired ? strike.count : 0,
+        inline: true,
       },
       {
         name: 'Expiration Time',
         value: expirationTime || '—',
+        inline: true,
       },
     ];
 
-    return msg.reply(
+    const ops: Promise<any>[] = [];
+
+    if (strike && hasExpired) {
+      ops.push(repository.clearStrike(guild?.id as string, author.id));
+    }
+
+    ops.push(msg.reply(
       new MessageEmbed({
         author: {
           name: config.name,
@@ -48,6 +61,8 @@ export default {
         color: config.embedColor,
         fields,
       }),
-    );
+    ));
+
+    await Promise.all(ops);
   },
 };
