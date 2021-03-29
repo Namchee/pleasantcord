@@ -13,7 +13,7 @@ export class Strike {
     public readonly count: number,
     public readonly lastUpdated: Date,
     public readonly deleted: boolean,
-  ) {}
+  ) { }
 
   public hasExpired(ref: Date, expirationTime: number): boolean {
     return this.lastUpdated.getTime() + (expirationTime * 1000) <=

@@ -57,7 +57,7 @@ export default {
         },
         {
           name: 'Strikers Count',
-          value: strikes.length,
+          value: strikes.length - invalidStrikes.length,
         },
       ],
     });

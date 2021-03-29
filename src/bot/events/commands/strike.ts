@@ -36,10 +36,12 @@ export default {
       {
         name: 'Current Strikes',
         value: strike && !hasExpired ? strike.count : 0,
+        inline: true,
       },
       {
         name: 'Expiration Time',
         value: expirationTime || '—',
+        inline: true,
       },
     ];
 

@@ -61,6 +61,7 @@ async function moderateMember(
         name: config.name,
         iconURL: config.imageUrl,
       },
+      color: config.embedColor,
       title: `${config.name} Server Moderation`,
       // eslint-disable-next-line max-len
       description: `Member \`${name}\` has been ${config.ban ? 'banned' : 'kicked'} due to repeated NSFW violation`,
@@ -155,7 +156,6 @@ export default {
                 {
                   name: 'Original Author',
                   value: author.toString(),
-                  inline: true,
                 },
                 {
                   name: 'Reason',

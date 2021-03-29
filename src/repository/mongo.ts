@@ -15,7 +15,7 @@ export class MongoRepository implements BotRepository {
   public async getStrikes(serverId: string): Promise<Strike[]> {
     const documents = await this.collection
       .find({ serverId })
-      .project({ userId: 1, count: 1, deleted: 1 })
+      .project({ userId: 1, lastUpdated: 1, count: 1, deleted: 1 })
       .toArray();
 
     return documents.map(doc => Strike.fromDocument(doc));
