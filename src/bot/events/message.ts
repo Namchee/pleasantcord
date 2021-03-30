@@ -6,7 +6,7 @@ import {
   TextChannel,
 } from 'discord.js';
 
-import { isNSFW, NSFWClassifier } from '../../service/nsfw.classifier';
+import { NSFWClassifier } from '../../service/nsfw.classifier';
 import { fetchImage } from '../../service/image.downloader';
 import { CommandHandler, BotContext } from '../types';
 import { errorHandler, getCommands } from '../utils';
@@ -160,11 +160,15 @@ export default {
                 {
                   name: 'Reason',
                   value: 'Potentially NSFW attachment',
+                },
+                {
+                  name: 'Category',
+                  value: category.name,
                   inline: true,
                 },
                 {
                   name: 'Accuracy',
-                  value: `${(confidence * 100).toFixed(2)}%`,
+                  value: `${(category.confidence * 100).toFixed(2)}%`,
                   inline: true,
                 },
               ];

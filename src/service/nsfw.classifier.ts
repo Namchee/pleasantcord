@@ -4,7 +4,7 @@ import { load, NSFWJS } from 'nsfwjs';
 
 import config from './../config/env';
 
-const { env } = config;
+const { env, bot } = config;
 
 export interface SFWVerdict {
   isSFW: boolean;
@@ -73,7 +73,8 @@ export class NSFWClassifier {
     });
 
     return {
-      isSFW: bestCategory.name !== 'Hentai' && bestCategory.name !== 'Porn',
+      isSFW: (!['Hentai', 'Porn'].includes(bestCategory.name)) ||
+        bestCategory.confidence < bot.confidence,
       category: bestCategory,
       classification: categories,
     };
