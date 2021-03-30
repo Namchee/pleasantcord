@@ -143,12 +143,13 @@ export default {
 
     try {
       const { name: botName, imageUrl: botImage } = ctx.config;
+      const classifier = await NSFWClassifier.getInstance();
 
       const moderations = attachments.map(
         async ({ url, name }: MessageAttachment) => {
           if (/\.(jpg|png|jpeg)$/.test(url)) {
             const image = await fetchImage(url);
-            const { isSFW, confidence } = await isNSFW(url);
+            const { isSFW, category } = await classifier.classifyImage(image);
 
             if (!isSFW) {
               const fields = [
