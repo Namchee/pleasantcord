@@ -4,12 +4,15 @@ import { BotContext, EventHandler } from './bot/types';
 import { getDBConnection } from './config/db';
 import { MongoRepository } from './repository/mongo';
 import { getEvents } from './bot/utils';
+import { NSFWClassifier } from './service/nsfw.classifier';
 
 import config from './config/env';
 
 const { env, bot } = config;
 
 (async (): Promise<void> => {
+  await NSFWClassifier.initializeCache();
+
   const discordClient = new Client();
   const dbConnection = await getDBConnection();
 

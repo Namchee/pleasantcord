@@ -6,7 +6,7 @@ import {
   TextChannel,
 } from 'discord.js';
 
-import { isNSFW } from '../../service/nsfw.classifier';
+import { isNSFW, NSFWClassifier } from '../../service/nsfw.classifier';
 import { fetchImage } from '../../service/image.downloader';
 import { CommandHandler, BotContext } from '../types';
 import { errorHandler, getCommands } from '../utils';
@@ -147,11 +147,10 @@ export default {
       const moderations = attachments.map(
         async ({ url, name }: MessageAttachment) => {
           if (/\.(jpg|png|jpeg)$/.test(url)) {
+            const image = await fetchImage(url);
             const { isSFW, confidence } = await isNSFW(url);
 
             if (!isSFW) {
-              const image = await fetchImage(url);
-
               const fields = [
                 {
                   name: 'Original Author',
