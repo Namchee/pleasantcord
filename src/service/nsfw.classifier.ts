@@ -1,7 +1,8 @@
-import axios from 'axios';
+
+import * as tf from '@tensorflow/tfjs-node';
+import { load, NSFWJS } from 'nsfwjs';
 
 import config from './../config/env';
-import apiConfig from './../config/api';
 
 const { env, bot } = config;
 
@@ -10,49 +11,72 @@ export interface SFWVerdict {
   confidence: number;
 }
 
-/**
- * Classify an image based on it's safe-for-work value
- * @param {string} url Image URL
- * @returns Verdict object, which contains a `boolean` value
- * that determines if it's SFW or NSFW and prediction accuracy
- */
-export async function isNSFW(url: string): Promise<SFWVerdict> {
-  const { data } = await axios.post(
-    `${apiConfig.url}/${apiConfig.modelId}/outputs`,
-    {
-      inputs: [
-        {
-          data: {
-            image: {
-              url,
-            },
-          },
-        },
-      ],
-    },
-    {
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Key ${env.CLARIFAI_KEY}`,
-      },
-    },
-  );
+type CategoryName = 'Drawing' | 'Hentai' | 'Porn' | 'Neutral' | 'Sexy';
+export interface ImageCategory {
+  name: CategoryName;
+  confidence: number;
+}
 
-  const concepts = data.outputs[0].data.concepts;
+export interface ImageClassification {
+  isSFW: boolean;
+  category: ImageCategory;
+  classification: ImageCategory[];
+}
 
-  for (const concept of concepts) {
-    if (concept.name === apiConfig.conceptName &&
-      concept.value >= bot.confidence
-    ) {
-      return {
-        isSFW: false,
-        confidence: concept.value,
-      };
+export class NSFWClassifier {
+  private static instance: NSFWClassifier;
+
+  private constructor(private readonly model: NSFWJS) {
+    if (env.NODE_ENV === 'development') {
+      tf.enableDebugMode();
+    } else {
+      tf.enableProdMode();
     }
   }
 
-  return {
-    isSFW: true,
-    confidence: 1,
-  };
+  public static async initializeCache(): Promise<void> {
+    await NSFWClassifier.getInstance();
+  }
+
+  public static async getInstance(): Promise<NSFWClassifier> {
+    if (!NSFWClassifier.instance) {
+      const model = await load(
+        'file://src/service/tfjs-models/',
+        { size: 299 },
+      );
+
+      NSFWClassifier.instance = new NSFWClassifier(model);
+    }
+
+    return NSFWClassifier.instance;
+  }
+
+  public async classifyImage(
+    imageBuffer: Buffer,
+  ): Promise<ImageClassification> {
+    const decodedImage = tf.node.decodeImage(imageBuffer, 3);
+    const classification = await this.model.classify(decodedImage);
+
+    let bestCategory!: ImageCategory;
+
+    const categories = classification.map((prediction) => {
+      const category = {
+        name: prediction.className as CategoryName,
+        confidence: prediction.probability,
+      };
+
+      if (!bestCategory || category.confidence > bestCategory.confidence) {
+        bestCategory = category;
+      }
+
+      return category;
+    });
+
+    return {
+      isSFW: (!['Hentai', 'Porn'].includes(bestCategory.name)) ||
+        bestCategory.confidence < bot.confidence,
+      category: bestCategory,
+      classification: categories,
+    };
+  }
 }

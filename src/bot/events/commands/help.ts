@@ -34,7 +34,7 @@ export default {
           },
           {
             name: 'Contribution',
-            value: 'GitHub — https://github.com/Namchee/pleasantcord',
+            value: `Contribute to ${config.name}'s development on [GitHub](https://github.com/Namchee/pleasantcord)`,
           },
         ],
         color: config.embedColor,

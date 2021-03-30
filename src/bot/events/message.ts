@@ -6,7 +6,7 @@ import {
   TextChannel,
 } from 'discord.js';
 
-import { isNSFW } from '../../service/nsfw.classifier';
+import { NSFWClassifier } from '../../service/nsfw.classifier';
 import { fetchImage } from '../../service/image.downloader';
 import { CommandHandler, BotContext } from '../types';
 import { errorHandler, getCommands } from '../utils';
@@ -143,15 +143,15 @@ export default {
 
     try {
       const { name: botName, imageUrl: botImage } = ctx.config;
+      const classifier = await NSFWClassifier.getInstance();
 
       const moderations = attachments.map(
         async ({ url, name }: MessageAttachment) => {
           if (/\.(jpg|png|jpeg)$/.test(url)) {
-            const { isSFW, confidence } = await isNSFW(url);
+            const image = await fetchImage(url);
+            const { isSFW, category } = await classifier.classifyImage(image);
 
             if (!isSFW) {
-              const image = await fetchImage(url);
-
               const fields = [
                 {
                   name: 'Original Author',
@@ -160,11 +160,15 @@ export default {
                 {
                   name: 'Reason',
                   value: 'Potentially NSFW attachment',
+                },
+                {
+                  name: 'Category',
+                  value: category.name,
                   inline: true,
                 },
                 {
                   name: 'Accuracy',
-                  value: `${(confidence * 100).toFixed(2)}%`,
+                  value: `${(category.confidence * 100).toFixed(2)}%`,
                   inline: true,
                 },
               ];

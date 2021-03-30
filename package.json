@@ -5,7 +5,6 @@
   "main": "dist/index.js",
   "scripts": {
     "lint": "eslint ./src/**.ts",
-    "test": "cross-env NODE_ENV=test jest --verbose",
     "dev": "nodemon",
     "build": "rm -rf dist/ && tsc",
     "start": "pm2-runtime start dist/index.js",
@@ -48,11 +47,13 @@
     "typesync": "^0.8.0"
   },
   "dependencies": {
+    "@tensorflow/tfjs-node": "^3.3.0",
     "axios": "^0.21.1",
     "discord.js": "^12.5.1",
     "luxon": "^1.25.0",
     "migrate-mongo": "^8.2.2",
     "mongo": "^0.1.0",
+    "nsfwjs": "^2.3.0",
     "pm2": "^4.5.0"
   }
 }
