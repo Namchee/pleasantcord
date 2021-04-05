@@ -1,24 +1,36 @@
 # Pleasantcord
 
-[![Code Style: Google](https://img.shields.io/badge/code%20style-google-blueviolet.svg)](https://github.com/google/gts)
+<p align="center">
+  <img src="docs/banner.png" title="Pleasantcord" alt="Pleasantcord Banner" />
 
-Pleasantcord is a simple NSFW image moderation bot 🤖 for Discord.
+</p>
 
-![Pleasantcord Demo](docs/demo-pleasantcord.png)
+<p align="center">
+  <a href="http://www.typescriptlang.org/">
+    <img src="https://img.shields.io/badge/%3C%2F%3E-TypeScript-%230074c1.svg" title="TypeScript" alt="Made with TypeScript" />
+  </a>
+  <a href="https://github.com/google/gts">
+    <img src="https://img.shields.io/badge/code%20style-google-blueviolet.svg" title="CodeStyle: Google" alt="GTS Logo" />
+  </a>
+</p>
 
-It uses [Clarifai](https://www.clarifai.com/) to classify any message attachments sent on a server. Once the attachment is classified as a possible NSFW content, this bot will delete the original message and repost it with a warning and spoiler tag.
+Pleasantcord is a simple NSFW image auto moderation bot 🤖 for Discord powered by [TensorFlow JS](https://www.npmjs.com/package/@tensorflow/tfjs-node). On the inside, it uses a pretrained [Inception V3 model](https://keras.io/api/applications/inceptionv3/) provided by [nsfw.js](https://github.com/infinitered/nsfwjs) that is able to distinguish image category to several categories.
 
 The bot behavior's can be controlled from the config file.
 
-## Requirements
-
-1. Working Docker installation
-2. [Clarifai](https://www.clarifai.com/) Account (possibly changed)
-3. Discord Developer Account
-
 ## Installation
 
-> You **MUST** self-host this bot yourself.
+> This bot is still on development process.
+
+Invite this bot to your server by clicking this link ***coming soon***.
+## Development
+
+### Requirements
+
+1. Docker
+2. Node v12 or higher
+
+## Installation
 
 1. Clone the repository
 2. Navigate to your freshly cloned git directory
@@ -26,32 +38,33 @@ The bot behavior's can be controlled from the config file.
 4. Fill the new `.env` file with the instructions on `.env.sample` file
 5. Execute `docker-compose up` from your favorite terminal.
 
-## Deployment
-
-TBD
-
 ## Configuration
 
-Below is the list of possible configuration for the bot
+Below is the list of possible configuration for the bot:
 
 Key | Description
 --- | -----------
 `name` | Discord's bot name
 `imageUrl` | Image to be shown on rich message embeds. Should be same as the bot display picture from Discord's Developer Portal.
-`commandPrefix` | Prefix for various commands for the bot.
+`prefix` | Prefix for various commands for the bot.
 `confidence` | Threshold for NSFW content prediction. Any content will be moderated if the NSFW probability is higher than this value.
 `deleteNSFW` | Determine if the bot should repost the NSFW content.
-`warn.count` | Determine how many times should a member be warned when commiting a NSFW violation before being banned / kicked
-`warn.refreshPeriod` | Determine expiration time for member's violation in seconds. Set as `-1` if violation should remain permanent.
-`ban` | Determine if excess violators should be banned instead of kicked.
+`strike.count` | Determine how many times should a member be warned when commiting a NSFW violation before being banned / kicked
+`strike.refreshPeriod` | Determine expiration time for member's violation in seconds. Set as `-1` if violation should remain permanent.
+`ban` | Determine if excess violators should be banned from the server instead of kicked.
 
 > This bot **DOES NOT** provide an `unban` command.
 
 ## Commands
 
+> Must be prefixed with `prefix` from the config.
+
 Command | Description
 ------- | -----------
-`warnings` | Count how many NSFW violation you've made.
+`strike` | Count how many NSFW violation by the said member on the current server. Can only be invoked by the said member.
+`strikes` | Count how many NSFW violation by all members on the current server.
+`status` | Show the bot status (ping, environment, etc).
+`help` | Show the bot help menu.
 
 ## Motivation
 
@@ -60,8 +73,8 @@ on SFW channels and still requires manual moderation. This bot aims to fix that.
 
 ## Acknowledgements
 
-- Profile image is taken from [this Unsplash image](https://unsplash.com/photos/6F2k0tqNuG4) by [Hongru Wang](https://unsplash.com/@hongru_wang)
-
+- [infinitered](https://github.com/infinitered) — Provides an easy-to-use pretrained model for NSFW detection.
+- [chez14](https://github.com/chez14) — Provides testing server and mental support.
 ## License
 
-This project is licensed under [MIT License](LICENSE)
+This project is licensed under the [MIT License](LICENSE)
