@@ -7,7 +7,7 @@
     "lint": "eslint ./src/**.ts",
     "dev": "nodemon",
     "build": "rm -rf dist/ && tsc",
-    "start": "pm2-runtime start dist/index.js",
+    "start": "node ./dist/index.js",
     "postuninstall": "npm prune",
     "migration:init": "migrate-mongo init",
     "migration:create": "sh -c 'migrate-mongo create $0'",
@@ -53,7 +53,6 @@
     "luxon": "^1.25.0",
     "migrate-mongo": "^8.2.2",
     "mongo": "^0.1.0",
-    "nsfwjs": "^2.4.0",
-    "pm2": "^4.5.6"
+    "nsfwjs": "^2.4.0"
   }
 }
