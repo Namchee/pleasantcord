@@ -1,7 +1,7 @@
 import { Collection, Db } from 'mongodb';
 import { DBException } from '../exceptions/db';
 import { Strike, StrikeDocument } from '../models/strike';
-import { BotRepository } from './bot';
+import { BotRepository, MaintenanceReport } from './bot';
 
 export class MongoRepository implements BotRepository {
   public constructor(
@@ -88,5 +88,21 @@ export class MongoRepository implements BotRepository {
 
       throw new DBException(message);
     }
+  }
+
+  public async clean(): Promise<MaintenanceReport> {
+    const lastMonth = new Date();
+
+    lastMonth.setMonth(lastMonth.getMonth() - 1);
+
+    const deleteResult = await this.collection
+      .deleteMany({
+        lastUpdated: { $lte: lastMonth },
+      });
+
+    return {
+      date: new Date(),
+      deletedCount: deleteResult.deletedCount as number,
+    };
   }
 }
