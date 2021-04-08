@@ -779,6 +779,13 @@
     "@types/bson" "*"
     "@types/node" "*"
 
+"@types/node-cron@^2.0.3":
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/@types/node-cron/-/node-cron-2.0.3.tgz#b5bb940523d265f6a36548856ec0c278ea5a35d6"
+  integrity sha512-gwBBGeY2XeYBLE0R01K9Sm2hvNcPGmoloL6aqthA3QmBB1GYXTHIJ42AGZL7bdXBRiwbRV8b6NB5iKpl20R3gw==
+  dependencies:
+    "@types/tz-offset" "*"
+
 "@types/node-fetch@^2.1.2":
   version "2.5.10"
   resolved "https://registry.yarnpkg.com/@types/node-fetch/-/node-fetch-2.5.10.tgz#9b4d4a0425562f9fcea70b12cb3fcdd946ca8132"
@@ -821,6 +828,11 @@
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@types/stack-utils/-/stack-utils-2.0.0.tgz#7036640b4e21cc2f259ae826ce843d277dad8cff"
   integrity sha512-RJJrrySY7A8havqpGObOB4W92QXKJo63/jFLLgpvOtsGUqbQZ9Sbgl35KMm1DjC6j7AvmmU2bIno+3IyEaemaw==
+
+"@types/tz-offset@*":
+  version "0.0.0"
+  resolved "https://registry.yarnpkg.com/@types/tz-offset/-/tz-offset-0.0.0.tgz#d58f1cebd794148d245420f8f0660305d320e565"
+  integrity sha512-XLD/llTSB6EBe3thkN+/I0L+yCTB6sjrcVovQdx2Cnl6N6bTzHmwe/J8mWnsXFgxLrj/emzdv8IR4evKYG2qxQ==
 
 "@types/webgl-ext@0.0.30":
   version "0.0.30"
@@ -3931,6 +3943,18 @@ mkdirp@^0.5.0, mkdirp@^0.5.1:
   dependencies:
     minimist "^1.2.5"
 
+moment-timezone@^0.5.31:
+  version "0.5.33"
+  resolved "https://registry.yarnpkg.com/moment-timezone/-/moment-timezone-0.5.33.tgz#b252fd6bb57f341c9b59a5ab61a8e51a73bbd22c"
+  integrity sha512-PTc2vcT8K9J5/9rDEPe5czSIKgLoGsH8UNpA4qZTVw0Vd/Uz19geE9abbIOQKaAQFcnQ3v5YEXrbSc5BpshH+w==
+  dependencies:
+    moment ">= 2.9.0"
+
+"moment@>= 2.9.0":
+  version "2.29.1"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.1.tgz#b2be769fa31940be9eeea6469c075e35006fa3d3"
+  integrity sha512-kHmoybcPV8Sqy59DwNDY3Jefr64lK/by/da0ViFcuA4DH0vQg5Q6Ze5VimxkfQNSC+Mls/Kx53s7TjP1RhFEDQ==
+
 mongo@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/mongo/-/mongo-0.1.0.tgz#c8af0f8df98d4894b772b37342987c3becf3718c"
@@ -4055,6 +4079,13 @@ node-bitmap@0.0.1:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/node-bitmap/-/node-bitmap-0.0.1.tgz#180eac7003e0c707618ef31368f62f84b2a69091"
   integrity sha1-GA6scAPgxwdhjvMTaPYvhLKmkJE=
+
+node-cron@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/node-cron/-/node-cron-3.0.0.tgz#b33252803e430f9cd8590cf85738efa1497a9522"
+  integrity sha512-DDwIvvuCwrNiaU7HEivFDULcaQualDv7KoNlB/UU1wPW0n1tDEmBJKhEIE6DlF2FuoOHcNbLJ8ITL2Iv/3AWmA==
+  dependencies:
+    moment-timezone "^0.5.31"
 
 node-fetch@^2.6.1, node-fetch@~2.6.1:
   version "2.6.1"

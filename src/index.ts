@@ -1,4 +1,5 @@
 import { Client } from 'discord.js';
+import { schedule } from 'node-cron';
 
 import { BotContext, EventHandler } from './bot/types';
 import { getDBConnection } from './config/db';
@@ -34,6 +35,10 @@ const { env, bot } = config;
     } else {
       discordClient.on(event, handler);
     }
+  });
+
+  schedule('0 0 1 * *', async () => {
+    await repository.clean();
   });
 
   discordClient.login(env.DISCORD_TOKEN);
