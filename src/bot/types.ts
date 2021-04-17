@@ -12,6 +12,10 @@ export interface BotConfig {
     count: number;
     refreshPeriod: number;
   };
+  modLog: {
+    category: string;
+    channel: string;
+  };
   ban: boolean;
 }
 
