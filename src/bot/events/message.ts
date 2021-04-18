@@ -1,4 +1,5 @@
 import {
+  Guild,
   GuildMember,
   Message,
   MessageAttachment,
@@ -9,7 +10,7 @@ import {
 import { NSFWClassifier } from '../../service/nsfw.classifier';
 import { fetchImage } from '../../service/image.downloader';
 import { CommandHandler, BotContext } from '../types';
-import { errorHandler, getCommands } from '../utils';
+import { handleError, getCommands, resolveModerationChannel } from '../utils';
 
 const commandMap: Record<string, Function> = {};
 const commandHandlers = getCommands();
@@ -23,7 +24,7 @@ async function moderateMember(
   msg: Message,
   member: GuildMember,
 ): Promise<void> {
-  const { guild, createdAt, channel } = msg;
+  const { guild, createdAt } = msg;
   const { nickname, displayName, id } = member;
 
   let name = nickname;
@@ -53,7 +54,9 @@ async function moderateMember(
         reason: 'Repeated NSFW content violation',
       });
     } else {
-      await member.kick('Repeated NSFW content violation');
+      await member.kick(
+        'Repeated NSFW content violation',
+      );
     }
 
     const moderationEmbed = new MessageEmbed({
@@ -83,8 +86,13 @@ async function moderateMember(
       ],
     });
 
+    const modChannel = resolveModerationChannel(
+      guild as Guild,
+      config,
+    );
+
     const ops: Promise<any>[] = [
-      channel.send(moderationEmbed),
+      modChannel.send(moderationEmbed),
       repository.clearStrike(guild?.id as string, id),
     ];
 
@@ -225,7 +233,12 @@ export default {
 
       await Promise.all(moderations);
     } catch (err) {
-      return channel.send(errorHandler(ctx.config, err));
+      const modChannel = resolveModerationChannel(
+        msg.guild as Guild,
+        ctx.config,
+      );
+
+      return modChannel.send(handleError(ctx.config, err));
     }
   },
 };

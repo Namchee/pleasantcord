@@ -7,12 +7,12 @@ import {
   GuildMember,
   MessageEmbed,
   OverwriteResolvable,
+  TextChannel,
 } from 'discord.js';
 
 import { BotConfig, CommandHandler, EventHandler } from './types';
 import { DBException } from '../exceptions/db';
 import { Logger, LogLevel } from '../service/logger';
-
 
 export function getCommands(): CommandHandler[] {
   const basePath = resolve(__dirname, 'events', 'commands');
@@ -58,11 +58,14 @@ export function getEvents(): EventHandler[] {
   return events;
 }
 
-export function errorHandler(config: BotConfig, err: Error): MessageEmbed {
+export function handleError(
+  { name, imageUrl }: BotConfig,
+  err: Error,
+): MessageEmbed {
   const errorMessage = new MessageEmbed({
     author: {
-      name: config.name,
-      iconURL: config.imageUrl,
+      name: name,
+      iconURL: imageUrl,
     },
     color: '#E53E3E',
   });
@@ -71,13 +74,13 @@ export function errorHandler(config: BotConfig, err: Error): MessageEmbed {
     if (err.code === Constants.APIErrors.MISSING_PERMISSIONS) {
       errorMessage.setTitle('Insufficient Permissions');
       errorMessage.setDescription(
-        `${config.name} lacks the required permissions to perform its duties`,
+        `${name} lacks the required permissions to perform its duties`,
       );
 
       errorMessage.addField(
         'Solution',
         // eslint-disable-next-line max-len
-        `Please make sure that ${config.name} has sufficient permissions as stated in the documentation to manage this server`,
+        `Please make sure that ${name} has sufficient permissions as stated in the documentation to manage this server`,
       );
     } else {
       errorMessage.setTitle(err.name);
@@ -85,6 +88,8 @@ export function errorHandler(config: BotConfig, err: Error): MessageEmbed {
     }
   } else {
     if (err instanceof DBException) {
+      Logger.getInstance().logDb(err.message, LogLevel.ERROR);
+
       errorMessage.setTitle('Data Management Error');
       errorMessage.setDescription(
         // eslint-disable-next-line max-len
@@ -114,77 +119,87 @@ export async function syncModerationChannels(
   { modLog }: BotConfig,
 ): Promise<void> {
   // setup channel for bot log
-  let categoryChannel = guild.channels.cache.find(
-    channel => channel.name === modLog.category &&
-      channel.type === 'category',
-  );
+  try {
+    let categoryChannel = guild.channels.cache.find(
+      channel => channel.name === modLog.category &&
+        channel.type === 'category',
+    );
 
-  let textChannel = guild.channels.cache.find(
-    channel => channel.name === modLog.channel &&
-      channel.type === 'text',
-  );
+    let textChannel = guild.channels.cache.find(
+      channel => channel.name === modLog.channel &&
+        channel.type === 'text',
+    );
 
-  const permissions: OverwriteResolvable[] = guild.roles.cache.map(
-    (role) => {
-      return {
-        id: role.id,
-        allow: [
-          'VIEW_CHANNEL',
-          'READ_MESSAGE_HISTORY',
-        ],
-        deny: [
-          'SEND_MESSAGES',
-          'ADD_REACTIONS',
-          'MANAGE_MESSAGES',
-        ],
-      };
-    },
-  );
-
-  if (!categoryChannel) {
-    categoryChannel = await guild.channels.create(
-      modLog.category,
-      {
-        type: 'category',
-        permissionOverwrites: permissions,
+    const permissions: OverwriteResolvable[] = guild.roles.cache.map(
+      (role) => {
+        return {
+          id: role.id,
+          allow: [
+            'VIEW_CHANNEL',
+            'READ_MESSAGE_HISTORY',
+          ],
+          deny: [
+            'SEND_MESSAGES',
+            'ADD_REACTIONS',
+            'MANAGE_MESSAGES',
+          ],
+        };
       },
     );
-  } else {
-    categoryChannel.overwritePermissions([
-      ...permissions,
-    ]);
-  }
 
-  await categoryChannel.overwritePermissions([
-    {
-      id: guild.me as GuildMember,
-      allow: [
-        'SEND_MESSAGES',
-      ],
-    },
-  ]);
+    permissions.push(
+      {
+        id: guild.me as GuildMember,
+        allow: [
+          'SEND_MESSAGES',
+        ],
+      },
+    );
+
+    if (!categoryChannel) {
+      categoryChannel = await guild.channels.create(
+        modLog.category,
+        {
+          type: 'category',
+          permissionOverwrites: permissions,
+        },
+      );
+    } else {
+      categoryChannel.overwritePermissions(permissions);
+    }
+
+    if (!textChannel) {
+      textChannel = await guild.channels.create(
+        modLog.channel,
+        {
+          type: 'text',
+          parent: categoryChannel,
+          permissionOverwrites: permissions,
+        },
+      );
+    } else {
+      await textChannel.overwritePermissions(permissions);
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+export function resolveModerationChannel(
+  guild: Guild,
+  { name, modLog }: BotConfig,
+): TextChannel {
+  const textChannel = guild.channels.cache.find((channel) => {
+    return channel.type === 'text' &&
+      channel.name === modLog.channel;
+  });
 
   if (!textChannel) {
-    textChannel = await guild.channels.create(
-      modLog.channel,
-      {
-        type: 'text',
-        parent: categoryChannel,
-        permissionOverwrites: permissions,
-      },
+    throw new Error(
+      // eslint-disable-next-line max-len
+      `${name} on ${guild.name} (#${guild.id}) is misconfigured: Text channel does not exist`,
     );
-  } else {
-    await textChannel.overwritePermissions([
-      ...permissions,
-    ]);
   }
 
-  await textChannel.overwritePermissions([
-    {
-      id: guild.me as GuildMember,
-      allow: [
-        'SEND_MESSAGES',
-      ],
-    },
-  ]);
+  return textChannel as TextChannel;
 }
