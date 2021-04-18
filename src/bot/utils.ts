@@ -116,72 +116,72 @@ export function handleError(
 
 export async function syncModerationChannels(
   guild: Guild,
-  { modLog }: BotConfig,
+  { name, modLog }: BotConfig,
 ): Promise<void> {
   // setup channel for bot log
-  try {
-    let categoryChannel = guild.channels.cache.find(
-      channel => channel.name === modLog.category &&
-        channel.type === 'category',
-    );
+  let categoryChannel = guild.channels.cache.find(
+    channel => channel.name === modLog.category &&
+      channel.type === 'category',
+  );
 
-    let textChannel = guild.channels.cache.find(
-      channel => channel.name === modLog.channel &&
-        channel.type === 'text',
-    );
+  let textChannel = guild.channels.cache.find(
+    channel => channel.name === modLog.channel &&
+      channel.type === 'text',
+  );
 
-    const permissions: OverwriteResolvable[] = guild.roles.cache.map(
-      (role) => {
-        return {
-          id: role.id,
-          allow: [
-            'VIEW_CHANNEL',
-            'READ_MESSAGE_HISTORY',
-          ],
-          deny: [
-            'SEND_MESSAGES',
-            'ADD_REACTIONS',
-            'MANAGE_MESSAGES',
-          ],
-        };
-      },
-    );
+  const roles = guild.roles.cache.filter(role => role.name !== name);
 
-    permissions.push(
-      {
-        id: guild.me as GuildMember,
+  const permissions: OverwriteResolvable[] = roles.map(
+    (role): OverwriteResolvable => {
+      return {
+        id: role.id,
         allow: [
-          'SEND_MESSAGES',
+          'VIEW_CHANNEL',
+          'READ_MESSAGE_HISTORY',
         ],
+        deny: [
+          'SEND_MESSAGES',
+          'ADD_REACTIONS',
+          'MANAGE_MESSAGES',
+        ],
+      };
+    },
+  );
+
+  permissions.push(
+    {
+      id: guild.me as GuildMember,
+      allow: [
+        'MANAGE_CHANNELS',
+        'VIEW_CHANNEL',
+        'SEND_MESSAGES',
+      ],
+    },
+  );
+
+  if (!categoryChannel) {
+    categoryChannel = await guild.channels.create(
+      modLog.category,
+      {
+        type: 'category',
+        permissionOverwrites: permissions,
       },
     );
+  } else {
+    categoryChannel.overwritePermissions(permissions);
+  }
 
-    if (!categoryChannel) {
-      categoryChannel = await guild.channels.create(
-        modLog.category,
-        {
-          type: 'category',
-          permissionOverwrites: permissions,
-        },
-      );
-    } else {
-      categoryChannel.overwritePermissions(permissions);
-    }
-
-    if (!textChannel) {
-      textChannel = await guild.channels.create(
-        modLog.channel,
-        {
-          type: 'text',
-          parent: categoryChannel,
-          permissionOverwrites: permissions,
-        },
-      );
-    } else {
-      await textChannel.overwritePermissions(permissions);
-    }
-  } catch (err) {
-    console.error(err);
+  if (!textChannel) {
+    textChannel = await guild.channels.create(
+      modLog.channel,
+      {
+        type: 'text',
+        parent: categoryChannel,
+        permissionOverwrites: permissions,
+      },
+    );
+  } else {
+    await textChannel.overwritePermissions(permissions);
   }
 }
 
