@@ -1,9 +1,17 @@
 import { readdirSync, statSync } from 'fs';
 import { resolve } from 'path';
-import { Constants, DiscordAPIError, MessageEmbed } from 'discord.js';
+import {
+  Constants,
+  DiscordAPIError,
+  Guild,
+  GuildMember,
+  MessageEmbed,
+  OverwriteResolvable,
+} from 'discord.js';
 
 import { BotConfig, CommandHandler, EventHandler } from './types';
 import { DBException } from '../exceptions/db';
+import { Logger, LogLevel } from '../service/logger';
 
 
 export function getCommands(): CommandHandler[] {
@@ -83,6 +91,8 @@ export function errorHandler(config: BotConfig, err: Error): MessageEmbed {
         'There\'s an error on data management. Please contact the developer immediately',
       );
     } else {
+      Logger.getInstance().logBot(err.message, LogLevel.ERROR);
+
       errorMessage.setTitle('Uncaught Exceptions Thrown');
       errorMessage.setDescription(
         // eslint-disable-next-line max-len
@@ -97,4 +107,84 @@ export function errorHandler(config: BotConfig, err: Error): MessageEmbed {
   }
 
   return errorMessage;
+}
+
+export async function syncModerationChannels(
+  guild: Guild,
+  { modLog }: BotConfig,
+): Promise<void> {
+  // setup channel for bot log
+  let categoryChannel = guild.channels.cache.find(
+    channel => channel.name === modLog.category &&
+      channel.type === 'category',
+  );
+
+  let textChannel = guild.channels.cache.find(
+    channel => channel.name === modLog.channel &&
+      channel.type === 'text',
+  );
+
+  const permissions: OverwriteResolvable[] = guild.roles.cache.map(
+    (role) => {
+      return {
+        id: role.id,
+        allow: [
+          'VIEW_CHANNEL',
+          'READ_MESSAGE_HISTORY',
+        ],
+        deny: [
+          'SEND_MESSAGES',
+          'ADD_REACTIONS',
+          'MANAGE_MESSAGES',
+        ],
+      };
+    },
+  );
+
+  if (!categoryChannel) {
+    categoryChannel = await guild.channels.create(
+      modLog.category,
+      {
+        type: 'category',
+        permissionOverwrites: permissions,
+      },
+    );
+  } else {
+    categoryChannel.overwritePermissions([
+      ...permissions,
+    ]);
+  }
+
+  await categoryChannel.overwritePermissions([
+    {
+      id: guild.me as GuildMember,
+      allow: [
+        'SEND_MESSAGES',
+      ],
+    },
+  ]);
+
+  if (!textChannel) {
+    textChannel = await guild.channels.create(
+      modLog.channel,
+      {
+        type: 'text',
+        parent: categoryChannel,
+        permissionOverwrites: permissions,
+      },
+    );
+  } else {
+    await textChannel.overwritePermissions([
+      ...permissions,
+    ]);
+  }
+
+  await textChannel.overwritePermissions([
+    {
+      id: guild.me as GuildMember,
+      allow: [
+        'SEND_MESSAGES',
+      ],
+    },
+  ]);
 }
