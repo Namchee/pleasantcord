@@ -39,9 +39,7 @@ export class Logger {
     this.logger.info(`[cron] ${msg}`);
   }
 
-  public logBot(msg: string, level: LogLevel = LogLevel.ERROR): void {
-    msg = `[bot]: ${msg}`;
-
+  private multiLevelLog(msg: string, level: LogLevel): void {
     switch (level) {
       case LogLevel.INFO: {
         this.logger.info(msg);
@@ -56,5 +54,17 @@ export class Logger {
         break;
       }
     }
+  }
+
+  public logBot(msg: string, level: LogLevel = LogLevel.ERROR): void {
+    msg = `[bot]: ${msg}`;
+
+    this.multiLevelLog(msg, level);
+  }
+
+  public logDb(msg: string, level: LogLevel = LogLevel.ERROR): void {
+    msg = `[db]: ${msg}`;
+
+    this.multiLevelLog(msg, level);
   }
 }
