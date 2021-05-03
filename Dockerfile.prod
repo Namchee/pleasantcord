@@ -1,14 +1,30 @@
-FROM node:14.16.0-apline3.13
+# Build Stage
 
-RUN mkdir -p /usr/src/app
-WORKDIR /usr/src/app
+FROM node:lts-alpine AS builder
 
+RUN mkdir -p /usr/src/bot
+WORKDIR /usr/src/bot
+
+COPY package.json ./
+COPY yarn.lock ./
+COPY tsconfig*.json ./
+COPY ./src ./src 
+
+RUN yarn install --frozen-lockfile && yarn build
+
+# Final Stage
+
+FROM node:lts-alpine
+
+WORKDIR /bot
+ENV NODE_ENV production
+
+COPY ./migrations ./migrations
+COPY package.json ./
 COPY yarn.lock ./
 
-RUN yarn install --frozen-lockfile
+RUN yarn install --production --frozen-lockfile
 
-COPY . .
+COPY --from=builder /usr/src/bot/dist ./dist
 
-RUN yarn build
-
-CMD ["yarn", "start"]
+CMD yarn start

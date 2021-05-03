@@ -1,4 +1,4 @@
-FROM node:latest
+FROM node:lts-alpine
 
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
@@ -9,4 +9,4 @@ RUN yarn install --frozen-lockfile
 
 COPY . .
 
-CMD ["yarn", "dev"]
+CMD yarn dev

@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.9'
 services:
   mongo:
     image: mongo:4.4.4
@@ -18,7 +18,7 @@ services:
     environment: 
       - NODE_ENV=production
     volumes:
-      - ./:/usr/src/app
+      - ./:/usr/src/bot
     depends_on:
       - mongo
     networks:
