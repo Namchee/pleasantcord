@@ -1,7 +1,8 @@
-import { config as parseEnv } from 'dotenv';
 import { resolve } from 'path';
 
 function loadEnv(fileName: string): void {
+  const { config: parseEnv } = require('dotenv');
+
   const result = parseEnv({
     path: resolve(process.cwd(), fileName),
   });

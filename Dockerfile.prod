@@ -5,9 +5,7 @@ FROM node:lts-alpine AS builder
 RUN mkdir -p /usr/src/bot
 WORKDIR /usr/src/bot
 
-COPY package.json ./
-COPY yarn.lock ./
-COPY tsconfig*.json ./
+COPY package.json yarn.lcok tsconfig*.json ./
 COPY ./src ./src 
 
 RUN yarn install --frozen-lockfile && yarn build
@@ -20,8 +18,7 @@ WORKDIR /bot
 ENV NODE_ENV production
 
 COPY ./migrations ./migrations
-COPY package.json ./
-COPY yarn.lock ./
+COPY package.json yarn.lock config.json ./
 
 RUN yarn install --production --frozen-lockfile
 
