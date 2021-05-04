@@ -1,4 +1,4 @@
-import { Strike } from '../models/strike';
+import { Strike } from '../entity/strike';
 
 export interface MaintenanceReport {
   date: Date;

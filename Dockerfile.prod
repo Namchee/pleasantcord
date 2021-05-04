@@ -1,24 +1,27 @@
 # Build Stage
 
-FROM node:lts-alpine AS builder
+FROM node:lts AS builder
 
 RUN mkdir -p /usr/src/bot
 WORKDIR /usr/src/bot
 
-COPY package.json yarn.lcok tsconfig*.json ./
-COPY ./src ./src 
+COPY package.json yarn.lock tsconfig*.json ./
+COPY ./src ./src
 
 RUN yarn install --frozen-lockfile && yarn build
 
 # Final Stage
 
-FROM node:lts-alpine
+FROM node:lts
 
-WORKDIR /bot
+RUN mkdir -p /usr/bot
+WORKDIR /usr/bot
+
 ENV NODE_ENV production
 
 COPY ./migrations ./migrations
 COPY package.json yarn.lock config.json ./
+COPY ./tfjs-models ./tfjs-models 
 
 RUN yarn install --production --frozen-lockfile
 

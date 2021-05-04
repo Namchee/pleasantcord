@@ -41,7 +41,7 @@ export class NSFWClassifier {
   public static async getInstance(): Promise<NSFWClassifier> {
     if (!NSFWClassifier.instance) {
       const model = await load(
-        'file://src/service/tfjs-models/',
+        'file://tfjs-models/',
         { size: 299 },
       );
 

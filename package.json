@@ -9,11 +9,11 @@
     "build": "rm -rf dist/ && tsc",
     "start": "node ./dist/index.js",
     "postuninstall": "npm prune",
-    "migration:init": "node ./node_modules/.bin/migrate-mongo init",
-    "migration:create": "sh -c 'node ./node_modules/.bin/migrate-mongo create $0'",
-    "migration:up": "node ./node_modules/.bin/migrate-mongo up",
-    "migration:down": "node ./node_modules/.bin/migrate-mongo down",
-    "migration:status": "node ./node_modules/.bin/migrate-mongo status"
+    "migration:init": "migrate-mongo init",
+    "migration:create": "sh -c 'migrate-mongo create $0'",
+    "migration:up": "migrate-mongo up",
+    "migration:down": "migrate-mongo down",
+    "migration:status": "migrate-mongo status"
   },
   "keywords": [
     "discord.js",

@@ -1,6 +1,6 @@
 import { Message, MessageEmbed } from 'discord.js';
 
-import { Strike } from '../../../models/strike';
+import { Strike } from '../../../entity/strike';
 import { BotContext } from '../../types';
 
 export default {

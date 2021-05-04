@@ -1,7 +1,7 @@
 FROM node:lts
 
-RUN mkdir -p /usr/src/app
-WORKDIR /usr/src/app
+RUN mkdir -p /usr/src/bot
+WORKDIR /usr/src/bot
 
 COPY yarn.lock ./
 

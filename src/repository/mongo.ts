@@ -1,6 +1,6 @@
 import { Collection, Db } from 'mongodb';
 import { DBException } from '../exceptions/db';
-import { Strike, StrikeDocument } from '../models/strike';
+import { Strike, StrikeDocument } from '../entity/strike';
 import { BotRepository, MaintenanceReport } from './bot';
 
 export class MongoRepository implements BotRepository {
