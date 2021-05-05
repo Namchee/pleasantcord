@@ -5,10 +5,10 @@ FROM node:lts AS builder
 RUN mkdir -p /usr/src/bot
 WORKDIR /usr/src/bot
 
-COPY package.json yarn.lock tsconfig*.json ./
+COPY package.json yarn.lock tsconfig.json .eslintrc.js ./
 COPY ./src ./src
 
-RUN yarn install --frozen-lockfile && yarn build
+RUN yarn install --frozen-lockfile && yarn lint && yarn build
 
 # Final Stage
 
@@ -19,12 +19,12 @@ WORKDIR /usr/bot
 
 ENV NODE_ENV production
 
-COPY ./migrations ./migrations
 COPY package.json yarn.lock config.json ./
-COPY ./tfjs-models ./tfjs-models 
+COPY ./tfjs-models ./tfjs-models
+COPY ./migrations ./migrations
 
 RUN yarn install --production --frozen-lockfile
 
 COPY --from=builder /usr/src/bot/dist ./dist
 
-CMD yarn start
+CMD ["yarn", "start"]
