@@ -6,13 +6,13 @@ RUN mkdir -p /usr/src/bot
 WORKDIR /usr/src/bot
 
 COPY package.json yarn.lock tsconfig.json .eslintrc.js ./
-COPY ./src ./src
+COPY src ./src
 
 RUN yarn install --frozen-lockfile && yarn lint && yarn build
 
 # Final Stage
 
-FROM node:lts
+FROM node:lts-alpine
 
 RUN mkdir -p /usr/bot
 WORKDIR /usr/bot
@@ -20,10 +20,10 @@ WORKDIR /usr/bot
 ENV NODE_ENV production
 
 COPY package.json yarn.lock config.json ./
-COPY ./tfjs-models ./tfjs-models
-COPY ./migrations ./migrations
+COPY tfjs-models ./tfjs-models
+COPY migrations ./migrations
 
-RUN yarn install --production --frozen-lockfile
+RUN yarn install --frozen-lockfile
 
 USER node
 
