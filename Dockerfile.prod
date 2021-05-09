@@ -25,6 +25,8 @@ COPY ./migrations ./migrations
 
 RUN yarn install --production --frozen-lockfile
 
-COPY --from=builder /usr/src/bot/dist ./dist
+USER node
+
+COPY --chown=node:node --from=builder /usr/src/bot/dist ./dist
 
 CMD ["yarn", "start"]
