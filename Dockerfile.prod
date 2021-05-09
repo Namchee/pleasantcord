@@ -23,7 +23,7 @@ COPY package.json yarn.lock config.json ./
 COPY tfjs-models ./tfjs-models
 COPY migrations ./migrations
 
-RUN yarn install --frozen-lockfile
+RUN yarn install --frozen-lockfile && yarn cache clean --all
 
 USER node
 
