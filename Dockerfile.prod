@@ -1,14 +1,32 @@
-FROM node:14.16.0-apline3.13
+# Build Stage
 
-RUN mkdir -p /usr/src/app
-WORKDIR /usr/src/app
+FROM node:lts AS builder
 
-COPY yarn.lock ./
+RUN mkdir -p /usr/src/bot
+WORKDIR /usr/src/bot
 
-RUN yarn install --frozen-lockfile
+COPY package.json yarn.lock tsconfig.json .eslintrc.js ./
+COPY src ./src
 
-COPY . .
+RUN yarn install --frozen-lockfile && yarn lint && yarn build
 
-RUN yarn build
+# Final Stage
+
+FROM node:lts-slim
+
+RUN mkdir -p /usr/bot
+WORKDIR /usr/bot
+
+ENV NODE_ENV production
+
+COPY package.json yarn.lock config.json ./
+COPY tfjs-models ./tfjs-models
+COPY migrations ./migrations
+
+RUN yarn install --frozen-lockfile && yarn cache clean --all && mkdir logs
+
+USER node
+
+COPY --chown=node:node --from=builder /usr/src/bot/dist ./dist
 
 CMD ["yarn", "start"]

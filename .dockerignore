@@ -1,2 +1,11 @@
-node_modules
 npm-debug.log
+dist
+docs
+node_modules
+.env
+.env.sample
+.npmrc
+README.MD
+LICENSE
+.git
+.github
