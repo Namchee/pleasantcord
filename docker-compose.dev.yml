@@ -12,6 +12,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
+    image: pleasantcord:dev
     env_file:
       - ./.env
     environment:

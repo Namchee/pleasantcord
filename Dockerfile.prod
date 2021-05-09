@@ -12,7 +12,7 @@ RUN yarn install --frozen-lockfile && yarn lint && yarn build
 
 # Final Stage
 
-FROM node:lts-alpine
+FROM node:lts-slim
 
 RUN mkdir -p /usr/bot
 WORKDIR /usr/bot
