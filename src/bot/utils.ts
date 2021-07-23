@@ -182,7 +182,6 @@ export async function syncModerationChannels(
       },
     );
   } else {
-    console.log(textChannel);
     await textChannel.overwritePermissions(permissions);
   }
 }
