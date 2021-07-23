@@ -16,6 +16,7 @@ services:
       context: .
       dockerfile: Dockerfile.prod
     image: pleasantcord:prod
+    restart: unless-stopped
     env_file:
       - ./.env
     environment: 

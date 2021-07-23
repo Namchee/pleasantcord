@@ -143,6 +143,7 @@ export async function syncModerationChannels(
           'SEND_MESSAGES',
           'ADD_REACTIONS',
           'MANAGE_MESSAGES',
+          'MANAGE_CHANNELS',
         ],
       };
     },
@@ -168,7 +169,7 @@ export async function syncModerationChannels(
       },
     );
   } else {
-    categoryChannel.overwritePermissions(permissions);
+    await categoryChannel.overwritePermissions(permissions);
   }
 
   if (!textChannel) {
@@ -181,6 +182,7 @@ export async function syncModerationChannels(
       },
     );
   } else {
+    console.log(textChannel);
     await textChannel.overwritePermissions(permissions);
   }
 }
