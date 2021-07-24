@@ -12,7 +12,7 @@ env:
 jobs:
   publish-image:
     runs-on: ubuntu-latest
-    permission:
+    permissions:
       contents: read
       packages: write
 
