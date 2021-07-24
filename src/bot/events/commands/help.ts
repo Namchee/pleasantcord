@@ -26,7 +26,7 @@ export default {
           {
             name: 'Who Am I?',
             // eslint-disable-next-line max-len
-            value: `${config.name} is a simple not-safe-for-world (NSFW for short) image moderation Discord bot. ${config.name} is able to detect NSFW contents AND texts from any natively supported attachment images sent by server members. It is built on top of discord.js`,
+            value: `${config.name} is a simple not-safe-for-work (NSFW for short) image auto-moderation Discord bot. ${config.name} is able to detect NSFW contents AND texts from any natively supported attachment images sent by server members. It is built on top of discord.js`,
           },
           {
             name: 'Available Commands',

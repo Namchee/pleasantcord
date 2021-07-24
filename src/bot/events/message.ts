@@ -145,7 +145,11 @@ export default {
       }
     }
 
-    if (channel.nsfw) {
+    const hasImage = attachments.some(
+      ({ url }) => /\.(jpg|png|jpeg)$/.test(url),
+    );
+
+    if (channel.nsfw || !hasImage) {
       return;
     }
 
