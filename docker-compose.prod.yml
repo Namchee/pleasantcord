@@ -11,11 +11,12 @@ services:
       - mongo-volume:/data/db
     networks: 
       - backend
-  bot_prod:
+  bot:
     build:
       context: .
       dockerfile: Dockerfile.prod
-    image: pleasantcord:prod
+    image: pleasantcord:latest
+    restart: unless-stopped
     env_file:
       - ./.env
     environment: 

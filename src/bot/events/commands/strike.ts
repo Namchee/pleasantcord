@@ -40,7 +40,7 @@ export default {
       },
       {
         name: 'Expiration Time',
-        value: expirationTime || '—',
+        value: expirationTime || '-',
         inline: true,
       },
     ];

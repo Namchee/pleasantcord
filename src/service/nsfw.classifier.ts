@@ -73,7 +73,7 @@ export class NSFWClassifier {
     });
 
     return {
-      isSFW: (!['Hentai', 'Porn'].includes(bestCategory.name)) ||
+      isSFW: !['Hentai', 'Porn'].includes(bestCategory.name) ||
         bestCategory.confidence < bot.confidence,
       category: bestCategory,
       classification: categories,
