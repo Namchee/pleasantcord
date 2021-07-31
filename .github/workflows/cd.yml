@@ -58,7 +58,7 @@ jobs:
           SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
       - name: Execute the automatic deployment script
         run: |
-          ssh -i "$SSH_KEY_PATH" $SSH_USER@SSH_HOST "deploy-bot" 
+          ssh -i "$SSH_KEY_PATH" $SSH_USER@$SSH_HOST "deploy-bot" 
         shell: bash
         env:
           SSH_USER: ${{ secrets.SSH_USER }}
