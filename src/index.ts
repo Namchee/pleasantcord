@@ -12,41 +12,48 @@ import { bootstrapBot } from './bot';
 const { env } = config;
 
 (async (): Promise<void> => {
-  await NSFWClassifier.initializeCache();
+  try {
+    await NSFWClassifier.initializeCache();
 
-  const connection = await getDBConnection();
-  const db = connection.db(env.MONGO_DBNAME);
-  const repository = new MongoRepository(db);
+    const connection = await getDBConnection();
+    const db = connection.db(env.MONGO_DBNAME);
+    const repository = new MongoRepository(db);
 
-  const discordClient = bootstrapBot(repository);
-  Logger.bootstrap();
+    const discordClient = bootstrapBot(repository);
 
-  schedule('0 0 1 * *', async () => {
-    await cleanDb(repository);
-  });
+    Logger.bootstrap();
 
-  const closeConnections = async (): Promise<void> => {
-    await connection.close();
-    discordClient.destroy();
-  };
+    schedule('0 0 1 * *', async () => {
+      await cleanDb(repository);
+    });
 
-  process.on('uncaughtException', async (err) => {
-    Logger.getInstance().logBot(`Uncaught Exception: ${err}`, LogLevel.ERROR);
-    await closeConnections();
-    process.exit(1);
-  });
+    discordClient.login(env.DISCORD_TOKEN);
 
-  process.on('unhandledRejection', async (reason) => {
-    Logger.getInstance().logBot(
-      `Unhandled promise rejection: ${reason}`,
-      LogLevel.ERROR,
-    );
-    await closeConnections();
-    process.exit(1);
-  });
+    const closeConnections = async (): Promise<void> => {
+      await connection.close();
+      discordClient.destroy();
+    };
 
-  process.on('SIGTERM', async () => {
-    await closeConnections();
-    process.exit(0);
-  });
+    process.on('uncaughtException', async (err) => {
+      Logger.getInstance().logBot(`Uncaught Exception: ${err}`, LogLevel.ERROR);
+      await closeConnections();
+      process.exit(1);
+    });
+
+    process.on('unhandledRejection', async (reason) => {
+      Logger.getInstance().logBot(
+        `Unhandled promise rejection: ${reason}`,
+        LogLevel.ERROR,
+      );
+      await closeConnections();
+      process.exit(1);
+    });
+
+    process.on('SIGTERM', async () => {
+      await closeConnections();
+      process.exit(0);
+    });
+  } catch (err) {
+    console.error(err);
+  }
 })();

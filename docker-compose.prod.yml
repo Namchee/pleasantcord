@@ -25,10 +25,13 @@ services:
       - mongo
     networks:
       - backend
+    volumes: 
+      - logs:/usr/bot/logs
 
 volumes:
   mongo-volume:
     driver: local
+  logs:
 
 networks:
   backend:

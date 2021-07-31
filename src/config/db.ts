@@ -1,4 +1,4 @@
-import { Db, MongoClient } from 'mongodb';
+import { MongoClient } from 'mongodb';
 import config from './env';
 
 const { env } = config;
