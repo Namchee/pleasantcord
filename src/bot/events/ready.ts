@@ -5,9 +5,7 @@ export default {
   event: 'ready',
   once: true,
   fn: async ({ client, config }: BotContext): Promise<void> => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`${config.name} is now ready to moderate servers`);
-    }
+    console.log(`${config.name} is now ready to moderate servers`);
 
     const setPresence = client.user?.setPresence({
       status: 'online',

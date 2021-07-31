@@ -106,3 +106,4 @@ dist
 .vscode-test
 mongo-volume
 sample.jpg
+deploy.sh
