@@ -19,7 +19,7 @@ WORKDIR /usr/bot
 
 ENV NODE_ENV production
 
-COPY package.json yarn.lock config.json ./
+COPY package.json yarn.lock config.json migrate-mongo-config.js ./
 COPY tfjs-models ./tfjs-models
 COPY migrations ./migrations
 

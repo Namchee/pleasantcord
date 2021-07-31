@@ -1,10 +1,3 @@
-// In this file you can configure migrate-mongo
-const { config } = require('dotenv');
-
-if (process.env.NODE_ENV === 'development') {
-  config();
-}
-
 const { env } = process;
 
 module.exports = {
