@@ -15,7 +15,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.prod
-    image: pleasantcord:latest
+    image: ghcr.io/namchee/pleasantcord:latest
     restart: unless-stopped
     env_file:
       - ./.env
