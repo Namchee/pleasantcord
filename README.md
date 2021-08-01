@@ -43,7 +43,14 @@ Invite this bot to your server by clicking [this link](https://discord.com/api/o
 
 The bot itself requires the following permission in your server, make sure to **check it all**:
 
-- 
+- Manage Roles
+- Manage Members
+- Kick Members
+- Ban Members
+- Send Messages
+- Manage Messages
+
+**Do not check any other permissions, `pleasantcord` does not require more permissions**
 ## Development
 
 ### Requirements
@@ -61,23 +68,17 @@ The bot itself requires the following permission in your server, make sure to **
 
 ## Configuration
 
-Below is the list of possible configuration for the bot:
-
 Key | Description
 --- | -----------
 `name` | Discord's bot name
 `imageUrl` | Image to be shown on rich message embeds. Should be same as the bot display picture from Discord's Developer Portal.
-`prefix` | Prefix for various commands for the bot.
-`confidence` | Threshold for NSFW content prediction. Any content will be moderated if the NSFW probability is higher than this value.
-`deleteNSFW` | Determine if the bot should repost the NSFW content.
-`strike.count` | Determine how many times should a member be warned when commiting a NSFW violation before being banned / kicked
-`strike.refreshPeriod` | Determine expiration time for member's violation in seconds. Set as `-1` if violation should remain permanent.
-`ban` | Determine if excess violators should be banned from the server instead of kicked.
-
-> This bot **DOES NOT** provide an `unban` command. Server administrators must unban the members themselves.
+`prefix` | Prefix for various commands for the bot. Default: `pc!`
+`confidence` | Threshold for NSFW content prediction. Any content will be moderated if the NSFW probability is higher than this value. Default: `0.75` (75 percent)
+`deleteNSFW` | Determine if the bot should delete original content and repost the NSFW content by blurring it. Default: `true`
+`strike.count` | Determine how many times should a member be warned when commiting a NSFW violation before being banned or kicked. Default: `3`
+`strike.refreshPeriod` | Determine expiration time for member's violation in seconds. Set as `-1` if violation should remain permanent. Default: `3600` (1 hour)
+`ban` | Determine if excess violators should be banned from the server instead of kicked. Default: `false`
 ## Commands
-
-> Must be prefixed with `prefix` from the config. By default, the `prefix` is `!`
 
 Command | Description
 ------- | -----------
@@ -86,6 +87,23 @@ Command | Description
 `status` | Show the bot status (ping, environment, etc).
 `help` | Show the bot help menu.
 
+## FAQ
+
+### Can I use a custom moderation configuration for `pleasantcord`?
+
+For now, no you can't. You must deploy your own bot instance and configure it yourself.
+
+In the future, it will be possible to configure it from a web dashboard. Stay tuned!
+
+### The classification is incorrect!
+
+I'm not the one who created the model, so I can't say anything about it. That being said, image classification is an ML algorithm which could produce false alarms from time to time, so false alarms are quite common occurence.
+
+If you feel that the moderation is too sensitive / lax, you must configure the bot yourself.
+
+### Can the bot unban previously banned users?
+
+This bot **DOES NOT** provide an `unban` command. Server administrators must unban the members themselves.
 ## Credits
 
 - [infinitered](https://github.com/infinitered) — Provides an easy-to-use pretrained model for NSFW detection.
