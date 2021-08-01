@@ -118,89 +118,86 @@ export async function syncModerationChannels(
   guild: Guild,
   { name, modLog }: BotConfig,
 ): Promise<void> {
-  // setup channel for bot log
-  let categoryChannel = guild.channels.cache.find(
-    channel => channel.name === modLog.category &&
-      channel.type === 'category',
-  );
+  try {
+    // setup channel for bot log
+    let categoryChannel = guild.channels.cache.find(
+      channel => channel.name === modLog.category &&
+        channel.type === 'category',
+    );
 
-  let textChannel = guild.channels.cache.find(
-    channel => channel.name === modLog.channel &&
-      channel.type === 'text',
-  );
+    let textChannel = guild.channels.cache.find(
+      channel => channel.name === modLog.channel &&
+        channel.type === 'text',
+    );
 
-  const roles = guild.roles.cache.filter(role => role.name !== name);
+    const roles = guild.roles.cache.filter(role => role.name !== name);
 
-  const permissions: OverwriteResolvable[] = roles.map(
-    (role): OverwriteResolvable => {
-      return {
-        id: role.id,
+    const permissions: OverwriteResolvable[] = roles.map(
+      (role): OverwriteResolvable => {
+        return {
+          id: role.id,
+          allow: [
+            'VIEW_CHANNEL',
+            'READ_MESSAGE_HISTORY',
+          ],
+          deny: [
+            'SEND_MESSAGES',
+            'ADD_REACTIONS',
+            'MANAGE_MESSAGES',
+            'MANAGE_CHANNELS',
+          ],
+        };
+      },
+    );
+
+    permissions.push(
+      {
+        id: guild.me as GuildMember,
         allow: [
-          'VIEW_CHANNEL',
-          'READ_MESSAGE_HISTORY',
-        ],
-        deny: [
-          'SEND_MESSAGES',
-          'ADD_REACTIONS',
-          'MANAGE_MESSAGES',
           'MANAGE_CHANNELS',
+          'VIEW_CHANNEL',
+          'SEND_MESSAGES',
         ],
-      };
-    },
-  );
-
-  permissions.push(
-    {
-      id: guild.me as GuildMember,
-      allow: [
-        'MANAGE_CHANNELS',
-        'VIEW_CHANNEL',
-        'SEND_MESSAGES',
-      ],
-    },
-  );
-
-  if (!categoryChannel) {
-    categoryChannel = await guild.channels.create(
-      modLog.category,
-      {
-        type: 'category',
-        permissionOverwrites: permissions,
       },
     );
-  } else {
-    await categoryChannel.overwritePermissions(permissions);
-  }
 
-  if (!textChannel) {
-    textChannel = await guild.channels.create(
-      modLog.channel,
-      {
-        type: 'text',
-        parent: categoryChannel,
-        permissionOverwrites: permissions,
-      },
-    );
-  } else {
-    await textChannel.overwritePermissions(permissions);
+    if (!categoryChannel) {
+      categoryChannel = await guild.channels.create(
+        modLog.category,
+        {
+          type: 'category',
+          permissionOverwrites: permissions,
+        },
+      );
+    } else {
+      await categoryChannel.overwritePermissions(permissions);
+    }
+
+    if (!textChannel) {
+      textChannel = await guild.channels.create(
+        modLog.channel,
+        {
+          type: 'text',
+          parent: categoryChannel,
+          permissionOverwrites: permissions,
+        },
+      );
+    } else {
+      await textChannel.overwritePermissions(permissions);
+    }
+  } catch (err) {
+    //
   }
 }
 
 export function resolveModerationChannel(
   guild: Guild,
-  { name, modLog }: BotConfig,
-): TextChannel {
+  { modLog }: BotConfig,
+): TextChannel | undefined {
   const textChannel = guild.channels.cache.find((channel) => {
     return channel.type === 'text' &&
       channel.name === modLog.channel;
   });
-
-  if (!textChannel) {
-    throw new Error(
-      // eslint-disable-next-line max-len
-      `${name} on ${guild.name} (#${guild.id}) is misconfigured: Text channel does not exist`,
-    );
-  }
 
   return textChannel as TextChannel;
 }

@@ -92,7 +92,9 @@ async function moderateMember(
     );
 
     const ops: Promise<any>[] = [
-      modChannel.send(moderationEmbed),
+      modChannel ?
+        modChannel.send(moderationEmbed) :
+        msg.reply(moderationEmbed),
       repository.clearStrike(guild?.id as string, id),
     ];
 
@@ -242,7 +244,14 @@ export default {
         ctx.config,
       );
 
-      return modChannel.send(handleError(ctx.config, err));
+      const error = handleError(ctx.config, err);
+
+      if (modChannel) {
+        modChannel.send(error);
+        return;
+      }
+
+      return msg.reply(error);
     }
   },
 };
