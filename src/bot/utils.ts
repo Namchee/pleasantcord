@@ -188,19 +188,12 @@ export async function syncModerationChannels(
 
 export function resolveModerationChannel(
   guild: Guild,
-  { name, modLog }: BotConfig,
-): TextChannel {
+  { modLog }: BotConfig,
+): TextChannel | undefined {
   const textChannel = guild.channels.cache.find((channel) => {
     return channel.type === 'text' &&
       channel.name === modLog.channel;
   });
-
-  if (!textChannel) {
-    throw new Error(
-      // eslint-disable-next-line max-len
-      `${name} on ${guild.name} (#${guild.id}) is misconfigured: Text channel does not exist`,
-    );
-  }
 
   return textChannel as TextChannel;
 }
