@@ -1,16 +1,14 @@
-import { Client } from 'discord.js';
+import { Client, Intents } from 'discord.js';
 import { BotRepository } from '../repository/bot';
 import { BotContext, EventHandler } from './types';
 import { getEvents } from './utils';
 
-import config from './../config/env';
-
 export function bootstrapBot(repository: BotRepository): Client {
-  const discordClient = new Client();
+  const client = new Client({
+    intents: [Intents.FLAGS.GUILD_MESSAGES],
+  });
 
   const context: BotContext = {
-    client: discordClient,
-    config: config.bot,
     repository,
   };
 
@@ -20,11 +18,11 @@ export function bootstrapBot(repository: BotRepository): Client {
     const handler = fn.bind(null, context);
 
     if (once) {
-      discordClient.once(event, handler);
+      client.once(event, handler);
     } else {
-      discordClient.on(event, handler);
+      client.on(event, handler);
     }
   });
 
-  return discordClient;
+  return client;
 }

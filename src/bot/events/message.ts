@@ -10,7 +10,7 @@ import {
 import { NSFWClassifier } from '../../service/nsfw.classifier';
 import { fetchImage } from '../../service/image.downloader';
 import { CommandHandler, BotContext } from '../types';
-import { handleError, getCommands, resolveModerationChannel } from '../utils';
+import { handleError, getCommands } from '../utils';
 
 const commandMap: Record<string, Function> = {};
 const commandHandlers = getCommands();
@@ -19,104 +19,11 @@ commandHandlers.forEach((handler: CommandHandler) => {
   commandMap[handler.command] = handler.fn;
 });
 
-async function moderateMember(
-  { config, repository }: BotContext,
-  msg: Message,
-  member: GuildMember,
-): Promise<void> {
-  const { guild, createdAt } = msg;
-  const { nickname, displayName, id } = member;
-
-  let name = nickname;
-
-  if (!name) {
-    name = displayName;
-  }
-
-  let count = 0;
-  let hasExpired = false;
-
-  const strike = await repository.getStrike(
-    guild?.id as string,
-    id,
-  );
-
-  if (strike) {
-    count = strike.count;
-
-    const now = new Date();
-    hasExpired = strike.hasExpired(now, config.strike.refreshPeriod);
-  }
-
-  if (count >= config.strike.count && !hasExpired) {
-    if (config.ban) {
-      await member.ban({
-        reason: 'Repeated NSFW content violation',
-      });
-    } else {
-      await member.kick(
-        'Repeated NSFW content violation',
-      );
-    }
-
-    const moderationEmbed = new MessageEmbed({
-      author: {
-        name: config.name,
-        iconURL: config.imageUrl,
-      },
-      color: config.embedColor,
-      title: `${config.name} Server Moderation`,
-      // eslint-disable-next-line max-len
-      description: `Member \`${name}\` has been ${config.ban ? 'banned' : 'kicked'} due to repeated NSFW violation`,
-      fields: [
-        {
-          name: 'Reason',
-          value: 'Repeated NSFW content violation',
-          inline: true,
-        },
-        {
-          name: 'Action',
-          value: config.ban ? 'Ban' : 'Kick',
-          inline: true,
-        },
-        {
-          name: 'Effective Date',
-          value: createdAt.toISOString(),
-        },
-      ],
-    });
-
-    const modChannel = resolveModerationChannel(
-      guild as Guild,
-      config,
-    );
-
-    const ops: Promise<any>[] = [
-      modChannel ?
-        modChannel.send(moderationEmbed) :
-        msg.reply(moderationEmbed),
-      repository.clearStrike(guild?.id as string, id),
-    ];
-
-    await Promise.all(ops);
-  } else {
-    if (strike && hasExpired) {
-      await repository.clearStrike(guild?.id as string, id);
-    }
-
-    await repository.addStrike(
-      guild?.id as string,
-      id,
-      createdAt,
-    );
-  }
-}
-
 export default {
   event: 'message',
   fn: async (ctx: BotContext, msg: Message): Promise<Message | void> => {
     const { author, attachments, content } = msg;
-    const { prefix, deleteNSFW } = ctx.config;
+    const prefix = 'pc!';
 
     if (!msg.guild || !msg.channel.isText() || author.bot) {
       return;
@@ -133,17 +40,17 @@ export default {
       } else {
         const unknownEmbed = new MessageEmbed({
           author: {
-            name: ctx.config.name,
-            iconURL: ctx.config.imageUrl,
+            name: 'pleasantcord',
+            iconURL: process.env.IMAGE_URL,
           },
           color: '#E53E3E',
           title: 'Unknown Command',
           description:
             // eslint-disable-next-line max-len
-            `**${ctx.config.name}** doesn't recognize the command that have been just sent.\nPlease refer to **${prefix}help** to show all available **${ctx.config.name}'s** commands.`,
+            `**pleasantcord** doesn't recognize the command that have been just sent.\nPlease refer to **${prefix}help** to show all available **${ctx.config.name}'s** commands.`,
         });
 
-        return channel.send(unknownEmbed);
+        return channel.send({ embeds: [unknownEmbed] });
       }
     }
 
@@ -156,7 +63,6 @@ export default {
     }
 
     try {
-      const { name: botName, imageUrl: botImage } = ctx.config;
       const classifier = await NSFWClassifier.getInstance();
 
       const moderations = attachments.map(
@@ -195,6 +101,7 @@ export default {
 
               const req = [];
 
+              /*
               if (!deleteNSFW) {
                 const blurredMessage = channel.send(
                   new MessageEmbed({
@@ -216,6 +123,7 @@ export default {
 
                 req.push(blurredMessage);
               }
+              */
 
               if (msg.deletable) {
                 req.push(

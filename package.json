@@ -47,14 +47,14 @@
     "typesync": "^0.8.0"
   },
   "dependencies": {
-    "@tensorflow/tfjs-node": "^3.3.0",
+    "@tensorflow/tfjs-node": "^3.8.0",
     "axios": "^0.21.1",
-    "discord.js": "^12.5.1",
+    "discord.js": "^13.1.0",
     "luxon": "^1.25.0",
     "migrate-mongo": "^8.2.2",
     "mongo": "^0.1.0",
     "node-cron": "^3.0.0",
-    "nsfwjs": "^2.4.0",
+    "nsfwjs": "^2.4.1",
     "pino": "^6.11.2"
   }
 }
