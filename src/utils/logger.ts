@@ -6,7 +6,10 @@ export class Logger {
   private constructor(dsn: string) {
     init({
       dsn,
-      sampleRate: 1.0,
+      sampleRate: 0.8,
+      environment: process.env.NODE_ENV === 'development' ?
+        'development' :
+        'production',
     });
   }
 
