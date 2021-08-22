@@ -1,16 +1,16 @@
 import { Client, Intents } from 'discord.js';
-import { BotRepository } from '../repository/bot';
+import { NSFWClassifier } from '../utils/nsfw.classifier';
 import { BotContext, EventHandler } from './types';
 import { getEvents } from './utils';
 
-export function bootstrapBot(repository: BotRepository): Client {
+export async function bootstrapBot(): Promise<Client> {
   const client = new Client({
-    intents: [Intents.FLAGS.GUILD_MESSAGES],
+    intents: [Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILDS],
   });
 
-  const context: BotContext = {
-    repository,
-  };
+  const classifier = await NSFWClassifier.newClassifier();
+
+  const context: BotContext = { classifier };
 
   const eventHandlers = getEvents();
 

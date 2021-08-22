@@ -1,8 +1,8 @@
 import { Awaited, ClientEvents, Message } from 'discord.js';
-import { BotRepository } from '../repository/bot';
+import { NSFWClassifier } from '../utils/nsfw.classifier';
 
 export interface BotContext {
-  repository: BotRepository;
+  classifier: NSFWClassifier;
 }
 
 export interface EventHandler {
@@ -11,11 +11,13 @@ export interface EventHandler {
   fn: (ctx: BotContext) => Awaited<void>;
 }
 
+export type CommandHandlerFunction = (
+  ctx: BotContext,
+  msg: Message,
+) => Awaited<void>;
+
 export interface CommandHandler {
   command: string;
   description: string;
-  fn: (
-    ctx: BotContext,
-    msg: Message,
-  ) => Awaited<void>;
+  fn: CommandHandlerFunction;
 }

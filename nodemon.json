@@ -3,7 +3,6 @@
   "legacyWatch": true,
   "verbose": true,
   "watch": [
-    "config.json",
     "src"
   ],
   "ignore": [

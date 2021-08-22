@@ -1,4 +1,4 @@
-import axios from 'axios';
+import fetch from 'node-fetch';
 
 /**
  * Fetch an image from Discord's CDN
@@ -7,12 +7,8 @@ import axios from 'axios';
  */
 export async function fetchImage(url: string): Promise<Buffer> {
   try {
-    const imageBuffer = await axios.get(
-      url,
-      { responseType: 'arraybuffer' },
-    );
-
-    return Buffer.from(imageBuffer.data, 'base64');
+    const res = await fetch(url);
+    return res.buffer();
   } catch (err) {
     if (process.env.NODE_ENV === 'development') {
       console.error(err);

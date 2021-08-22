@@ -8,12 +8,7 @@
     "dev": "nodemon",
     "build": "rm -rf dist/ && tsc",
     "start": "node ./dist/index.js",
-    "postuninstall": "npm prune",
-    "migration:init": "migrate-mongo init",
-    "migration:create": "sh -c 'migrate-mongo create $0'",
-    "migration:up": "migrate-mongo up",
-    "migration:down": "migrate-mongo down",
-    "migration:status": "migrate-mongo status"
+    "postuninstall": "npm prune"
   },
   "keywords": [
     "discord.js",
@@ -48,12 +43,11 @@
   },
   "dependencies": {
     "@tensorflow/tfjs-node": "^3.8.0",
-    "axios": "^0.21.1",
+    "@types/dotenv": "^8.2.0",
     "discord.js": "^13.1.0",
-    "luxon": "^1.25.0",
     "migrate-mongo": "^8.2.2",
     "mongo": "^0.1.0",
-    "node-cron": "^3.0.0",
+    "node-fetch": "^2.6.1",
     "nsfwjs": "^2.4.1",
     "pino": "^6.11.2"
   }

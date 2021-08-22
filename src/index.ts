@@ -1,37 +1,22 @@
-import { schedule } from 'node-cron';
+import { config } from 'dotenv';
 
-import { getDBConnection } from './config/db';
-import { MongoRepository } from './repository/mongo';
-import { Logger, LogLevel } from './service/logger';
-import { NSFWClassifier } from './service/nsfw.classifier';
-
-import config from './config/env';
-import { cleanDb } from './service/db.cleaner';
+import { Logger, LogLevel } from './utils/logger';
 import { bootstrapBot } from './bot';
 
-const { env } = config;
+if (process.env.NODE_ENV === 'development') {
+  config();
+}
 
 (async (): Promise<void> => {
   try {
-    await NSFWClassifier.initializeCache();
-
-    const connection = await getDBConnection();
-    const db = connection.db(env.MONGO_DBNAME);
-    const repository = new MongoRepository(db);
-
-    const discordClient = bootstrapBot(repository);
+    const client = await bootstrapBot();
 
     Logger.bootstrap();
 
-    schedule('0 0 1 * *', async () => {
-      await cleanDb(repository);
-    });
-
-    discordClient.login(env.DISCORD_TOKEN);
+    client.login(process.env.DISCORD_TOKEN);
 
     const closeConnections = async (): Promise<void> => {
-      await connection.close();
-      discordClient.destroy();
+      client.destroy();
     };
 
     process.on('uncaughtException', async (err) => {
