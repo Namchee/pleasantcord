@@ -9,7 +9,6 @@ export async function bootstrapBot(): Promise<Client> {
   });
 
   const classifier = await NSFWClassifier.newClassifier();
-
   const context: BotContext = { classifier };
 
   const eventHandlers = getEvents();

@@ -1,70 +1,44 @@
-import { resolve } from 'path';
-import { existsSync, mkdirSync } from 'fs';
-
-import pino from 'pino';
-
-export enum LogLevel {
-  INFO = 0,
-  WARN = 1,
-  ERROR = 2,
-}
+import { init, captureException, close } from '@sentry/node';
 
 export class Logger {
   private static instance: Logger;
 
-  private constructor(
-    private readonly logger: pino.Logger,
-  ) { }
-
-  public static bootstrap(): void {
-    const logPath = resolve(process.cwd(), 'logs');
-
-    if (!existsSync(logPath)) {
-      mkdirSync(logPath);
-    }
+  private constructor(dsn: string) {
+    init({
+      dsn,
+      sampleRate: 1.0,
+    });
   }
 
   public static getInstance(): Logger {
     if (!Logger.instance) {
-      const path = resolve(process.cwd(), 'logs', 'bot.log');
-      const dest = pino.destination(path);
+      const dsn = process.env.DSN;
 
-      Logger.instance = new Logger(pino(dest));
+      if (!dsn) {
+        console.error('Failed to initialize logger: DSN is undefined');
+      }
+
+      Logger.instance = new Logger(dsn as string);
     }
 
     return Logger.instance;
   }
 
-  public logCron(msg: string): void {
-    this.logger.info(`[cron] ${msg}`);
-  }
-
-  private multiLevelLog(msg: string, level: LogLevel): void {
-    switch (level) {
-      case LogLevel.INFO: {
-        this.logger.info(msg);
-        break;
-      }
-      case LogLevel.WARN: {
-        this.logger.warn(msg);
-        break;
-      }
-      case LogLevel.ERROR: {
-        this.logger.error(msg);
-        break;
-      }
+  private captureError(msg: string): void {
+    if (process.env.NODE_ENV === 'development') {
+      console.error(msg);
     }
+
+    captureException(msg);
   }
 
-  public logBot(msg: string, level: LogLevel = LogLevel.ERROR): void {
+  public logBot(msg: string): void {
     msg = `[bot]: ${msg}`;
 
-    this.multiLevelLog(msg, level);
+    this.captureError(msg);
   }
 
-  public logDb(msg: string, level: LogLevel = LogLevel.ERROR): void {
-    msg = `[db]: ${msg}`;
-
-    this.multiLevelLog(msg, level);
+  public async closeLogger(): Promise<void> {
+    await close();
   }
 }

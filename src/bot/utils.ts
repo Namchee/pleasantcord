@@ -1,9 +1,9 @@
-import { readdirSync, statSync } from 'fs';
+import { readdirSync } from 'fs';
 import { resolve } from 'path';
 import { Constants, DiscordAPIError, MessageEmbed } from 'discord.js';
 
 import { CommandHandler, EventHandler } from './types';
-import { Logger, LogLevel } from '../utils/logger';
+import { Logger } from '../utils/logger';
 
 export function getCommands(): CommandHandler[] {
   const basePath = resolve(__dirname, 'commands');
@@ -29,9 +29,6 @@ export function getEvents(): EventHandler[] {
   const eventFiles = readdirSync(basePath);
 
   const events = eventFiles
-    .filter((eventFile: string) => {
-      return !statSync(resolve(basePath, eventFile)).isDirectory();
-    })
     .map((eventFile: string) => {
       const file = require(resolve(basePath, eventFile));
 
@@ -75,12 +72,12 @@ export function handleError(
       errorMessage.setDescription(err.message);
     }
   } else {
-    Logger.getInstance().logBot(err.message, LogLevel.ERROR);
+    Logger.getInstance().logBot(err.message);
 
     errorMessage.setTitle('Uncaught Exceptions Thrown');
     errorMessage.setDescription(
       // eslint-disable-next-line max-len
-      'There\'s an unexpected error throw by the bot. Please contact the developer immediately',
+      'There\'s an unexpected error throw by the bot.',
     );
 
     errorMessage.addField(

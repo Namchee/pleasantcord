@@ -3,7 +3,7 @@ import fetch from 'node-fetch';
 /**
  * Fetch an image from Discord's CDN
  * @param {string} url Image URL
- * @returns Buffer
+ * @returns {Promise<Buffer>} image, in `Buffer`
  */
 export async function fetchImage(url: string): Promise<Buffer> {
   try {
@@ -14,6 +14,6 @@ export async function fetchImage(url: string): Promise<Buffer> {
       console.error(err);
     }
 
-    throw new Error('Cannot fetch image from Discord\'s CDN');
+    throw new Error('Failed to fetch contents from Discord\'s CDN');
   }
 }
