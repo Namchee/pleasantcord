@@ -21,7 +21,7 @@ async function testContent(
   msg: Message,
 ): Promise<void> {
   const channel = msg.channel as TextChannel;
-  const deleteNSFW = false;
+  const deleteNSFW = true;
 
   const hasImage = msg.attachments.some(
     ({ url }) => /\.(jpg|png|jpeg)$/.test(url),
@@ -35,10 +35,8 @@ async function testContent(
     async ({ url, name }: MessageAttachment) => {
       if (/\.(jpg|png|jpeg)$/.test(url)) {
         const image = await fetchImage(url);
-        const { isSFW, category } = await classifier.classifyImage(
-          image,
-          0.7,
-        );
+        const { isSFW, category, classification } = await classifier
+          .classifyImage(image, 0.7);
 
         if (!isSFW) {
           const fields = [
@@ -83,10 +81,28 @@ async function testContent(
             });
           }
 
-          return [
+          const request = [
             channel.send({ embeds: [embed], files }),
             msg.delete(),
           ];
+
+          if (process.env.NODE_ENV === 'development') {
+            const devEmbed = new MessageEmbed({
+              author: {
+                name: 'pleasantcord',
+                iconURL: process.env.IMAGE_URL,
+              },
+              title: '[DEV] Image Labels',
+              description: classification?.map(({ name, probability }) => {
+                return `**${name}** — ${(probability * 100).toFixed(2)}%`;
+              }).join('\n'),
+              color: '#2674C2',
+            });
+
+            request.push(channel.send({ embeds: [devEmbed] }));
+          }
+
+          return request;
         }
       }
     },
