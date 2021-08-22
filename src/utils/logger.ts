@@ -27,18 +27,18 @@ export class Logger {
     return Logger.instance;
   }
 
-  private captureError(msg: string): void {
+  private captureError(err: Error): void {
     if (process.env.NODE_ENV === 'development') {
-      console.error(msg);
+      console.error(err.message);
     }
 
-    captureException(msg);
+    captureException(err);
   }
 
-  public logBot(msg: string): void {
-    msg = `[bot]: ${msg}`;
+  public logBot(err: Error): void {
+    err.message = `[bot]: ${err.message}`;
 
-    this.captureError(msg);
+    this.captureError(err);
   }
 
   public async closeLogger(): Promise<void> {

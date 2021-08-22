@@ -6,6 +6,7 @@ import {
 } from 'discord.js';
 
 import { fetchImage } from '../../utils/image.downloader';
+import { ImageCategory } from '../../utils/nsfw.classifier';
 import { CommandHandler, BotContext, CommandHandlerFunction } from '../types';
 import { handleError, getCommands } from '../utils';
 
@@ -17,11 +18,18 @@ commandHandlers.forEach((handler: CommandHandler) => {
 });
 
 async function testContent(
-  { classifier }: BotContext,
+  { classifier, configRepository }: BotContext,
   msg: Message,
 ): Promise<void> {
   const channel = msg.channel as TextChannel;
-  const deleteNSFW = true;
+  const config = await configRepository.getConfig(msg.guildId as string);
+
+  if (!config) {
+    throw new Error(
+      // eslint-disable-next-line max-len
+      `Data synchronization failure: Configuration doesn't exists for ${msg.guild?.name}`,
+    );
+  }
 
   const hasImage = msg.attachments.some(
     ({ url }) => /\.(jpg|png|jpeg)$/.test(url),
@@ -35,10 +43,16 @@ async function testContent(
     async ({ url, name }: MessageAttachment) => {
       if (/\.(jpg|png|jpeg)$/.test(url)) {
         const image = await fetchImage(url);
-        const { isSFW, category, classification } = await classifier
-          .classifyImage(image, 0.7);
+        const classification = await classifier.classifyImage(image);
+        const isNSFW = classification.some((cat) => {
+          return config.categories.includes(cat.name) &&
+            cat.probability >= config.threshold;
+        });
 
-        if (!isSFW) {
+        if (isNSFW) {
+          const category = classification.find(
+            cat => config.categories.includes(cat.name),
+          ) as ImageCategory;
           const fields = [
             {
               name: 'Author',
@@ -74,7 +88,7 @@ async function testContent(
 
           const files = [];
 
-          if (!deleteNSFW) {
+          if (!config.delete) {
             files.push({
               attachment: image,
               name: `SPOILER_${name}`,
@@ -93,7 +107,7 @@ async function testContent(
                 iconURL: process.env.IMAGE_URL,
               },
               title: '[DEV] Image Labels',
-              description: classification?.map(({ name, probability }) => {
+              description: classification.map(({ name, probability }) => {
                 return `**${name}** — ${(probability * 100).toFixed(2)}%`;
               }).join('\n'),
               color: '#2674C2',

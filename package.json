@@ -47,6 +47,7 @@
     "@tensorflow/tfjs-node": "^3.8.0",
     "@types/dotenv": "^8.2.0",
     "discord.js": "^13.1.0",
+    "faunadb": "^4.3.0",
     "migrate-mongo": "^8.2.2",
     "mongo": "^0.1.0",
     "node-fetch": "^2.6.1",

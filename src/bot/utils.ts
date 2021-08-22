@@ -55,34 +55,27 @@ export function handleError(
     color: '#E53E3E',
   });
 
-  if (err instanceof DiscordAPIError) {
-    if (err.code === Constants.APIErrors.MISSING_PERMISSIONS) {
-      errorMessage.setTitle('Insufficient Permissions');
-      errorMessage.setDescription(
-        `pleasantcord lacks the required permissions to perform its duties`,
-      );
-
-      errorMessage.addField(
-        'Solution',
-        // eslint-disable-next-line max-len
-        `Please make sure that pleasantcord has sufficient permissions as stated in the documentation to manage this server`,
-      );
-    } else {
-      errorMessage.setTitle(err.name);
-      errorMessage.setDescription(err.message);
-    }
-  } else {
-    Logger.getInstance().logBot(err.message);
-
-    errorMessage.setTitle('Uncaught Exceptions Thrown');
+  if (
+    err instanceof DiscordAPIError &&
+    err.code === Constants.APIErrors.MISSING_PERMISSIONS
+  ) {
+    errorMessage.setTitle('Insufficient Permissions');
     errorMessage.setDescription(
-      // eslint-disable-next-line max-len
-      'There\'s an unexpected error throw by the bot.',
+      `\`pleasantcord\` lacks the required permissions to perform its duties`,
     );
 
     errorMessage.addField(
-      'Stacktrace',
-      err.stack as string,
+      'Solution',
+      // eslint-disable-next-line max-len
+      `Please make sure that \`pleasantcord\` has all the required permissions as stated in the documentation to manage this server`,
+    );
+  } else {
+    Logger.getInstance().logBot(err);
+
+    errorMessage.setTitle('Whoops!');
+    errorMessage.setDescription(
+      // eslint-disable-next-line max-len
+      '`pleasantcord` has encountered an unexpected error. The error has been reported to the system.',
     );
   }
 
