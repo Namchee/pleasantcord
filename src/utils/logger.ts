@@ -18,7 +18,7 @@ export class Logger {
       const dsn = process.env.DSN;
 
       if (!dsn) {
-        console.error('Failed to initialize logger: DSN is undefined');
+        throw new Error('Failed to initialize logger: DSN is undefined');
       }
 
       Logger.instance = new Logger(dsn as string);

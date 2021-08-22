@@ -31,5 +31,10 @@ if (process.env.NODE_ENV === 'development') {
     process.exit(0);
   });
 
+  process.on('SIGKILL', async () => {
+    await cleanup();
+    process.exit(0);
+  });
+
   await client.login(process.env.DISCORD_TOKEN);
 })();
