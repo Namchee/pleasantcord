@@ -17,7 +17,7 @@ commandHandlers.forEach((handler: CommandHandler) => {
   commandMap[handler.command] = handler.fn;
 });
 
-async function testContent(
+async function moderateContent(
   { classifier, configRepository }: BotContext,
   msg: Message,
 ): Promise<void> {
@@ -42,8 +42,14 @@ async function testContent(
   const moderations = msg.attachments.map(
     async ({ url, name }: MessageAttachment) => {
       if (/\.(jpg|png|jpeg)$/.test(url)) {
+        let start = 0;
+        if (process.env.NODE_ENV === 'development') {
+          start = performance.now();
+        }
+
         const image = await fetchImage(url);
         const classification = await classifier.classifyImage(image);
+
         const isNSFW = classification.some((cat) => {
           return config.categories.includes(cat.name) &&
             cat.probability >= config.threshold;
@@ -107,18 +113,29 @@ async function testContent(
                 iconURL: process.env.IMAGE_URL,
               },
               title: '[DEV] Image Labels',
-              description: classification.map(({ name, probability }) => {
-                return `**${name}** — ${(probability * 100).toFixed(2)}%`;
-              }).join('\n'),
+              fields: [
+                {
+                  name: 'Labels',
+                  value: classification.map(({ name, probability }) => {
+                    return `${name} — ${(probability * 100).toFixed(2)}%`;
+                  }).join('\n'),
+                },
+                {
+                  name: 'Elapsed Time',
+                  value: `${(performance.now() - start).toFixed(3)} ms`,
+                },
+              ],
               color: '#2674C2',
             });
 
             request.push(channel.send({ embeds: [devEmbed] }));
           }
 
-          return request;
+          return Promise.all(request);
         }
       }
+
+      return [];
     },
   );
 
@@ -158,7 +175,7 @@ export default {
         }
       }
 
-      await testContent(ctx, msg);
+      await moderateContent(ctx, msg);
     } catch (err) {
       const errorEmbed = handleError(err as Error);
       msg.channel.send({ embeds: [errorEmbed] });
