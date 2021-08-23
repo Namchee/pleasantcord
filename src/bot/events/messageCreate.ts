@@ -39,7 +39,7 @@ async function moderateContent(
     return;
   }
 
-  const moderations = msg.attachments.map(
+  msg.attachments.forEach(
     async ({ url, name }: MessageAttachment) => {
       if (/\.(jpg|png|jpeg)$/.test(url)) {
         let start = 0;
@@ -101,10 +101,8 @@ async function moderateContent(
             });
           }
 
-          const request = [
-            channel.send({ embeds: [embed], files }),
-            msg.delete(),
-          ];
+          channel.send({ embeds: [embed], files });
+          msg.delete();
 
           if (process.env.NODE_ENV === 'development') {
             const devEmbed = new MessageEmbed({
@@ -128,18 +126,12 @@ async function moderateContent(
               color: '#2674C2',
             });
 
-            request.push(channel.send({ embeds: [devEmbed] }));
+            channel.send({ embeds: [devEmbed] });
           }
-
-          return Promise.all(request);
         }
       }
-
-      return [];
     },
   );
-
-  await Promise.all(moderations);
 }
 
 export default {

@@ -72,10 +72,10 @@ export function handleError(
   } else {
     Logger.getInstance().logBot(err);
 
-    errorMessage.setTitle('Whoops!');
+    errorMessage.setTitle('Ouch!');
     errorMessage.setDescription(
       // eslint-disable-next-line max-len
-      '`pleasantcord` has encountered an unexpected error. The error has been reported to the system.',
+      '`pleasantcord` has encountered an unexpected error. The error has been reported to the system. Please try again.',
     );
   }
 
