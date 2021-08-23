@@ -12,7 +12,7 @@ export async function bootstrapBot(
     intents: [Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILDS],
   });
 
-  const context: BotContext = { classifier, configRepository };
+  const context: BotContext = { client, classifier, configRepository };
 
   const eventHandlers = getEvents();
 

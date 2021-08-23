@@ -1,8 +1,9 @@
-import { Awaited, ClientEvents, Message } from 'discord.js';
+import { Awaited, Client, ClientEvents, Message } from 'discord.js';
 import { ConfigurationRepository } from '../repository/config';
 import { NSFWClassifier } from '../utils/nsfw.classifier';
 
 export interface BotContext {
+  client: Client;
   classifier: NSFWClassifier;
   configRepository: ConfigurationRepository;
 }
