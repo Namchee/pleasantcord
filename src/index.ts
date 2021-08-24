@@ -16,7 +16,7 @@ if (process.env.NODE_ENV === 'development') {
 
   if (!secret) {
     throw new Error(
-      'Failed to initialize DB connection: Secret does not exist',
+      'Failed to initialize DB connection: secret does not exist',
     );
   }
 
@@ -29,7 +29,10 @@ if (process.env.NODE_ENV === 'development') {
   const client = await bootstrapBot(classifier, configRepository);
   const cleanup = async (): Promise<void> => {
     client.destroy();
-    await Logger.getInstance().closeLogger();
+    await Promise.all([
+      dbClient.close(),
+      Logger.getInstance().closeLogger(),
+    ]);
   };
 
   process.on('uncaughtException', async (err) => {
@@ -50,6 +53,11 @@ if (process.env.NODE_ENV === 'development') {
   });
 
   process.on('SIGKILL', async () => {
+    await cleanup();
+    process.exit(0);
+  });
+
+  process.on('SIGINT', async () => {
     await cleanup();
     process.exit(0);
   });

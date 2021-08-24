@@ -1,7 +1,9 @@
+import { resolve } from 'path';
 import { Message, MessageEmbed } from 'discord.js';
 
 import { BotContext } from '../types';
-import packageInfo from './../../../package.json';
+
+const packageInfo = require(resolve(process.cwd(), 'package.json'));
 
 export default {
   command: 'status',
