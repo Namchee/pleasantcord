@@ -22,11 +22,11 @@
   </a>
 </p>
 
-> Currently, the bot is offline. I'll fix some issues as soon as possible.
-
 Pleasantcord is a simple NSFW image auto moderation bot 🤖 for Discord powered by [TensorFlow JS](https://www.npmjs.com/package/@tensorflow/tfjs-node). On the inside, it uses a pretrained [Inception V3 model](https://keras.io/api/applications/inceptionv3/) provided by [nsfw.js](https://github.com/infinitered/nsfwjs) that is able to distinguish image category to several categories.
 
-<img src="./docs/demo.gif" />
+<p align="center">
+  <img src="./docs/demo.gif" />
+</p>
 
 ## Motivation
 
