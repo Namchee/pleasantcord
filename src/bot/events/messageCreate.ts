@@ -41,6 +41,8 @@ async function moderateContent(
 
   const moderations = msg.attachments.map(
     async ({ url, name }: MessageAttachment) => {
+      const request = [];
+
       if (/\.(jpg|png|jpeg)$/.test(url)) {
         let start = 0;
         if (process.env.NODE_ENV === 'development') {
@@ -103,41 +105,39 @@ async function moderateContent(
             });
           }
 
-          const request = [
+          request.push(
             channel.send({ embeds: [embed], files }),
             msg.delete(),
-          ];
+          );
+        }
 
-          if (process.env.NODE_ENV === 'development') {
-            const devEmbed = new MessageEmbed({
-              author: {
-                name: 'pleasantcord',
-                iconURL: process.env.IMAGE_URL,
+        if (process.env.NODE_ENV === 'development') {
+          const devEmbed = new MessageEmbed({
+            author: {
+              name: 'pleasantcord',
+              iconURL: process.env.IMAGE_URL,
+            },
+            title: '[DEV] Image Labels',
+            fields: [
+              {
+                name: 'Labels',
+                value: classification.map(({ name, probability }) => {
+                  return `${name} — ${(probability * 100).toFixed(2)}%`;
+                }).join('\n'),
               },
-              title: '[DEV] Image Labels',
-              fields: [
-                {
-                  name: 'Labels',
-                  value: classification.map(({ name, probability }) => {
-                    return `${name} — ${(probability * 100).toFixed(2)}%`;
-                  }).join('\n'),
-                },
-                {
-                  name: 'Elapsed Time',
-                  value: `${(performance.now() - start).toFixed(3)} ms`,
-                },
-              ],
-              color: '#2674C2',
-            });
+              {
+                name: 'Elapsed Time',
+                value: `${(performance.now() - start).toFixed(3)} ms`,
+              },
+            ],
+            color: '#2674C2',
+          });
 
-            request.push(channel.send({ embeds: [devEmbed] }));
-          }
-
-          return Promise.all(request);
+          request.push(channel.send({ embeds: [devEmbed] }));
         }
       }
 
-      return [];
+      return Promise.all(request);
     },
   );
 
