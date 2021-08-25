@@ -6,9 +6,11 @@ import { NSFWClassifier } from './utils/nsfw.classifier';
 import { Client } from 'faunadb';
 import { FaunaConfigurationRepository } from './repository/config';
 
-(async (): Promise<void> => {
+if (process.env.NODE_ENV === 'development') {
   config();
+}
 
+(async (): Promise<void> => {
   const classifier = await NSFWClassifier.newClassifier();
   const secret = process.env.DB_SECRET;
 
