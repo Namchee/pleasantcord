@@ -4,6 +4,9 @@ on:
   release:
     types: [published]
   workflow_dispatch:
+  push:
+    branches:
+      - dev # TODO: this is a test, remove this on complete
 
 jobs:
   deploy:
@@ -21,6 +24,4 @@ jobs:
         uses: yarn lint && yarn test
       - name: Build the files
         uses: yarn build
-      - name: Restart the bot
-        uses: pm2 restart bot
       
