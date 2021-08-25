@@ -8,7 +8,9 @@ const packageInfo = require(resolve(process.cwd(), 'package.json'));
 export default {
   command: 'status',
   description: 'Show the bot status',
-  fn: async ({ client }: BotContext, msg: Message): Promise<Message> => {
+  fn: async (_: BotContext, msg: Message): Promise<Message> => {
+    const time = Date.now() - msg.createdTimestamp;
+
     let packageVersion: string = packageInfo.dependencies['discord.js'];
 
     if (/^[^\d]/.test(packageVersion)) {
@@ -24,7 +26,7 @@ export default {
       },
       {
         name: 'Response Time',
-        value: `~${client.ws.ping} ms`,
+        value: `~${time} ms`,
         inline: true,
       },
     ];
