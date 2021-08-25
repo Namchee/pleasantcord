@@ -1,17 +1,15 @@
-import { Message, MessageEmbed } from 'discord.js';
 import { resolve } from 'path';
+import { Message, MessageEmbed } from 'discord.js';
 
-import { BotContext } from '../../types';
+import { BotContext } from '../types';
 
-const packageInfo = require(
-  resolve(process.cwd(), 'package.json'),
-);
+const packageInfo = require(resolve(process.cwd(), 'package.json'));
 
 export default {
   command: 'status',
   description: 'Show the bot status',
-  fn: async ({ config }: BotContext, msg: Message): Promise<Message> => {
-    const time = new Date().getTime() - msg.createdTimestamp;
+  fn: async (_: BotContext, msg: Message): Promise<Message> => {
+    const time = Date.now() - msg.createdTimestamp;
 
     let packageVersion: string = packageInfo.dependencies['discord.js'];
 
@@ -33,16 +31,18 @@ export default {
       },
     ];
 
-    const responseMessage: MessageEmbed = new MessageEmbed({
+    const embed: MessageEmbed = new MessageEmbed({
       author: {
-        name: config.name,
-        iconURL: config.imageUrl,
+        name: 'pleasantcord',
+        iconURL: process.env.IMAGE_URL,
       },
       title: 'Status Report',
       fields,
-      color: config.embedColor,
+      color: process.env.NODE_ENV === 'development' ?
+        '#2674C2' :
+        '#FFA31A',
     });
 
-    return msg.channel.send(responseMessage);
+    return msg.channel.send({ embeds: [embed] });
   },
 };

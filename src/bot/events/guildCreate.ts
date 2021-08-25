@@ -1,25 +1,19 @@
 import { Guild } from 'discord.js';
 
-import { Logger, LogLevel } from '../../service/logger';
+import { BASE_CONFIG } from '../../entity/config';
 import { BotContext } from '../types';
-import { handleError, syncModerationChannels } from '../utils';
+import { handleError } from './../utils';
 
 export default {
   event: 'guildCreate',
-  fn: async ({ config }: BotContext, guild: Guild): Promise<void> => {
+  fn: async (
+    { configRepository }: BotContext,
+    guild: Guild,
+  ): Promise<void> => {
     try {
-      await syncModerationChannels(
-        guild,
-        config,
-      );
-
-      Logger.getInstance().logBot(
-        // eslint-disable-next-line max-len
-        `Successfully initialized ${config.name}'s moderation channel on ${guild.name} (#${guild.id})`,
-        LogLevel.INFO,
-      );
+      await configRepository.createConfig(guild.id, BASE_CONFIG);
     } catch (err) {
-      handleError(config, err);
+      handleError(err as Error);
     }
   },
 };

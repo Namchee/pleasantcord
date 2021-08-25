@@ -1,59 +1,61 @@
-import { schedule } from 'node-cron';
+import { config } from 'dotenv';
 
-import { getDBConnection } from './config/db';
-import { MongoRepository } from './repository/mongo';
-import { Logger, LogLevel } from './service/logger';
-import { NSFWClassifier } from './service/nsfw.classifier';
-
-import config from './config/env';
-import { cleanDb } from './service/db.cleaner';
+import { Logger } from './utils/logger';
 import { bootstrapBot } from './bot';
+import { NSFWClassifier } from './utils/nsfw.classifier';
+import { Client } from 'faunadb';
+import { FaunaConfigurationRepository } from './repository/config';
 
-const { env } = config;
+if (process.env.NODE_ENV === 'development') {
+  config();
+}
 
 (async (): Promise<void> => {
-  try {
-    await NSFWClassifier.initializeCache();
+  const classifier = await NSFWClassifier.newClassifier();
+  const secret = process.env.DB_SECRET;
 
-    const connection = await getDBConnection();
-    const db = connection.db(env.MONGO_DBNAME);
-    const repository = new MongoRepository(db);
-
-    const discordClient = bootstrapBot(repository);
-
-    Logger.bootstrap();
-
-    schedule('0 0 1 * *', async () => {
-      await cleanDb(repository);
-    });
-
-    discordClient.login(env.DISCORD_TOKEN);
-
-    const closeConnections = async (): Promise<void> => {
-      await connection.close();
-      discordClient.destroy();
-    };
-
-    process.on('uncaughtException', async (err) => {
-      Logger.getInstance().logBot(`Uncaught Exception: ${err}`, LogLevel.ERROR);
-      await closeConnections();
-      process.exit(1);
-    });
-
-    process.on('unhandledRejection', async (reason) => {
-      Logger.getInstance().logBot(
-        `Unhandled promise rejection: ${reason}`,
-        LogLevel.ERROR,
-      );
-      await closeConnections();
-      process.exit(1);
-    });
-
-    process.on('SIGTERM', async () => {
-      await closeConnections();
-      process.exit(0);
-    });
-  } catch (err) {
-    console.error(err);
+  if (!secret) {
+    throw new Error(
+      'Failed to initialize DB connection: secret does not exist',
+    );
   }
+
+  const dbClient = new Client({
+    secret,
+    domain: process.env.DB_HOST,
+  });
+  const configRepository = new FaunaConfigurationRepository(dbClient);
+
+  const client = await bootstrapBot(classifier, configRepository);
+  const cleanup = async (): Promise<void> => {
+    client.destroy();
+    await Promise.all([
+      dbClient.close(),
+      Logger.getInstance().closeLogger(),
+    ]);
+  };
+
+  process.on('uncaughtException', async (err) => {
+    Logger.getInstance().logBot(err);
+    await cleanup();
+    process.exit(1);
+  });
+
+  process.on('unhandledRejection', async (reason) => {
+    Logger.getInstance().logBot(reason as Error);
+    await cleanup();
+    process.exit(1);
+  });
+
+  process.on('SIGTERM', async () => {
+    await cleanup();
+    process.exit(0);
+  });
+
+  process.on('SIGINT', async () => {
+    await cleanup();
+    process.exit(0);
+  });
+
+  await client.login(process.env.DISCORD_TOKEN);
 })();

@@ -70,6 +70,8 @@ typings/
 
 # dotenv environment variables file
 .env
+.env.dev
+.env.prod
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -104,6 +106,3 @@ dist
 
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
-mongo-volume
-sample.jpg
-deploy.sh

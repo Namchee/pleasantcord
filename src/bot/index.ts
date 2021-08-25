@@ -1,18 +1,18 @@
-import { Client } from 'discord.js';
-import { BotRepository } from '../repository/bot';
+import { Client, Intents } from 'discord.js';
+import { ConfigurationRepository } from '../repository/config';
+import { NSFWClassifier } from '../utils/nsfw.classifier';
 import { BotContext, EventHandler } from './types';
 import { getEvents } from './utils';
 
-import config from './../config/env';
+export async function bootstrapBot(
+  classifier: NSFWClassifier,
+  configRepository: ConfigurationRepository,
+): Promise<Client> {
+  const client = new Client({
+    intents: [Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILDS],
+  });
 
-export function bootstrapBot(repository: BotRepository): Client {
-  const discordClient = new Client();
-
-  const context: BotContext = {
-    client: discordClient,
-    config: config.bot,
-    repository,
-  };
+  const context: BotContext = { client, classifier, configRepository };
 
   const eventHandlers = getEvents();
 
@@ -20,11 +20,11 @@ export function bootstrapBot(repository: BotRepository): Client {
     const handler = fn.bind(null, context);
 
     if (once) {
-      discordClient.once(event, handler);
+      client.once(event, handler);
     } else {
-      discordClient.on(event, handler);
+      client.on(event, handler);
     }
   });
 
-  return discordClient;
+  return client;
 }
