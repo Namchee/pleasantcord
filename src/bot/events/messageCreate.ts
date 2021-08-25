@@ -89,7 +89,9 @@ async function moderateContent(
             },
             title: 'Possible NSFW Contents Detected',
             fields,
-            color: '#E53E3E',
+            color: process.env.NODE_ENV === 'development' ?
+              '#2674C2' :
+              '#FFA31A',
           });
 
           const files = [];

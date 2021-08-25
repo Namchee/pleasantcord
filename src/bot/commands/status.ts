@@ -36,7 +36,9 @@ export default {
       },
       title: 'Status Report',
       fields,
-      color: '#2674C2',
+      color: process.env.NODE_ENV === 'development' ?
+        '#2674C2' :
+        '#FFA31A',
     });
 
     return msg.channel.send({ embeds: [embed] });
