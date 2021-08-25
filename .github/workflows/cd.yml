@@ -19,9 +19,9 @@ jobs:
         with:
           node-version: '16.x'
       - name: Install dependencies
-        uses: yarn install --frozen-lockfile
+        run: yarn install --frozen-lockfile
       - name: Lint and test
-        uses: yarn lint && yarn test
+        run: yarn lint && yarn test
       - name: Build the files
-        uses: yarn build
+        run: yarn build
       
