@@ -24,11 +24,13 @@
 
 Pleasantcord is a simple NSFW image auto moderation bot 🤖 for Discord powered by [TensorFlow JS](https://www.npmjs.com/package/@tensorflow/tfjs-node). On the inside, it uses a pretrained [Inception V3 model](https://keras.io/api/applications/inceptionv3/) provided by [nsfw.js](https://github.com/infinitered/nsfwjs) that is able to distinguish image category to several categories.
 
+<img src="./docs/demo.gif" />
+
 ## Motivation
 
 Discord has [NSFW Channel System](https://support.discord.com/hc/en-us/articles/115000084051-NSFW-Channels-and-Content). Unfortunately, the system cannot prevent NSFW contents from being posted on SFW channels and content moderation must still be done manually by server administrator.
 
-This bot aims to fix that by automatically detecting potential NSFW images and administer correct response to the posted content either by blurring the image or removing it altogether.
+This bot aims to fix that by automatically detecting potential NSFW images and administer correct response to the posted content either by blurring the image (coming soon!) or removing it altogether.
 
 ## Installation
 
