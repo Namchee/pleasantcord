@@ -11,7 +11,7 @@
   <a href="https://github.com/google/gts">
     <img src="https://img.shields.io/badge/code%20style-google-blueviolet.svg" title="CodeStyle: Google" alt="GTS Logo" />
   </a>
-  <a href="https://discord.com/api/oauth2/authorize?client_id=750668307555942482&permissions=268445718&scope=bot">
+  <a href="https://discord.com/api/oauth2/authorize?client_id=750668307555942482&permissions=10240&scope=bot">
     <img src="https://img.shields.io/badge/Discord-Invite-blue" title="Bot Invite Link" alt="Bot Invite Link" />
   </a>
   <a href="https://github.com/Namchee/pleasantcord/issues">
@@ -36,7 +36,7 @@ This bot aims to fix that by automatically detecting potential NSFW images and a
 
 > This bot is still on active development. The API **may** break at any moment
 
-Invite this bot to your server by clicking [this link](https://discord.com/api/oauth2/authorize?client_id=750668307555942482&permissions=268445718&scope=bot).
+Invite this bot to your server by clicking [this link](https://discord.com/api/oauth2/authorize?client_id=750668307555942482&permissions=10240&scope=bot).
 
 The bot itself requires the following permission in your server, make sure that the bot has **all** the permissions below:
 
