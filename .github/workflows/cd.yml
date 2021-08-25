@@ -20,8 +20,8 @@ jobs:
           node-version: '16.x'
       - name: Install dependencies
         run: yarn install --frozen-lockfile
-      - name: Lint and test
-        run: yarn lint && yarn test
+      - name: Lint and fix automatically fixable issues
+        run: yarn lint:fix
       - name: Build the files
         run: yarn build
       

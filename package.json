@@ -5,6 +5,7 @@
   "description": "🤖 NSFW image moderation bot for Discord",
   "scripts": {
     "lint": "eslint ./src/**.ts",
+    "lint:fix": "eslint ./src/**.ts --fix",
     "dev": "nodemon",
     "build": "rm -rf dist/ && tsc",
     "start": "pm2 start ecosystem.config.js",
