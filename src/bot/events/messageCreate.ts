@@ -4,18 +4,36 @@ import {
   MessageEmbed,
   TextChannel,
 } from 'discord.js';
+import { IMAGE_FILE } from '../../constants/content';
 
 import { fetchImage } from '../../utils/image.downloader';
 import { ImageCategory } from '../../utils/nsfw.classifier';
 import { CommandHandler, BotContext, CommandHandlerFunction } from '../types';
 import { handleError, getCommands } from '../utils';
 
+/**
+ * Get all available commands from command files and
+ * register all commands to a simple object map.
+ */
 const commandMap: Record<string, CommandHandlerFunction> = {};
 const commandHandlers = getCommands();
 
 commandHandlers.forEach((handler: CommandHandler) => {
   commandMap[handler.command] = handler.fn;
 });
+
+/**
+ * Check if an attachment is supported by pleasantcord.
+ *
+ * @param {string} url content url
+ * @returns `true` if the content is supported, `false`
+ * otherwise.
+ */
+function isSupportedContent(url: string): boolean {
+  const extension = url.split('.').pop() as string;
+
+  return IMAGE_FILE.includes(extension);
+}
 
 async function moderateContent(
   { classifier, configRepository }: BotContext,
@@ -31,9 +49,7 @@ async function moderateContent(
     );
   }
 
-  const hasImage = msg.attachments.some(
-    ({ url }) => /\.(jpg|png|jpeg)$/.test(url),
-  );
+  const hasImage = msg.attachments.some(({ url }) => isSupportedContent(url));
 
   if (channel.nsfw || !hasImage) {
     return;
@@ -43,7 +59,7 @@ async function moderateContent(
     async ({ url, name }: MessageAttachment) => {
       const request = [];
 
-      if (/\.(jpg|png|jpeg)$/.test(url)) {
+      if (isSupportedContent(url)) {
         let start = 0;
         if (process.env.NODE_ENV === 'development') {
           start = performance.now();
@@ -127,7 +143,7 @@ async function moderateContent(
               },
               {
                 name: 'Elapsed Time',
-                value: `${(performance.now() - start).toFixed(3)} ms`,
+                value: `${(performance.now() - start).toFixed(2)} ms`,
               },
             ],
             color: '#2674C2',

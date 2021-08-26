@@ -1,0 +1,9 @@
+// List of supported image files to be moderated.
+// Should support all visual contents that also supported
+// by Discord.
+export const IMAGE_FILE = [
+  'jpg',
+  'jpeg',
+  'png',
+  'webp',
+];
