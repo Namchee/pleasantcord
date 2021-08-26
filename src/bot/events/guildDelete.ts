@@ -10,6 +10,7 @@ export default {
     guild: Guild,
   ): Promise<void> => {
     try {
+      // delete server config if the bot is removed from a guild.
       await configRepository.deleteConfig(guild.id);
     } catch (err) {
       handleError(err as Error);

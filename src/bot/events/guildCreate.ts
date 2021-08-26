@@ -11,6 +11,7 @@ export default {
     guild: Guild,
   ): Promise<void> => {
     try {
+      // create guild config when the bot enters a guild.
       await configRepository.createConfig(guild.id, BASE_CONFIG);
     } catch (err) {
       handleError(err as Error);

@@ -4,10 +4,9 @@ import {
   MessageEmbed,
   TextChannel,
 } from 'discord.js';
-import { IMAGE_FILE } from '../../constants/content';
+import { ImageCategory, IMAGE_FILE } from '../../constants/content';
 
 import { fetchImage } from '../../utils/image.downloader';
-import { ImageCategory } from '../../utils/nsfw.classifier';
 import { CommandHandler, BotContext, CommandHandlerFunction } from '../types';
 import { handleError, getCommands } from '../utils';
 
@@ -35,6 +34,14 @@ function isSupportedContent(url: string): boolean {
   return IMAGE_FILE.includes(extension);
 }
 
+/**
+ * Check all supported content for NSFW contents
+ * and react accordingly.
+ *
+ * @param {BotContext} ctx bot context
+ * @param {Message} msg discord's message object
+ * @returns {Promise<void>}
+ */
 async function moderateContent(
   { classifier, configRepository }: BotContext,
   msg: Message,
@@ -70,7 +77,7 @@ async function moderateContent(
 
         const isNSFW = classification.some((cat) => {
           return config.categories.includes(cat.name) &&
-            cat.probability >= config.threshold;
+            cat.accuracy >= config.threshold;
         });
 
         if (isNSFW) {
@@ -89,7 +96,7 @@ async function moderateContent(
             },
             {
               name: 'Accuracy',
-              value: `${(category.probability * 100).toFixed(2)}%`,
+              value: `${(category.accuracy * 100).toFixed(2)}%`,
               inline: true,
             },
           ];
@@ -137,8 +144,8 @@ async function moderateContent(
             fields: [
               {
                 name: 'Labels',
-                value: classification.map(({ name, probability }) => {
-                  return `${name} — ${(probability * 100).toFixed(2)}%`;
+                value: classification.map(({ name, accuracy }) => {
+                  return `${name} — ${(accuracy * 100).toFixed(2)}%`;
                 }).join('\n'),
               },
               {

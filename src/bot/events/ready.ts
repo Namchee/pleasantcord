@@ -21,6 +21,8 @@ export default {
         ],
       });
 
+      // sync all configs, just in case if the configs are
+      // corrupted or deleted by accident.
       await Promise.all(
         client.guilds.cache.map(async (guild) => {
           const config = await configRepository.getConfig(guild.id);

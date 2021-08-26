@@ -1,7 +1,8 @@
 import fetch from 'node-fetch';
 
 /**
- * Fetch an image from Discord's CDN
+ * Fetch an image from Discord's CDN.
+ *
  * @param {string} url Image URL
  * @returns {Promise<Buffer>} image, in `Buffer`
  */

@@ -1,11 +1,16 @@
-export type CategoryName = 'Drawing' | 'Hentai' | 'Porn' | 'Neutral' | 'Sexy';
+import { Category } from '../constants/content';
 
+
+// Configuration object which is unique per server.
 export interface Configuration {
+  // Minimum accuracy level to be classified as NSFW
   readonly threshold: number;
-  readonly categories: CategoryName[];
+  // List of image
+  readonly categories: Category[];
   readonly delete: boolean;
 }
 
+// Default configuration for all servers.
 export const BASE_CONFIG: Configuration = {
   threshold: 0.75,
   categories: ['Hentai', 'Porn'],

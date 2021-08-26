@@ -5,6 +5,11 @@ import { Constants, DiscordAPIError, MessageEmbed } from 'discord.js';
 import { CommandHandler, EventHandler } from './types';
 import { Logger } from '../utils/logger';
 
+/**
+ * Get all available commands from command files.
+ *
+ * @returns {CommandHandler[]} list of command handlers.
+ */
 export function getCommands(): CommandHandler[] {
   const basePath = resolve(__dirname, 'commands');
   const commandFiles = readdirSync(basePath);
@@ -24,6 +29,11 @@ export function getCommands(): CommandHandler[] {
   return commands;
 }
 
+/**
+ * Get all available event handlers from event files.
+ *
+ * @returns {EventHandler[]} list of event handlers.
+ */
 export function getEvents(): EventHandler[] {
   const basePath = resolve(__dirname, 'events');
   const eventFiles = readdirSync(basePath);
@@ -44,6 +54,14 @@ export function getEvents(): EventHandler[] {
   return events;
 }
 
+/**
+ * Catch all errors thrown by the bot and construct the appropriate
+ * error message. Will report the error when an unexpected errors
+ * are caught.
+ *
+ * @param {Error} err error object
+ * @returns {MessageEmbed} error message.
+ */
 export function handleError(
   err: Error,
 ): MessageEmbed {
