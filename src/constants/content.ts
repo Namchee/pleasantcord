@@ -9,9 +9,10 @@ export const IMAGE_FILE = [
   'jpeg',
   'png',
   'webp',
+  'gif',
 ];
 
-export interface ImageCategory {
+export interface ContentCategory {
   name: Category;
   accuracy: number;
 }

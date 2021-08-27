@@ -4,7 +4,7 @@ import {
   MessageEmbed,
   TextChannel,
 } from 'discord.js';
-import { ImageCategory, IMAGE_FILE } from '../../constants/content';
+import { ContentCategory, IMAGE_FILE } from '../../constants/content';
 
 import { fetchImage } from '../../utils/image.downloader';
 import { CommandHandler, BotContext, CommandHandlerFunction } from '../types';
@@ -56,9 +56,10 @@ async function moderateContent(
     );
   }
 
-  const hasImage = msg.attachments.some(({ url }) => isSupportedContent(url));
+  const hasSupportedContent = msg.attachments
+    .some(({ url }) => isSupportedContent(url));
 
-  if (channel.nsfw || !hasImage) {
+  if (channel.nsfw || !hasSupportedContent) {
     return;
   }
 
@@ -73,7 +74,9 @@ async function moderateContent(
         }
 
         const image = await fetchImage(url);
-        const classification = await classifier.classifyImage(image);
+        const classification = url.endsWith('gif') ?
+          await classifier.classifyGif(image) :
+          await classifier.classifyImage(image);
 
         const isNSFW = classification.some((cat) => {
           return config.categories.includes(cat.name) &&
@@ -83,7 +86,7 @@ async function moderateContent(
         if (isNSFW) {
           const category = classification.find(
             cat => config.categories.includes(cat.name),
-          ) as ImageCategory;
+          ) as ContentCategory;
           const fields = [
             {
               name: 'Author',
