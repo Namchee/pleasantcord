@@ -61,6 +61,7 @@ async function moderateContent(
       });
     }
   });
+  // for unexplained reason, `type` is deprecated although it isn't
   msg.embeds.forEach(({ type, url }) => {
     if (url && EMBED_CONTENT_TYPE.includes(type)) {
       contents.push({
