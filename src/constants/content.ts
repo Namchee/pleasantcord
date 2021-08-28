@@ -1,18 +1,17 @@
-// List of all content category.
-export type Category = 'Drawing' | 'Hentai' | 'Porn' | 'Neutral' | 'Sexy';
-
-// List of supported image files to be moderated.
+// List of supported image files to be moderated when sent by attachments.
 // Should support all visual contents that also supported
 // by Discord.
-export const IMAGE_FILE = [
-  'jpg',
-  'jpeg',
-  'png',
-  'webp',
-  'gif',
+export const ATTACHMENT_CONTENT_TYPE = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
 ];
 
-export interface ContentCategory {
-  name: Category;
-  accuracy: number;
-}
+// List of supported image files to be moderated when sent by embeds.
+// Should support all visual contents that also supported
+// by Discord.
+export const EMBED_CONTENT_TYPE = [
+  'gifv',
+  'image',
+];

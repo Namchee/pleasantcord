@@ -1,12 +1,13 @@
-import { Category } from '../constants/content';
+import { Label } from '../entity/content';
 
 
-// Configuration object which is unique per server.
+// pleasantcord's server configuration. Unique per server.
 export interface Configuration {
   // Minimum accuracy level to be classified as NSFW
   readonly threshold: number;
-  // List of image
-  readonly categories: Category[];
+  // List of image categories
+  readonly categories: Label[];
+  // Determine if possible NSFW contents should be deleted or not.
   readonly delete: boolean;
 }
 

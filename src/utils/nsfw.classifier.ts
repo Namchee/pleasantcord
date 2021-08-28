@@ -2,7 +2,7 @@
 import * as tf from '@tensorflow/tfjs-node';
 import { load, NSFWJS } from 'nsfwjs';
 
-import { Category, ContentCategory } from '../constants/content';
+import { Label, Category } from '../entity/content';
 
 /**
  * NSFW content classifier.
@@ -35,9 +35,9 @@ export class NSFWClassifier {
    * Classify an image to 5 categories
    *
    * @param {Buffer} buffer image in `Buffer` format
-   * @returns {Promise<ContentCategory[]>} image labels with accuracy numbers.
+   * @returns {Promise<Category[]>} image labels with accuracy numbers.
    */
-  public async classifyImage(buffer: Buffer): Promise<ContentCategory[]> {
+  public async classifyImage(buffer: Buffer): Promise<Category[]> {
     let predictions = 1;
 
     if (process.env.NODE_ENV === 'development') {
@@ -66,12 +66,12 @@ export class NSFWClassifier {
    * @param {Buffer} buffer GIF in `Buffer` format
    * @returns {Promise<ContentCategory[]>} GIF labels with accuracy numbers.
    */
-  public async classifyGif(buffer: Buffer): Promise<ContentCategory[]> {
+  public async classifyGif(buffer: Buffer): Promise<Category[]> {
     const classification = await this.model.classifyGif(buffer, {
       topk: 1,
     });
 
-    const frequency: Record<Category, number> = {
+    const frequency: Record<Label, number> = {
       Hentai: 0,
       Porn: 0,
       Neutral: 0,
@@ -84,8 +84,8 @@ export class NSFWClassifier {
       frequency[top.className]++;
     });
 
-    const result = Object.entries(frequency).map((value): ContentCategory => {
-      const cat = value[0] as Category;
+    const result = Object.entries(frequency).map((value): Category => {
+      const cat = value[0] as Label;
       return {
         name: cat,
         accuracy: (frequency[cat] / classification.length),
