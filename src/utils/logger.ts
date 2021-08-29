@@ -1,6 +1,12 @@
 import { init, captureException, close } from '@sentry/node';
 
+/**
+ * Error logger.
+ * Catch all unexpected errors and report them to error
+ * reporting system.
+ */
 export class Logger {
+  // singleton instance
   private static instance: Logger;
 
   private constructor(dsn: string) {
@@ -13,6 +19,11 @@ export class Logger {
     });
   }
 
+  /**
+   * Get the singleton instance of the logger.
+   *
+   * @returns {Logger} logger instance
+   */
   public static getInstance(): Logger {
     if (!Logger.instance) {
       const dsn = process.env.DSN;
@@ -27,6 +38,11 @@ export class Logger {
     return Logger.instance;
   }
 
+  /**
+   * Capture all errors and send it to Sentry.
+   *
+   * @param {Error} err error object
+   */
   private captureError(err: Error): void {
     if (process.env.NODE_ENV === 'development') {
       console.error(err.message);
@@ -35,12 +51,21 @@ export class Logger {
     captureException(err);
   }
 
+  /**
+   * Log errors which is thrown by the bot and report them
+   * to error reporting system.
+   *
+   * @param {Error} err error object.
+   */
   public logBot(err: Error): void {
     err.message = `[bot]: ${err.message}`;
 
     this.captureError(err);
   }
 
+  /**
+   * Close the error reporter gracefully.
+   */
   public async closeLogger(): Promise<void> {
     await close();
   }

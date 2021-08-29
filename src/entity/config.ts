@@ -1,11 +1,17 @@
-export type CategoryName = 'Drawing' | 'Hentai' | 'Porn' | 'Neutral' | 'Sexy';
+import { Label } from '../entity/content';
 
+
+// pleasantcord's server configuration. Unique per server.
 export interface Configuration {
+  // Minimum accuracy level to be classified as NSFW
   readonly threshold: number;
-  readonly categories: CategoryName[];
+  // List of image categories
+  readonly categories: Label[];
+  // Determine if possible NSFW contents should be deleted or not.
   readonly delete: boolean;
 }
 
+// Default configuration for all servers.
 export const BASE_CONFIG: Configuration = {
   threshold: 0.75,
   categories: ['Hentai', 'Porn'],

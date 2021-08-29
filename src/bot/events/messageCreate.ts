@@ -1,15 +1,22 @@
 import {
   Message,
-  MessageAttachment,
   MessageEmbed,
   TextChannel,
 } from 'discord.js';
 
-import { fetchImage } from '../../utils/image.downloader';
-import { ImageCategory } from '../../utils/nsfw.classifier';
+import {
+  EMBED_CONTENT_TYPE,
+  ATTACHMENT_CONTENT_TYPE,
+} from '../../constants/content';
+import { Category, Content } from '../../entity/content';
+import { fetchContent } from '../../utils/content.downloader';
 import { CommandHandler, BotContext, CommandHandlerFunction } from '../types';
 import { handleError, getCommands } from '../utils';
 
+/**
+ * Get all available commands from command files and
+ * register all commands to a simple object map.
+ */
 const commandMap: Record<string, CommandHandlerFunction> = {};
 const commandHandlers = getCommands();
 
@@ -17,11 +24,24 @@ commandHandlers.forEach((handler: CommandHandler) => {
   commandMap[handler.command] = handler.fn;
 });
 
+/**
+ * Check all supported content for NSFW contents
+ * and react accordingly.
+ *
+ * @param {BotContext} ctx bot context
+ * @param {Message} msg discord's message object
+ * @returns {Promise<void>}
+ */
 async function moderateContent(
   { classifier, configRepository }: BotContext,
   msg: Message,
 ): Promise<void> {
   const channel = msg.channel as TextChannel;
+
+  if (channel.nsfw) {
+    return;
+  }
+
   const config = await configRepository.getConfig(msg.guildId as string);
 
   if (!config) {
@@ -31,115 +51,127 @@ async function moderateContent(
     );
   }
 
-  const hasImage = msg.attachments.some(
-    ({ url }) => /\.(jpg|png|jpeg)$/.test(url),
-  );
+  const contents: Content[] = [];
+  msg.attachments.forEach(({ url, name, contentType }) => {
+    if (!!contentType && ATTACHMENT_CONTENT_TYPE.includes(contentType)) {
+      contents.push({
+        type: contentType === 'image/gif' ? 'gif' : 'image',
+        name: name || 'nsfw-attachment',
+        url,
+      });
+    }
+  });
+  // for unexplained reason, `type` is deprecated although it isn't
+  msg.embeds.forEach(({ type, url }) => {
+    if (url && EMBED_CONTENT_TYPE.includes(type)) {
+      contents.push({
+        type: type === 'gifv' ? 'gif' : 'image',
+        name: 'nsfw-embed',
+        url,
+      });
+    }
+  });
 
-  if (channel.nsfw || !hasImage) {
-    return;
-  }
+  const moderations = contents.map(async ({ type, name, url }: Content) => {
+    const request = [];
 
-  const moderations = msg.attachments.map(
-    async ({ url, name }: MessageAttachment) => {
-      const request = [];
+    let start = 0;
+    if (process.env.NODE_ENV === 'development') {
+      start = performance.now();
+    }
 
-      if (/\.(jpg|png|jpeg)$/.test(url)) {
-        let start = 0;
-        if (process.env.NODE_ENV === 'development') {
-          start = performance.now();
-        }
+    const content = await fetchContent(url);
+    const classification = type === 'gif' ?
+      await classifier.classifyGif(content) :
+      await classifier.classifyImage(content);
 
-        const image = await fetchImage(url);
-        const classification = await classifier.classifyImage(image);
+    const isNSFW = classification.some((cat) => {
+      return config.categories.includes(cat.name) &&
+        cat.accuracy >= config.threshold;
+    });
 
-        const isNSFW = classification.some((cat) => {
-          return config.categories.includes(cat.name) &&
-            cat.probability >= config.threshold;
-        });
+    if (isNSFW) {
+      const category = classification.find(
+        cat => config.categories.includes(cat.name),
+      ) as Category;
 
-        if (isNSFW) {
-          const category = classification.find(
-            cat => config.categories.includes(cat.name),
-          ) as ImageCategory;
-          const fields = [
-            {
-              name: 'Author',
-              value: msg.author.toString(),
-            },
-            {
-              name: 'Category',
-              value: category.name,
-              inline: true,
-            },
-            {
-              name: 'Accuracy',
-              value: `${(category.probability * 100).toFixed(2)}%`,
-              inline: true,
-            },
-          ];
+      const fields = [
+        {
+          name: 'Author',
+          value: msg.author.toString(),
+        },
+        {
+          name: 'Category',
+          value: category.name,
+          inline: true,
+        },
+        {
+          name: 'Accuracy',
+          value: `${(category.accuracy * 100).toFixed(2)}%`,
+          inline: true,
+        },
+      ];
 
-          if (msg.content) {
-            fields.push(
-              { name: 'Contents', value: msg.content, inline: false },
-            );
-          }
-
-          const embed = new MessageEmbed({
-            author: {
-              name: 'pleasantcord',
-              iconURL: process.env.IMAGE_URL,
-            },
-            title: 'Possible NSFW Contents Detected',
-            fields,
-            color: process.env.NODE_ENV === 'development' ?
-              '#2674C2' :
-              '#FFA31A',
-          });
-
-          const files = [];
-
-          if (!config.delete) {
-            files.push({
-              attachment: image,
-              name: `SPOILER_${name}`,
-            });
-          }
-
-          request.push(
-            channel.send({ embeds: [embed], files }),
-            msg.delete(),
-          );
-        }
-
-        if (process.env.NODE_ENV === 'development') {
-          const devEmbed = new MessageEmbed({
-            author: {
-              name: 'pleasantcord',
-              iconURL: process.env.IMAGE_URL,
-            },
-            title: '[DEV] Image Labels',
-            fields: [
-              {
-                name: 'Labels',
-                value: classification.map(({ name, probability }) => {
-                  return `${name} — ${(probability * 100).toFixed(2)}%`;
-                }).join('\n'),
-              },
-              {
-                name: 'Elapsed Time',
-                value: `${(performance.now() - start).toFixed(3)} ms`,
-              },
-            ],
-            color: '#2674C2',
-          });
-
-          request.push(channel.send({ embeds: [devEmbed] }));
-        }
+      if (msg.content) {
+        fields.push(
+          { name: 'Contents', value: msg.content, inline: false },
+        );
       }
 
-      return Promise.all(request);
-    },
-  );
+      const embed = new MessageEmbed({
+        author: {
+          name: 'pleasantcord',
+          iconURL: process.env.IMAGE_URL,
+        },
+        title: 'Possible NSFW Contents Detected',
+        fields,
+        color: process.env.NODE_ENV === 'development' ?
+          '#2674C2' :
+          '#FFA31A',
+      });
+
+      const files = [];
+
+      if (!config.delete) {
+        files.push({
+          attachment: content,
+          name: `SPOILER_${name}`,
+        });
+      }
+
+      request.push(
+        channel.send({ embeds: [embed], files }),
+        msg.delete(),
+      );
+    }
+
+    if (process.env.NODE_ENV === 'development') {
+      const devEmbed = new MessageEmbed({
+        author: {
+          name: 'pleasantcord',
+          iconURL: process.env.IMAGE_URL,
+        },
+        title: '[DEV] Image Labels',
+        fields: [
+          {
+            name: 'Labels',
+            value: classification.map(({ name, accuracy }) => {
+              return `${name} — ${(accuracy * 100).toFixed(2)}%`;
+            }).join('\n'),
+          },
+          {
+            name: 'Elapsed Time',
+            value: `${(performance.now() - start).toFixed(2)} ms`,
+          },
+        ],
+        color: '#2674C2',
+      });
+
+      request.push(channel.send({ embeds: [devEmbed] }));
+    }
+
+    return Promise.all(request);
+  });
 
   await Promise.all(moderations);
 }

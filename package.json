@@ -27,6 +27,7 @@
     "@types/eslint": "^6.1.8",
     "@types/jest": "^26.0.12",
     "@types/node": "^16.7.1",
+    "@types/sharp": "^0.28.5",
     "@typescript-eslint/eslint-plugin": "^2.24.0",
     "@typescript-eslint/parser": "^2.24.0",
     "cross-env": "^7.0.2",
@@ -46,11 +47,14 @@
     "@sentry/node": "^6.11.0",
     "@sentry/tracing": "^6.11.0",
     "@tensorflow/tfjs-node": "^3.8.0",
+    "cheerio": "^1.0.0-rc.10",
     "discord.js": "^13.1.0",
     "dotenv": "^10.0.0",
     "faunadb": "^4.3.0",
     "node-fetch": "^2.6.1",
     "nsfwjs": "^2.4.1",
-    "pm2": "^5.1.1"
+    "pm2": "^5.1.1",
+    "sharp": "^0.29.0",
+    "webp-converter": "^2.3.3"
   }
 }

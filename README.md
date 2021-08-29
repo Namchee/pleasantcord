@@ -64,6 +64,14 @@ By default, `pleasantcord` will classify any image contents as NSFW when it has 
 
 For now, no you can't. In the future, it will be possible to configure the behavior yourself. Stay tuned!
 
+### The GIF classification is so slow!
+
+We are aware of this issue. GIF classification is still a beta feature right now. We are looking to enhance the performance in future release.
+
+### Animated `webp` and `png` throw errors!
+
+Discord cannot display them correctly, yet there's no way to distinguish them from normal non-animated one as they share the same header. Don't worry, we are aware of this and working to fix this issue.
+
 ### The classification is incorrect!
 
 I'm not the one who created the model, so I can't say anything about it. That being said, image classification is an ML algorithm which could produce false alarms from time to time, so false alarms are quite common occurence.
