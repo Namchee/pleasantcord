@@ -1,5 +1,6 @@
 import fetch from 'node-fetch';
 import cheerio from 'cheerio';
+import sharp from 'sharp';
 
 /**
  * Fetch supported contents from either Discord's CDN or an
@@ -27,6 +28,11 @@ export async function fetchContent(source: string): Promise<Buffer> {
       }
 
       return fetchContent(url.toString());
+    }
+
+    if (header?.match('image/webp')) {
+      const buffer = await response.buffer();
+      return sharp(buffer).jpeg().toBuffer();
     }
 
     return response.buffer();

@@ -27,6 +27,7 @@
     "@types/eslint": "^6.1.8",
     "@types/jest": "^26.0.12",
     "@types/node": "^16.7.1",
+    "@types/sharp": "^0.28.5",
     "@typescript-eslint/eslint-plugin": "^2.24.0",
     "@typescript-eslint/parser": "^2.24.0",
     "cross-env": "^7.0.2",
@@ -53,6 +54,7 @@
     "node-fetch": "^2.6.1",
     "nsfwjs": "^2.4.1",
     "pm2": "^5.1.1",
+    "sharp": "^0.29.0",
     "webp-converter": "^2.3.3"
   }
 }
