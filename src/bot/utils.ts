@@ -93,7 +93,7 @@ export function handleError(
     errorMessage.setTitle('Ouch!');
     errorMessage.setDescription(
       // eslint-disable-next-line max-len
-      '`pleasantcord` has encountered an unexpected error. The error has been reported to the system. Please try again.',
+      'Unfortunately, `pleasantcord` has encountered an unexpected error. Don\'t worry, the error has been reported to the system. If this issue persists, please submit an issue to [GitHub](https://github.com/Namchee/pleasantcord/issues)',
     );
   }
 
