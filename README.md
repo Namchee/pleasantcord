@@ -14,11 +14,14 @@
   <a href="https://discord.com/api/oauth2/authorize?client_id=750668307555942482&permissions=10240&scope=bot">
     <img src="https://img.shields.io/badge/Discord-Invite-blue" title="Bot Invite Link" alt="Bot Invite Link" />
   </a>
+  <a href="https://discord.gg/Pj4aGp8Aky">
+    <img src="https://img.shields.io/badge/Support%20Server-Invite%20Link-blue?logo=discord" title="Support Server Link" alt="Support Server Link" />
+  </a>
   <a href="https://github.com/Namchee/pleasantcord/issues">
     <img src="https://img.shields.io/github/issues/namchee/pleasantcord" title="Issues" alt="Issues" />
   </a>
   <a href="https://github.com/Namchee/pleasantcord/blob/master/LICENSE">
-    <img src="https://img.shields.io/github/license/namchee/pleasantcord" title="Issues" alt="Issues" />
+    <img src="https://img.shields.io/github/license/namchee/pleasantcord" title="License" alt="License" />
   </a>
 </p>
 
@@ -28,6 +31,8 @@ Pleasantcord is a simple NSFW image auto moderation bot 🤖 for Discord powered
   <img src="./docs/demo.gif" />
 </p>
 
+> This is just a demo. Of course Pleasantcord won't remove Cuphead images!
+
 ## Motivation
 
 Discord has [NSFW Channel System](https://support.discord.com/hc/en-us/articles/115000084051-NSFW-Channels-and-Content). Unfortunately, the system cannot prevent NSFW contents from being posted on SFW channels and content moderation must still be done manually by server administrator.
@@ -36,8 +41,6 @@ This bot aims to fix that by automatically detecting potential NSFW images and a
 
 ## Installation
 
-> This bot is still on active development. The API **may** break at any moment
-
 Invite this bot to your server by clicking [this link](https://discord.com/api/oauth2/authorize?client_id=750668307555942482&permissions=10240&scope=bot).
 
 The bot itself requires the following permission in your server, make sure that the bot has **all** the permissions below:
@@ -45,10 +48,9 @@ The bot itself requires the following permission in your server, make sure that 
 - `Send Messages`
 - `Manage Messages`
 
-## Development
-
-TBA
 ## Commands
+
+All commands are prefixed with `pc!`
 
 Command | Description
 ------- | -----------
@@ -59,7 +61,7 @@ Command | Description
 
 ### What's the default behavior of `pleasantcord`?
 
-By default, `pleasantcord` will classify any image contents as NSFW when it has `Hentai` or `Porn` label with more than 70% accuracy and delete it from any text channel that isn't configured to be a NSFW channel.
+By default, `pleasantcord` will classify any image contents as NSFW when it has `Hentai` or `Porn` label with more than 75% accuracy and delete it from any **text channel** that isn't configured to be a NSFW channel.
 ### Can I use a custom moderation configuration for `pleasantcord`?
 
 For now, no you can't. In the future, it will be possible to configure the behavior yourself. Stay tuned!
