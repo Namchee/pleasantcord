@@ -48,6 +48,10 @@ The bot itself requires the following permission in your server, make sure that 
 - `Send Messages`
 - `Manage Messages`
 
+Besides the above permissions, make sure that `pleasantcord` is able to view and access your channels.
+
+Failed to comply with those requirements may result `pleasantcord` to throw `Missing permissions` or `Missing Access`.
+
 ## Commands
 
 All commands are prefixed with `pc!`
