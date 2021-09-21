@@ -78,6 +78,12 @@ Discord cannot display them correctly, yet there's no way to distinguish them fr
 
 I'm not the one who created the model, so I can't say anything about it. That being said, image classification is an ML algorithm which could produce false alarms from time to time, so false alarms are quite common occurence.
 
+## Data Privacy
+
+Technically, `pleasantcord` won't store any of your data. However when `pleasantcord` has encountered an error on your server, `pleasantcord` will store the stacktrace on the logging system which *may* include your personal data (which is 100% embeddable content). This is done to ensure easier error debugging and fixing.
+
+When the issue has been detected, acknowledged, and analyzed, your personal data will **immediately** deleted. If you feel that your data is still stored on our system, feel free to [join our support server](https://discord.com/api/oauth2/authorize?client_id=750668307555942482&permissions=10240&scope=bot) and contact the moderators directly.
+
 ## Credits
 
 - [infinitered](https://github.com/infinitered) — Provides an easy-to-use pretrained model for NSFW detection.
