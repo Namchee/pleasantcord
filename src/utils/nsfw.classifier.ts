@@ -11,7 +11,7 @@ import { Label, Category } from '../entity/content';
 export class NSFWClassifier {
   private constructor(private readonly model: NSFWJS) {
     if (process.env.NODE_ENV === 'development') {
-      tf.enableDebugMode();
+      tf.enableProdMode();
     } else {
       tf.enableProdMode();
     }
