@@ -72,106 +72,110 @@ async function moderateContent(
     }
   });
 
-  const moderations = contents.map(async ({ type, name, url }: Content) => {
-    const request = [];
+  const moderations: Promise<Message[] | Message>[] = contents.map(
+    async ({ type, name, url }: Content) => {
+      const request = [];
 
-    let start = 0;
-    if (process.env.NODE_ENV === 'development') {
-      start = performance.now();
-    }
-
-    const content = await fetchContent(url);
-    const classification = type === 'gif' ?
-      await classifier.classifyGif(content) :
-      await classifier.classifyImage(content);
-
-    const isNSFW = classification.some((cat) => {
-      return config.categories.includes(cat.name) &&
-        cat.accuracy >= config.threshold;
-    });
-
-    if (isNSFW) {
-      const category = classification.find(
-        cat => config.categories.includes(cat.name),
-      ) as Category;
-
-      const fields = [
-        {
-          name: 'Author',
-          value: msg.author.toString(),
-        },
-        {
-          name: 'Category',
-          value: category.name,
-          inline: true,
-        },
-        {
-          name: 'Accuracy',
-          value: `${(category.accuracy * 100).toFixed(2)}%`,
-          inline: true,
-        },
-      ];
-
-      if (msg.content) {
-        fields.push(
-          { name: 'Contents', value: msg.content, inline: false },
-        );
+      let start = 0;
+      if (process.env.NODE_ENV === 'development') {
+        start = performance.now();
       }
 
-      const embed = new MessageEmbed({
-        author: {
-          name: 'pleasantcord',
-          iconURL: process.env.IMAGE_URL,
-        },
-        title: 'Possible NSFW Contents Detected',
-        fields,
-        color: process.env.NODE_ENV === 'development' ?
-          '#2674C2' :
-          '#FFA31A',
+      const content = await fetchContent(url);
+      const classification = type === 'gif' ?
+        await classifier.classifyGif(content) :
+        await classifier.classifyImage(content);
+
+      const isNSFW = classification.some((cat) => {
+        return config.categories.includes(cat.name) &&
+          cat.accuracy >= config.threshold;
       });
 
-      const files = [];
+      if (isNSFW) {
+        const category = classification.find(
+          cat => config.categories.includes(cat.name),
+        ) as Category;
 
-      if (!config.delete) {
-        files.push({
-          attachment: content,
-          name: `SPOILER_${name}`,
+        const fields = [
+          {
+            name: 'Author',
+            value: msg.author.toString(),
+          },
+          {
+            name: 'Category',
+            value: category.name,
+            inline: true,
+          },
+          {
+            name: 'Accuracy',
+            value: `${(category.accuracy * 100).toFixed(2)}%`,
+            inline: true,
+          },
+        ];
+
+        if (msg.content) {
+          fields.push(
+            { name: 'Contents', value: msg.content, inline: false },
+          );
+        }
+
+        const embed = new MessageEmbed({
+          author: {
+            name: 'pleasantcord',
+            iconURL: process.env.IMAGE_URL,
+          },
+          title: 'Possible NSFW Contents Detected',
+          fields,
+          color: process.env.NODE_ENV === 'development' ?
+            '#2674C2' :
+            '#FFA31A',
         });
+
+        const files = [];
+
+        if (!config.delete) {
+          files.push({
+            attachment: content,
+            name: `SPOILER_${name}`,
+          });
+        }
+
+        request.push(
+          channel.send({ embeds: [embed], files }),
+        );
+
+        if (msg.deletable && !msg.deleted) {
+          request.push(msg.delete());
+        }
       }
 
-      request.push(
-        channel.send({ embeds: [embed], files }),
-        msg.delete(),
-      );
-    }
-
-    if (process.env.NODE_ENV === 'development') {
-      const devEmbed = new MessageEmbed({
-        author: {
-          name: 'pleasantcord',
-          iconURL: process.env.IMAGE_URL,
-        },
-        title: '[DEV] Image Labels',
-        fields: [
-          {
-            name: 'Labels',
-            value: classification.map(({ name, accuracy }) => {
-              return `${name} — ${(accuracy * 100).toFixed(2)}%`;
-            }).join('\n'),
+      if (process.env.NODE_ENV === 'development') {
+        const devEmbed = new MessageEmbed({
+          author: {
+            name: 'pleasantcord',
+            iconURL: process.env.IMAGE_URL,
           },
-          {
-            name: 'Elapsed Time',
-            value: `${(performance.now() - start).toFixed(2)} ms`,
-          },
-        ],
-        color: '#2674C2',
-      });
+          title: '[DEV] Image Labels',
+          fields: [
+            {
+              name: 'Labels',
+              value: classification.map(({ name, accuracy }) => {
+                return `${name} — ${(accuracy * 100).toFixed(2)}%`;
+              }).join('\n'),
+            },
+            {
+              name: 'Elapsed Time',
+              value: `${(performance.now() - start).toFixed(2)} ms`,
+            },
+          ],
+          color: '#2674C2',
+        });
 
-      request.push(channel.send({ embeds: [devEmbed] }));
-    }
+        request.push(channel.send({ embeds: [devEmbed] }));
+      }
 
-    return Promise.all(request);
-  });
+      return Promise.all(request);
+    });
 
   await Promise.all(moderations);
 }
@@ -212,7 +216,10 @@ export default {
       await moderateContent(ctx, msg);
     } catch (err) {
       const errorEmbed = handleError(err as Error);
-      msg.channel.send({ embeds: [errorEmbed] });
+
+      if (errorEmbed) {
+        msg.channel.send({ embeds: [errorEmbed] });
+      }
     }
   },
 };

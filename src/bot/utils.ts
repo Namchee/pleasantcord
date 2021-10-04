@@ -64,7 +64,15 @@ export function getEvents(): EventHandler[] {
  */
 export function handleError(
   err: Error,
-): MessageEmbed {
+): MessageEmbed | null {
+  if (
+    err instanceof DiscordAPIError &&
+    err.code === Constants.APIErrors.UNKNOWN_MESSAGE
+  ) {
+    // this is caused by double deletion, kindly ignore this
+    return null;
+  }
+
   const errorMessage = new MessageEmbed({
     author: {
       name: 'pleasantcord',
