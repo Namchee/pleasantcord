@@ -69,7 +69,7 @@ export function handleError(
   const errorMessage = new MessageEmbed({
     author: {
       name: 'pleasantcord',
-      iconURL: '',
+      iconURL: process.env.IMAGE_URL,
     },
     color: '#E53E3E',
   });
@@ -98,7 +98,7 @@ export function handleError(
     errorMessage.setTitle('Ouch!');
     errorMessage.setDescription(
       // eslint-disable-next-line max-len
-      'Unfortunately, `pleasantcord` has encountered an unexpected error. Don\'t worry, the error has been reported to the system. If this issue persists, please submit an issue to [GitHub](https://github.com/Namchee/pleasantcord/issues)',
+      'Unfortunately, `pleasantcord` has encountered an unexpected error. Don\'t worry, the error has been reported to the system and will be resolved as soon as possible.\n\nIf this issue persists, please submit an issue to [GitHub](https://github.com/Namchee/pleasantcord/issues) or join [our support server](https://discord.gg/Pj4aGp8Aky) and submit your bug report on the appropriate channel.',
     );
   }
 
