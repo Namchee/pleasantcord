@@ -4,10 +4,7 @@ import {
   TextChannel,
 } from 'discord.js';
 
-import {
-  EMBED_CONTENT_TYPE,
-  ATTACHMENT_CONTENT_TYPE,
-} from '../../constants/content';
+import { ATTACHMENT_CONTENT_TYPE } from '../../constants/content';
 import { Category, Content } from '../../entity/content';
 import { fetchContent } from '../../utils/content.downloader';
 import { CommandHandler, BotContext, CommandHandlerFunction } from '../types';
@@ -62,13 +59,47 @@ async function moderateContent(
     }
   });
   // for unexplained reason, `type` is deprecated although it isn't
-  msg.embeds.forEach(({ type, url }) => {
-    if (url && EMBED_CONTENT_TYPE.includes(type)) {
-      contents.push({
-        type: type === 'gifv' ? 'gif' : 'image',
-        name: 'nsfw-embed',
-        url,
-      });
+  msg.embeds.forEach(({ type, url, image, video, thumbnail }) => {
+    switch (type) {
+      case 'image': {
+        contents.push({
+          type: 'image',
+          name: 'nsfw-embed',
+          url: url as string,
+        });
+
+        break;
+      }
+      case 'gifv': {
+        contents.push({
+          type: 'gif',
+          name: 'nsfw-embed',
+          url: url as string,
+        });
+
+        break;
+      }
+      case 'rich': {
+        if (image) {
+          contents.push({
+            type: 'image',
+            name: 'nsfw-embed',
+            url: image.url,
+          });
+
+          break;
+        }
+
+        if (video && thumbnail) {
+          contents.push({
+            type: 'image',
+            name: 'nsfw-embed',
+            url: thumbnail.url,
+          });
+
+          break;
+        }
+      }
     }
   });
 
@@ -128,7 +159,7 @@ async function moderateContent(
           fields,
           color: process.env.NODE_ENV === 'development' ?
             '#2674C2' :
-            '#FFA31A',
+            '#FF9B05',
         });
 
         const files = [];

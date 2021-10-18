@@ -78,6 +78,12 @@ We are aware of this issue. GIF classification is still a beta feature right now
 
 Discord cannot display them correctly, yet there's no way to distinguish them from normal non-animated one as they share the same header. Don't worry, we are aware of this and working to fix this issue.
 
+### `pleasantcord` doesn't work on Twitter's GIF
+
+Twitter's GIFs are actually sent as an MP4 video. Unfortunately, that kind of behavior made Twitter's GIFs are indistinguishable from actual video which possibly has gigantic size that *may* slow down the bot by *a lot* so we actually skipped Twitter's GIF (or any GIFs coming from rich embeds!).
+
+For now, the best of both worlds is simply checking the thumbnails for NSFW contents.
+
 ### The classification is incorrect!
 
 I'm not the one who created the model, so I can't say anything about it. That being said, image classification is an ML algorithm which could produce false alarms from time to time, so false alarms are quite common occurence.
