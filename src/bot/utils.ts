@@ -71,7 +71,7 @@ export function handleError(
       name: 'pleasantcord',
       iconURL: process.env.IMAGE_URL,
     },
-    color: '#E53E3E',
+    color: '#CD2B31',
   });
 
   if (err instanceof DiscordAPIError) {

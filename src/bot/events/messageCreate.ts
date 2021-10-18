@@ -159,7 +159,7 @@ async function moderateContent(
           fields,
           color: process.env.NODE_ENV === 'development' ?
             '#2674C2' :
-            '#FFA31A',
+            '#FF9B05',
         });
 
         const files = [];
