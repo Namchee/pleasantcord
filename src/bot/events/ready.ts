@@ -11,6 +11,10 @@ export default {
     }
 
     try {
+      configRepository.setBotId(
+        client.user?.id as string,
+      );
+
       client.user?.setPresence({
         status: 'online',
         activities: [

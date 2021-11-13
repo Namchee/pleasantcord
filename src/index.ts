@@ -3,8 +3,7 @@ import { config } from 'dotenv';
 import { Logger } from './utils/logger';
 import { bootstrapBot } from './bot';
 import { NSFWClassifier } from './utils/nsfw.classifier';
-import { Client } from 'faunadb';
-import { FaunaConfigurationRepository } from './repository/config';
+import { CloudflareConfigurationRepository } from './repository/config';
 
 if (process.env.NODE_ENV === 'development') {
   config();
@@ -12,27 +11,24 @@ if (process.env.NODE_ENV === 'development') {
 
 (async (): Promise<void> => {
   const classifier = await NSFWClassifier.newClassifier();
-  const secret = process.env.DB_SECRET;
 
-  if (!secret) {
-    throw new Error(
-      'Failed to initialize DB connection: secret does not exist',
-    );
+  const apiKey = process.env.API_KEY;
+  const apiUrl = process.env.API_URL;
+
+  if (!apiKey || !apiUrl) {
+    throw new Error('Missing API information. Please check the configuration');
   }
 
-  const dbClient = new Client({
-    secret,
-    domain: process.env.DB_HOST,
-  });
-  const configRepository = new FaunaConfigurationRepository(dbClient);
+  const configRepo = new CloudflareConfigurationRepository(
+    `${apiUrl}/api`,
+    apiKey,
+  );
 
-  const client = await bootstrapBot(classifier, configRepository);
+  const client = await bootstrapBot(classifier, configRepo);
+
   const cleanup = async (): Promise<void> => {
     client.destroy();
-    await Promise.all([
-      dbClient.close(),
-      Logger.getInstance().closeLogger(),
-    ]);
+    await Logger.getInstance().closeLogger();
   };
 
   process.on('uncaughtException', async (err) => {

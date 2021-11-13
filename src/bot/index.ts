@@ -1,4 +1,5 @@
 import { Client, Intents } from 'discord.js';
+
 import { ConfigurationRepository } from '../repository/config';
 import { NSFWClassifier } from '../utils/nsfw.classifier';
 import { BotContext, EventHandler } from './types';
@@ -24,7 +25,6 @@ export async function bootstrapBot(
   });
 
   const context: BotContext = { client, classifier, configRepository };
-
   const eventHandlers = getEvents();
 
   eventHandlers.forEach(({ event, once, fn }: EventHandler) => {
