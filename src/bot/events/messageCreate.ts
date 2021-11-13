@@ -119,7 +119,7 @@ async function moderateContent(
 
       const isNSFW = classification.some((cat) => {
         return config.categories.includes(cat.name) &&
-          cat.accuracy >= config.threshold;
+          cat.accuracy >= config.accuracy;
       });
 
       if (isNSFW) {
