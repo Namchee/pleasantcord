@@ -8,7 +8,7 @@ const packageInfo = require(resolve(process.cwd(), 'package.json'));
 export default {
   command: 'status',
   description: 'Show the bot status',
-  fn: async (_: BotContext, msg: Message): Promise<Message> => {
+  fn: async ({ client }: BotContext, msg: Message): Promise<Message> => {
     const time = Date.now() - msg.createdTimestamp;
 
     let packageVersion: string = packageInfo.dependencies['discord.js'];
@@ -23,6 +23,11 @@ export default {
         name: 'Bot Environment',
         // eslint-disable-next-line max-len
         value: `**NodeJS Version**: ${process.version.slice(1)}\n**Framework**: DiscordJS ${packageVersion}`,
+      },
+      {
+        name: 'Active Servers',
+        value: `${client.guilds.cache.size} servers`,
+        inline: true,
       },
       {
         name: 'Response Time',
