@@ -4,7 +4,7 @@ import { BotContext } from '../types';
 
 export default {
   command: 'config',
-  description: 'Show pleasantcord\'s configuration for the current guild',
+  description: 'Show configuration for the current server',
   fn: async (
     { configRepository }: BotContext,
     msg: Message,
