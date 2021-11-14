@@ -5,6 +5,7 @@ import {
 } from 'discord.js';
 
 import { ATTACHMENT_CONTENT_TYPE } from '../../constants/content';
+import { BASE_CONFIG } from '../../entity/config';
 import { Category, Content } from '../../entity/content';
 import { fetchContent } from '../../utils/content.downloader';
 import { CommandHandler, BotContext, CommandHandlerFunction } from '../types';
@@ -39,13 +40,18 @@ async function moderateContent(
     return;
   }
 
-  const config = await configRepository.getConfig(msg.guildId as string);
+  let config = BASE_CONFIG;
 
-  if (!config) {
+  const realConfig = await configRepository.getConfig(msg.guildId as string);
+
+  if (realConfig) {
+    config = realConfig;
+    /*
     throw new Error(
       // eslint-disable-next-line max-len
-      `Data synchronization failure: Configuration doesn't exists for ${msg.guild?.name}`,
+      `Data synchronization failure: Configuration ${msg.guild?.name}`,
     );
+    */
   }
 
   const contents: Content[] = [];

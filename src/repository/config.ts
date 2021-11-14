@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 import { Client, errors, query as q } from 'faunadb';
 
-import { BASE_CONFIG, Configuration } from '../entity/config';
+import { Configuration } from '../entity/config';
 import { Logger } from '../utils/logger';
 
 import type { HeadersInit } from 'node-fetch';
@@ -111,7 +111,7 @@ implements ConfigurationRepository {
         new Error('Failed to fetch configuration from API'),
       );
 
-      return BASE_CONFIG;
+      return null;
     }
   }
 
