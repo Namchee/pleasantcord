@@ -5,7 +5,6 @@ import { Configuration } from '../entity/config';
 import { Logger } from '../utils/logger';
 
 import type { HeadersInit } from 'node-fetch';
-import { Label } from '../entity/content';
 
 export interface ConfigurationRepository {
   setBotId: (id: string) => void;
@@ -104,8 +103,7 @@ implements ConfigurationRepository {
       );
 
       const json = await result.json();
-
-      return this.convertConfigToRawConfig(json.data);
+      return json['data'];
     } catch (err) {
       Logger.getInstance().logBot(
         new Error('Failed to fetch configuration from API'),
@@ -149,16 +147,5 @@ implements ConfigurationRepository {
         new Error('Failed to delete configuration'),
       );
     }
-  }
-
-  private convertConfigToRawConfig(
-    config: Record<string, unknown>,
-  ): Configuration {
-    return {
-      accuracy: config['accuracy'] as number,
-      categories: (config['categories'] as Record<string, unknown>[])
-        .map(val => val.name as Label),
-      delete: config['delete'] as boolean,
-    };
   }
 }
