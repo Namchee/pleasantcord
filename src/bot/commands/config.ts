@@ -40,6 +40,9 @@ export default {
           value: config.delete ? 'Yes' : 'No',
         },
       ],
+      color: process.env.NODE_ENV === 'development' ?
+        '#2674C2' :
+        '#FF9B05',
     });
 
     return channel.send({ embeds: [embed] });
