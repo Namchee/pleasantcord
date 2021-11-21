@@ -10,11 +10,7 @@ import { Label, Category } from '../entity/content';
  */
 export class NSFWClassifier {
   private constructor(private readonly model: NSFWJS) {
-    if (process.env.NODE_ENV === 'development') {
-      tf.enableProdMode();
-    } else {
-      tf.enableProdMode();
-    }
+    tf.enableProdMode();
   }
 
   /**
@@ -46,6 +42,7 @@ export class NSFWClassifier {
     const decodedImage = tf.node.decodeImage(buffer, 3) as tf.Tensor3D;
 
     const classification = await this.model.classify(decodedImage, predictions);
+    decodedImage.dispose();
     const categories = classification.map((c) => {
       return {
         name: c.className,
