@@ -42,6 +42,7 @@ export class NSFWClassifier {
     const decodedImage = tf.node.decodeImage(buffer, 3) as tf.Tensor3D;
 
     const classification = await this.model.classify(decodedImage, predictions);
+    // prevent memory leak
     decodedImage.dispose();
     const categories = classification.map((c) => {
       return {

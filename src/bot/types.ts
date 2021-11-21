@@ -1,13 +1,13 @@
 import { Awaited, Client, ClientEvents, Message } from 'discord.js';
 
-import { ConfigurationRepository } from '../repository/config';
-import { NSFWClassifier } from '../utils/nsfw.classifier';
+import { ConfigurationService } from '../service/config';
+import { NSFWClassifier } from '../service/classifier';
 
 // Bot dependency object.
 export interface BotContext {
   client: Client;
   classifier: NSFWClassifier;
-  configRepository: ConfigurationRepository;
+  service: ConfigurationService;
 }
 
 // Discord's event handler definition

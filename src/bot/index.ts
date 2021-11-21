@@ -1,7 +1,7 @@
 import { Client, Intents } from 'discord.js';
 
-import { ConfigurationRepository } from '../repository/config';
-import { NSFWClassifier } from '../utils/nsfw.classifier';
+import { NSFWClassifier } from '../service/classifier';
+import { ConfigurationService } from '../service/config';
 import { BotContext, EventHandler } from './types';
 import { getEvents } from './utils';
 
@@ -17,14 +17,18 @@ import { getEvents } from './utils';
  */
 export async function bootstrapBot(
   classifier: NSFWClassifier,
-  configRepository: ConfigurationRepository,
+  service: ConfigurationService,
 ): Promise<Client> {
   const client = new Client({
     // weirdly, both are required.
     intents: [Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILDS],
   });
 
-  const context: BotContext = { client, classifier, configRepository };
+  const context: BotContext = {
+    client,
+    classifier,
+    service,
+  };
   const eventHandlers = getEvents();
 
   eventHandlers.forEach(({ event, once, fn }: EventHandler) => {

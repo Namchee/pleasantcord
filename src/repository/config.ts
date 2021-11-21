@@ -1,74 +1,41 @@
 import fetch from 'node-fetch';
-import { Client, errors, query as q } from 'faunadb';
 
 import { Configuration } from '../entity/config';
 import { Logger } from '../utils/logger';
 
 import type { HeadersInit } from 'node-fetch';
+import NodeCache from 'node-cache';
+import { FIVE_MINUTES } from '../constants/cache';
 
-export interface ConfigurationRepository {
-  setBotId: (id: string) => void;
-  getConfig: (id: string) => Promise<Configuration | null>;
-  createConfig: (id: string, config: Configuration) => Promise<void>;
-  deleteConfig: (id: string) => Promise<void>;
+export interface ConfigurationCache {
+  getConfig: (id: string) => Configuration | null;
+  setConfig: (id: string, config: Configuration) => void;
+  deleteConfig: (id: string) => void;
 }
 
-export class FaunaConfigurationRepository implements ConfigurationRepository {
-  public constructor(private readonly client: Client) {}
+export interface ConfigurationRepository {
+  getConfig: (id: string) => Promise<Configuration | null>;
+  setBotId: (id: string) => void;
+  createConfig: (id: string, config: Configuration) => Promise<boolean>;
+  deleteConfig: (id: string) => Promise<boolean>;
+}
 
-  public setBotId(): void {
-    throw new Error('Fauna DB does not need this');
+export class LocalConfigurationCache
+implements ConfigurationCache {
+  public constructor(private readonly cache: NodeCache) { }
+
+  public getConfig(id: string): Configuration | null {
+    const config = this.cache.get(id);
+
+    return config ? (config as Configuration) : null;
   }
 
-  public async createConfig(
-    id: string,
-    config: Configuration,
-  ): Promise<void> {
-    await this.client.query(
-      q.Create(
-        q.Ref(
-          q.Collection('configurations'),
-          id,
-        ),
-        {
-          data: config,
-        },
-      ),
-    );
+  public setConfig(id: string, config: Configuration): void {
+    this.cache.set(id, config, FIVE_MINUTES);
   }
 
-  public async getConfig(id: string): Promise<Configuration | null> {
-    try {
-      const document: Record<string, any> = await this.client.query(
-        q.Get(
-          q.Ref(
-            q.Collection('configurations'),
-            id,
-          ),
-        ),
-      );
-
-      return document['data'];
-    } catch (err) {
-      const error = err as Error;
-
-      if (error instanceof errors.NotFound) {
-        return null;
-      }
-
-      throw error;
-    }
-  }
-
-  public async deleteConfig(id: string): Promise<void> {
-    await this.client.query(
-      q.Delete(
-        q.Ref(
-          q.Collection('configurations'),
-          id,
-        ),
-      ),
-    );
+  public deleteConfig(id: string): void {
+    this.cache.del(id);
   }
 }
 
@@ -79,7 +46,7 @@ implements ConfigurationRepository {
   public constructor(
     private readonly url: string,
     private readonly apiKey: string,
-  ) {}
+  ) { }
 
   private get headers(): HeadersInit {
     return {
@@ -93,28 +60,33 @@ implements ConfigurationRepository {
   }
 
   public async getConfig(id: string): Promise<Configuration | null> {
-    try {
-      const result = await fetch(
-        `${this.url}/config/${id}`,
-        {
-          method: 'GET',
-          headers: this.headers,
-        },
-      );
+    const result = await fetch(
+      `${this.url}/config/${id}`,
+      {
+        method: 'GET',
+        headers: this.headers,
+      },
+    );
 
-      const json = await result.json();
-      return json['data'];
-    } catch (err) {
+    if (!result.ok) {
       Logger.getInstance().logBot(
-        new Error('Failed to fetch configuration from API'),
+        new Error(
+          `Failed to get configuration for server ${id}: ${result.statusText}`,
+        ),
       );
 
       return null;
     }
+
+    const json = await result.json();
+    return json['data'];
   }
 
-  public async createConfig(id: string, config: Configuration): Promise<void> {
-    const result = await fetch(
+  public async createConfig(
+    id: string,
+    config: Configuration,
+  ): Promise<boolean> {
+    const { ok, statusText } = await fetch(
       `${this.url}/config`,
       {
         method: 'POST',
@@ -126,15 +98,19 @@ implements ConfigurationRepository {
       },
     );
 
-    if (!result.ok) {
+    if (!ok) {
       Logger.getInstance().logBot(
-        new Error('Failed to create configuration'),
+        new Error(
+          `Failed to create configuration for server ${id}: ${statusText}`,
+        ),
       );
     }
+
+    return ok;
   }
 
-  public async deleteConfig(id: string): Promise<void> {
-    const result = await fetch(
+  public async deleteConfig(id: string): Promise<boolean> {
+    const { ok, statusText } = await fetch(
       `${this.url}/config/${id}`,
       {
         method: 'DELETE',
@@ -142,10 +118,14 @@ implements ConfigurationRepository {
       },
     );
 
-    if (!result.ok) {
+    if (!ok) {
       Logger.getInstance().logBot(
-        new Error('Failed to delete configuration'),
+        new Error(
+          `Failed to delete configuration for server ${id}: ${statusText}`,
+        ),
       );
     }
+
+    return ok;
   }
 }
