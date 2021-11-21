@@ -5,18 +5,14 @@ import { BotContext } from '../types';
 export default {
   command: 'config',
   description: 'Show configuration for the current server',
-  fn: async (
-    { configRepository }: BotContext,
-    msg: Message,
-  ): Promise<Message> => {
+  fn: async ({ service }: BotContext, msg: Message): Promise<Message> => {
     const { channel, guild } = msg;
 
-    const config = await configRepository.getConfig(guild?.id as string);
+    const config = await service.getConfig(guild?.id as string);
 
     if (!config) {
       throw new Error(
-        // eslint-disable-next-line max-len
-        `Data synchronization failure: Configuration doesn't exists for ${msg.guild?.name}`,
+        `Failed to get configuration for server ${msg.guildId}`,
       );
     }
 

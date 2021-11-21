@@ -1,9 +1,16 @@
 import { config } from 'dotenv';
 
+import NodeCache from 'node-cache';
+
 import { Logger } from './utils/logger';
 import { bootstrapBot } from './bot';
-import { NSFWClassifier } from './utils/nsfw.classifier';
-import { CloudflareConfigurationRepository } from './repository/config';
+import { NSFWClassifier } from './service/classifier';
+import {
+  CloudflareConfigurationRepository,
+  LocalConfigurationCache,
+} from './repository/config';
+import { FIVE_MINUTES } from './constants/cache';
+import { ConfigurationService } from './service/config';
 
 if (process.env.NODE_ENV === 'development') {
   config();
@@ -19,12 +26,20 @@ if (process.env.NODE_ENV === 'development') {
     throw new Error('Missing API information. Please check the configuration');
   }
 
-  const configRepo = new CloudflareConfigurationRepository(
+  const localCache = new NodeCache({
+    stdTTL: FIVE_MINUTES,
+    checkperiod: FIVE_MINUTES,
+  });
+
+  const repository = new CloudflareConfigurationRepository(
     `${apiUrl}/api`,
     apiKey,
   );
+  const cache = new LocalConfigurationCache(localCache);
 
-  const client = await bootstrapBot(classifier, configRepo);
+  const service = new ConfigurationService(cache, repository);
+
+  const client = await bootstrapBot(classifier, service);
 
   const cleanup = async (): Promise<void> => {
     client.destroy();

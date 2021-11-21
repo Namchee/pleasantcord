@@ -6,12 +6,12 @@ import { handleError } from './../utils';
 export default {
   event: 'guildDelete',
   fn: async (
-    { configRepository }: BotContext,
+    { service }: BotContext,
     guild: Guild,
   ): Promise<void> => {
     try {
       // delete server config if the bot is removed from a guild.
-      await configRepository.deleteConfig(guild.id);
+      await service.deleteConfig(guild.id);
     } catch (err) {
       handleError(err as Error);
     }

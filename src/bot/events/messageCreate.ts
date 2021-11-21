@@ -3,11 +3,13 @@ import {
   MessageEmbed,
   TextChannel,
 } from 'discord.js';
+import { performance } from 'perf_hooks';
 
 import { ATTACHMENT_CONTENT_TYPE } from '../../constants/content';
 import { BASE_CONFIG } from '../../entity/config';
 import { Category, Content } from '../../entity/content';
-import { fetchContent } from '../../utils/content.downloader';
+import { fetchContent } from '../../utils/fetcher';
+import { Logger } from '../../utils/logger';
 import { CommandHandler, BotContext, CommandHandlerFunction } from '../types';
 import { handleError, getCommands } from '../utils';
 
@@ -31,7 +33,7 @@ commandHandlers.forEach((handler: CommandHandler) => {
  * @returns {Promise<void>}
  */
 async function moderateContent(
-  { classifier, configRepository }: BotContext,
+  { classifier, service }: BotContext,
   msg: Message,
 ): Promise<void> {
   const channel = msg.channel as TextChannel;
@@ -42,16 +44,14 @@ async function moderateContent(
 
   let config = BASE_CONFIG;
 
-  const realConfig = await configRepository.getConfig(msg.guildId as string);
+  const realConfig = await service.getConfig(msg.guildId as string);
 
   if (realConfig) {
     config = realConfig;
-    /*
-    throw new Error(
-      // eslint-disable-next-line max-len
-      `Data synchronization failure: Configuration ${msg.guild?.name}`,
+  } else {
+    Logger.getInstance().logBot(
+      new Error(`Failed to get configuration for server ${msg.guildId}}`),
     );
-    */
   }
 
   const contents: Content[] = [];
@@ -248,6 +248,8 @@ export default {
 
           await msg.channel.send({ embeds: [unknownEmbed] });
         }
+
+        return;
       }
 
       await moderateContent(ctx, msg);
