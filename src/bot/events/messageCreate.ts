@@ -33,7 +33,7 @@ commandHandlers.forEach((handler: CommandHandler) => {
  * @returns {Promise<void>}
  */
 async function moderateContent(
-  { classifier, service, rateLimiter }: BotContext,
+  { model, service, rateLimiter }: BotContext,
   msg: Message,
 ): Promise<void> {
   const channel = msg.channel as TextChannel;

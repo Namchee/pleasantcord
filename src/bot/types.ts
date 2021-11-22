@@ -1,15 +1,18 @@
 import { Awaited, Client, ClientEvents, Message } from 'discord.js';
 
 import { ConfigurationService } from '../service/config';
-import { NSFWClassifier } from '../service/classifier';
 import { RateLimiter } from '../service/rate-limit';
+import { NSFWJS } from 'nsfwjs';
+import { FunctionThread, Pool } from 'threads';
+import { Category } from '../entity/content';
 
 // Bot dependency object.
 export interface BotContext {
   client: Client;
-  classifier: NSFWClassifier;
+  model: NSFWJS;
   service: ConfigurationService;
   rateLimiter: RateLimiter;
+  workers: Pool<FunctionThread<[NSFWJS, string, 'gif' | 'image'], Category[]> >;
 }
 
 // Discord's event handler definition
