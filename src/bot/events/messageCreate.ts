@@ -33,7 +33,7 @@ commandHandlers.forEach((handler: CommandHandler) => {
  * @returns {Promise<void>}
  */
 async function moderateContent(
-  { classifier, service }: BotContext,
+  { classifier, service, rateLimiter }: BotContext,
   msg: Message,
 ): Promise<void> {
   const channel = msg.channel as TextChannel;
@@ -108,6 +108,14 @@ async function moderateContent(
       }
     }
   });
+
+  const rateLimitKey = `${msg.guildId as string}:${msg.channelId}`;
+
+  if (rateLimiter.isRateLimited(rateLimitKey)) {
+    return;
+  }
+
+  rateLimiter.rateLimit(rateLimitKey);
 
   const moderations: Promise<Message[] | Message>[] = contents.map(
     async ({ type, name, url }: Content) => {

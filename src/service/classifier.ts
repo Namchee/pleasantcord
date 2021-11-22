@@ -39,7 +39,7 @@ export class NSFWClassifier {
     if (process.env.NODE_ENV === 'development') {
       predictions = 5;
     }
-    const decodedImage = tf.node.decodeImage(buffer, 3) as tf.Tensor3D;
+    const decodedImage = tf.node.decodeImage(buffer);
 
     const classification = await this.model.classify(decodedImage, predictions);
     // prevent memory leak

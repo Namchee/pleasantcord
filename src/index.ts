@@ -9,8 +9,9 @@ import {
   CloudflareConfigurationRepository,
   LocalConfigurationCache,
 } from './repository/config';
-import { FIVE_MINUTES } from './constants/cache';
+import { FIVE_MINUTES, TEN_SECONDS } from './constants/time';
 import { ConfigurationService } from './service/config';
+import { LocalRateLimiter } from './service/rate-limit';
 
 if (process.env.NODE_ENV === 'development') {
   config();
@@ -26,20 +27,25 @@ if (process.env.NODE_ENV === 'development') {
     throw new Error('Missing API information. Please check the configuration');
   }
 
-  const localCache = new NodeCache({
+  const configCache = new NodeCache({
     stdTTL: FIVE_MINUTES,
     checkperiod: FIVE_MINUTES,
+  });
+  const rateLimitStore = new NodeCache({
+    stdTTL: TEN_SECONDS,
+    checkperiod: TEN_SECONDS,
   });
 
   const repository = new CloudflareConfigurationRepository(
     `${apiUrl}/api`,
     apiKey,
   );
-  const cache = new LocalConfigurationCache(localCache);
+  const cache = new LocalConfigurationCache(configCache);
+  const rateLimiter = new LocalRateLimiter(rateLimitStore);
 
   const service = new ConfigurationService(cache, repository);
 
-  const client = await bootstrapBot(classifier, service);
+  const client = await bootstrapBot(classifier, service, rateLimiter);
 
   const cleanup = async (): Promise<void> => {
     client.destroy();

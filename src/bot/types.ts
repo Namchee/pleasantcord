@@ -2,12 +2,14 @@ import { Awaited, Client, ClientEvents, Message } from 'discord.js';
 
 import { ConfigurationService } from '../service/config';
 import { NSFWClassifier } from '../service/classifier';
+import { RateLimiter } from '../service/rate-limit';
 
 // Bot dependency object.
 export interface BotContext {
   client: Client;
   classifier: NSFWClassifier;
   service: ConfigurationService;
+  rateLimiter: RateLimiter;
 }
 
 // Discord's event handler definition
