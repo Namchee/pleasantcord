@@ -12,7 +12,11 @@ export interface BotContext {
   model: NSFWJS;
   service: ConfigurationService;
   rateLimiter: RateLimiter;
-  workers: Pool<FunctionThread<[NSFWJS, string, 'gif' | 'image'], Category[]> >;
+  workers: Pool<
+    FunctionThread<[NSFWJS, string, 'gif' | 'image'],
+    Category[]
+    >
+  >;
 }
 
 // Discord's event handler definition

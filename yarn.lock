@@ -873,7 +873,7 @@
     rimraf "^2.6.2"
     tar "^4.4.6"
 
-"@tensorflow/tfjs@3.11.0", "@tensorflow/tfjs@^3.11.0":
+"@tensorflow/tfjs@3.11.0":
   version "3.11.0"
   resolved "https://registry.yarnpkg.com/@tensorflow/tfjs/-/tfjs-3.11.0.tgz#63d5231f41d57ca11b910664632a8e349eba3967"
   integrity sha512-TTYrKdkoh1sHnt4vn6MboLbpi1Es4U1Aw+L3PqwadRvXW4+7ySUtc00McrQ+ooK0q3Qhl3N7cvgchgM7nED3Mg==
@@ -4812,7 +4812,7 @@ npmlog@^4.0.1, npmlog@^4.1.2:
     gauge "~2.7.3"
     set-blocking "~2.0.0"
 
-nsfwjs@^2.2.0:
+nsfwjs@^2.4.1:
   version "2.4.1"
   resolved "https://registry.yarnpkg.com/nsfwjs/-/nsfwjs-2.4.1.tgz#406dff6e379f4fc1c5fd4d16b7a64e4ae4b355c1"
   integrity sha512-8XPUPVeIIfkSeWjHEytDMedZNISR0SCjv67JYbS75SIYcmz8Y7GZqNfLupltjcwsqV0e4bwdc4l4bEOno58QdA==

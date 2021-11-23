@@ -1,8 +1,11 @@
 import { config } from 'dotenv';
 
 import NodeCache from 'node-cache';
-
+import { Pool, spawn, Worker } from 'threads';
 import { load } from 'nsfwjs';
+
+import '@tensorflow/tfjs-node';
+
 import { Logger } from './utils/logger';
 import { bootstrapBot } from './bot';
 import {
@@ -12,7 +15,6 @@ import {
 import { FIVE_MINUTES, TEN_SECONDS } from './constants/time';
 import { ConfigurationService } from './service/config';
 import { LocalRateLimiter } from './service/rate-limit';
-import { Pool, spawn } from 'threads';
 import { Classifier } from './service/workers';
 
 if (process.env.NODE_ENV === 'development') {

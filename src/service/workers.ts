@@ -1,5 +1,5 @@
 
-import * as tf from '@tensorflow/tfjs-node';
+import tf from '@tensorflow/tfjs-node';
 import { expose } from 'threads/worker';
 import { Label, Category } from '../entity/content';
 
@@ -84,6 +84,8 @@ async function classify(
   type: 'gif' | 'image',
 ): Promise<Category[]> {
   const buffer = await fetchContent(source);
+
+  console.log(buffer);
 
   return type === 'gif' ?
     classifyGif(model, buffer) :
