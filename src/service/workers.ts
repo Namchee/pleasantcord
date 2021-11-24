@@ -1,97 +1,92 @@
 
-import tf from '@tensorflow/tfjs-node';
-import { expose } from 'threads/worker';
-import { Label, Category } from '../entity/content';
+import * as tf from '@tensorflow/tfjs-node';
 
-import { NSFWJS } from 'nsfwjs';
+import { NSFWJS, load } from 'nsfwjs';
+import { expose } from 'threads/worker';
+
+import { Category, Label } from '../entity/content';
 import { fetchContent } from '../utils/fetcher';
 
-/**
- * Classify an image to 5 categories
- *
- * @param {Buffer} buffer image in `Buffer` format
- * @returns {Promise<Category[]>} image labels with accuracy numbers.
- */
-async function classifyImage(
-  model: NSFWJS,
-  buffer: Buffer,
-): Promise<Category[]> {
-  let predictions = 1;
+let model: NSFWJS;
 
-  if (process.env.NODE_ENV === 'development') {
-    predictions = 5;
-  }
-  const decodedImage = tf.node.decodeImage(buffer) as tf.Tensor3D;
+const getModel = async () => {
+  if (!model) {
+    const nsfwModel = await load(
+      'file://tfjs-models/',
+      { size: 299 },
+    );
 
-  const classification = await model.classify(decodedImage, predictions);
-  // prevent memory leak
-  decodedImage.dispose();
-  const categories = classification.map((c) => {
-    return {
-      name: c.className,
-      accuracy: c.probability,
-    };
-  });
-
-  categories.sort((a, b) => {
-    return a.accuracy > b.accuracy ? -1 : 1;
-  });
-
-  return categories;
-}
-
-/**
- * Classify a GIF to 5 categories
- *
- * @param {Buffer} buffer GIF in `Buffer` format
- * @returns {Promise<ContentCategory[]>} GIF labels with accuracy numbers.
- */
-async function classifyGif(model: NSFWJS, buffer: Buffer): Promise<Category[]> {
-  const categories = await model.classifyGif(buffer, {
-    topk: 1,
-  });
-
-  const frequency: Record<Label, number> = {
-    Hentai: 0,
-    Porn: 0,
-    Neutral: 0,
-    Drawing: 0,
-    Sexy: 0,
-  };
-
-  categories.forEach((cat) => {
-    frequency[cat[0].className]++;
-  });
-
-  const result = Object.entries(frequency).map((value): Category => {
-    const cat = value[0] as Label;
-    return {
-      name: cat,
-      accuracy: (frequency[cat] / categories.length),
-    };
-  }).sort((a, b) => a.accuracy > b.accuracy ? -1 : 1);
-
-  if (process.env.NODE_ENV !== 'development') {
-    return result.slice(0, 1);
+    model = nsfwModel;
   }
 
-  return result;
-}
+  return model;
+};
 
-async function classify(
-  model: NSFWJS,
-  source: string,
-  type: 'gif' | 'image',
-): Promise<Category[]> {
-  const buffer = await fetchContent(source);
+const classifier = {
+  classifyImage: async (source: string): Promise<Category[]> => {
+    const buffer = await fetchContent(source);
+    const model = await getModel();
 
-  console.log(buffer);
+    let predictions = 1;
 
-  return type === 'gif' ?
-    classifyGif(model, buffer) :
-    classifyImage(model, buffer);
-}
+    if (process.env.NODE_ENV === 'development') {
+      predictions = 5;
+    }
+    const decodedImage = tf.node.decodeImage(buffer) as tf.Tensor3D;
 
-export type Classifier = typeof classify;
+    const classification = await model.classify(decodedImage, predictions);
+    // prevent memory leak
+    decodedImage.dispose();
+    const categories = classification.map((c) => {
+      return {
+        name: c.className,
+        accuracy: c.probability,
+      };
+    });
 
-expose(classify);
+    categories.sort((a, b) => {
+      return a.accuracy > b.accuracy ? -1 : 1;
+    });
+
+    return categories;
+  },
+
+  classifyGIF: async (source: string): Promise<Category[]> => {
+    const buffer = await fetchContent(source);
+    const model = await getModel();
+
+    const categories = await model.classifyGif(buffer, {
+      topk: 1,
+    });
+
+    const frequency: Record<Label, number> = {
+      Hentai: 0,
+      Porn: 0,
+      Neutral: 0,
+      Drawing: 0,
+      Sexy: 0,
+    };
+
+    categories.forEach((cat) => {
+      frequency[cat[0].className]++;
+    });
+
+    const result = Object.entries(frequency).map((value): Category => {
+      const cat = value[0] as Label;
+      return {
+        name: cat,
+        accuracy: (frequency[cat] / categories.length),
+      };
+    }).sort((a, b) => a.accuracy > b.accuracy ? -1 : 1);
+
+    if (process.env.NODE_ENV !== 'development') {
+      return result.slice(0, 1);
+    }
+
+    return result;
+  },
+};
+
+export type Classifier = typeof classifier;
+
+expose(classifier);

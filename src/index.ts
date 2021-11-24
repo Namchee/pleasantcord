@@ -1,10 +1,6 @@
 import { config } from 'dotenv';
 
 import NodeCache from 'node-cache';
-import { Pool, spawn, Worker } from 'threads';
-import { load } from 'nsfwjs';
-
-import '@tensorflow/tfjs-node';
 
 import { Logger } from './utils/logger';
 import { bootstrapBot } from './bot';
@@ -15,18 +11,12 @@ import {
 import { FIVE_MINUTES, TEN_SECONDS } from './constants/time';
 import { ConfigurationService } from './service/config';
 import { LocalRateLimiter } from './service/rate-limit';
-import { Classifier } from './service/workers';
 
 if (process.env.NODE_ENV === 'development') {
   config();
 }
 
 (async (): Promise<void> => {
-  const model = await load(
-    'file://tfjs-models/',
-    { size: 299 },
-  );
-
   const apiKey = process.env.API_KEY;
   const apiUrl = process.env.API_URL;
 
@@ -51,9 +41,8 @@ if (process.env.NODE_ENV === 'development') {
   const rateLimiter = new LocalRateLimiter(rateLimitStore);
 
   const service = new ConfigurationService(cache, repository);
-  const pool = Pool(() => spawn<Classifier>(new Worker('./service/workers')));
 
-  const client = await bootstrapBot(model, service, rateLimiter, pool);
+  const client = await bootstrapBot(service, rateLimiter);
 
   const cleanup = async (): Promise<void> => {
     client.destroy();

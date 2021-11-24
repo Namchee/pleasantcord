@@ -1,7 +1,4 @@
 import { Client, Intents } from 'discord.js';
-import { NSFWJS } from 'nsfwjs';
-import { FunctionThread, Pool } from 'threads';
-import { Category } from '../entity/content';
 
 import { ConfigurationService } from '../service/config';
 import { RateLimiter } from '../service/rate-limit';
@@ -19,10 +16,8 @@ import { getEvents } from './utils';
  * to listen and respond to events.
  */
 export async function bootstrapBot(
-  model: NSFWJS,
   service: ConfigurationService,
   rateLimiter: RateLimiter,
-  pool: Pool<FunctionThread<[NSFWJS, string, 'gif' | 'image'], Category[]> >,
 ): Promise<Client> {
   const client = new Client({
     // weirdly, both are required.
@@ -31,10 +26,8 @@ export async function bootstrapBot(
 
   const context: BotContext = {
     client,
-    model,
     service,
     rateLimiter,
-    workers: pool,
   };
 
   const eventHandlers = getEvents();

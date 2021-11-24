@@ -2,21 +2,13 @@ import { Awaited, Client, ClientEvents, Message } from 'discord.js';
 
 import { ConfigurationService } from '../service/config';
 import { RateLimiter } from '../service/rate-limit';
-import { NSFWJS } from 'nsfwjs';
-import { FunctionThread, Pool } from 'threads';
 import { Category } from '../entity/content';
 
 // Bot dependency object.
 export interface BotContext {
   client: Client;
-  model: NSFWJS;
   service: ConfigurationService;
   rateLimiter: RateLimiter;
-  workers: Pool<
-    FunctionThread<[NSFWJS, string, 'gif' | 'image'],
-    Category[]
-    >
-  >;
 }
 
 // Discord's event handler definition
@@ -45,4 +37,15 @@ export interface CommandHandler {
   command: string;
   description: string;
   fn: CommandHandlerFunction;
+}
+
+/**
+ * Classification result.
+ *
+ * Returned from classification result from thread
+ */
+export interface ClassificationResult {
+  source: string;
+  categories: Category[];
+  time?: number;
 }
