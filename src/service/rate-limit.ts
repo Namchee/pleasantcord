@@ -1,5 +1,5 @@
 import NodeCache from 'node-cache';
-import { TEN_SECONDS } from '../constants/time';
+import { THREE_SECONDS } from '../constants/time';
 
 export interface RateLimiter {
   isRateLimited(key: string): boolean;
@@ -14,6 +14,6 @@ export class LocalRateLimiter implements RateLimiter {
   }
 
   public rateLimit(key: string): void {
-    this.cache.set(key, true, TEN_SECONDS);
+    this.cache.set(key, true, THREE_SECONDS);
   }
 }

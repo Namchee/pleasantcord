@@ -8,7 +8,7 @@ import {
   CloudflareConfigurationRepository,
   LocalConfigurationCache,
 } from './repository/config';
-import { FIVE_MINUTES, TEN_SECONDS } from './constants/time';
+import { FIVE_MINUTES, THREE_SECONDS } from './constants/time';
 import { ConfigurationService } from './service/config';
 import { LocalRateLimiter } from './service/rate-limit';
 
@@ -29,8 +29,8 @@ if (process.env.NODE_ENV === 'development') {
     checkperiod: FIVE_MINUTES,
   });
   const rateLimitStore = new NodeCache({
-    stdTTL: TEN_SECONDS,
-    checkperiod: TEN_SECONDS,
+    stdTTL: THREE_SECONDS,
+    checkperiod: THREE_SECONDS,
   });
 
   const repository = new CloudflareConfigurationRepository(

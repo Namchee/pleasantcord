@@ -1,2 +1,2 @@
 export const FIVE_MINUTES = 60 * 5;
-export const TEN_SECONDS = 10;
+export const THREE_SECONDS = 3;
