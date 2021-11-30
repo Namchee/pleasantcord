@@ -5,7 +5,7 @@ import { Logger } from '../utils/logger';
 
 import type { HeadersInit } from 'node-fetch';
 import NodeCache from 'node-cache';
-import { FIVE_MINUTES } from '../constants/cache';
+import { FIVE_MINUTES } from '../constants/time';
 
 export interface ConfigurationCache {
   getConfig: (id: string) => Configuration | null;

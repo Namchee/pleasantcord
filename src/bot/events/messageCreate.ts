@@ -4,13 +4,20 @@ import {
   TextChannel,
 } from 'discord.js';
 import { performance } from 'perf_hooks';
+import { ModuleThread, Pool, spawn, Worker } from 'threads';
+import { QueuedTask } from 'threads/dist/master/pool-types';
 
 import { ATTACHMENT_CONTENT_TYPE } from '../../constants/content';
 import { BASE_CONFIG } from '../../entity/config';
 import { Category, Content } from '../../entity/content';
-import { fetchContent } from '../../utils/fetcher';
+import { Classifier } from '../../service/workers';
 import { Logger } from '../../utils/logger';
-import { CommandHandler, BotContext, CommandHandlerFunction } from '../types';
+import {
+  CommandHandler,
+  BotContext,
+  CommandHandlerFunction,
+  ClassificationResult,
+} from '../types';
 import { handleError, getCommands } from '../utils';
 
 /**
@@ -24,6 +31,10 @@ commandHandlers.forEach((handler: CommandHandler) => {
   commandMap[handler.command] = handler.fn;
 });
 
+const workers = Pool(
+  () => spawn<Classifier>(new Worker(`../../service/workers`)),
+);
+
 /**
  * Check all supported content for NSFW contents
  * and react accordingly.
@@ -33,25 +44,13 @@ commandHandlers.forEach((handler: CommandHandler) => {
  * @returns {Promise<void>}
  */
 async function moderateContent(
-  { classifier, service }: BotContext,
+  { service, rateLimiter }: BotContext,
   msg: Message,
 ): Promise<void> {
   const channel = msg.channel as TextChannel;
 
   if (channel.nsfw) {
     return;
-  }
-
-  let config = BASE_CONFIG;
-
-  const realConfig = await service.getConfig(msg.guildId as string);
-
-  if (realConfig) {
-    config = realConfig;
-  } else {
-    Logger.getInstance().logBot(
-      new Error(`Failed to get configuration for server ${msg.guildId}}`),
-    );
   }
 
   const contents: Content[] = [];
@@ -109,112 +108,166 @@ async function moderateContent(
     }
   });
 
-  const moderations: Promise<Message[] | Message>[] = contents.map(
-    async ({ type, name, url }: Content) => {
-      const request = [];
+  if (contents.length === 0) {
+    return;
+  }
 
+  const isDev = process.env.NODE_ENV === 'development';
+  const rateLimitKey = `${msg.guildId as string}:${msg.channelId}`;
+
+  if (rateLimiter.isRateLimited(rateLimitKey) && !isDev) {
+    return;
+  }
+
+  rateLimiter.rateLimit(rateLimitKey);
+
+  let config = BASE_CONFIG;
+
+  const realConfig = await service.getConfig(msg.guildId as string);
+
+  if (realConfig) {
+    config = realConfig;
+  } else {
+    Logger.getInstance().logBot(
+      new Error(`Failed to get configuration for server ${msg.guildId}}`),
+    );
+  }
+
+  const tasks: QueuedTask<
+    ModuleThread<Classifier>,
+    ClassificationResult
+  >[] = [];
+
+  contents.forEach(({ url, type }) => {
+    const classification = workers.queue(async (classifier) => {
       let start = 0;
-      if (process.env.NODE_ENV === 'development') {
+
+      if (isDev) {
         start = performance.now();
       }
 
-      const content = await fetchContent(url);
-      const classification = type === 'gif' ?
-        await classifier.classifyGif(content) :
-        await classifier.classifyImage(content);
+      const categories = type === 'gif' ?
+        await classifier.classifyGIF(url) :
+        await classifier.classifyImage(url);
 
-      const isNSFW = classification.some((cat) => {
-        return config.categories.includes(cat.name) &&
-          cat.accuracy >= config.accuracy;
-      });
-
-      if (isNSFW) {
-        const category = classification.find(
-          cat => config.categories.includes(cat.name),
-        ) as Category;
-
-        const fields = [
-          {
-            name: 'Author',
-            value: msg.author.toString(),
-          },
-          {
-            name: 'Category',
-            value: category.name,
-            inline: true,
-          },
-          {
-            name: 'Accuracy',
-            value: `${(category.accuracy * 100).toFixed(2)}%`,
-            inline: true,
-          },
-        ];
-
-        if (msg.content) {
-          fields.push(
-            { name: 'Contents', value: msg.content, inline: false },
-          );
-        }
-
-        const embed = new MessageEmbed({
-          author: {
-            name: 'pleasantcord',
-            iconURL: process.env.IMAGE_URL,
-          },
-          title: 'Possible NSFW Contents Detected',
-          fields,
-          color: process.env.NODE_ENV === 'development' ?
-            '#2674C2' :
-            '#FF9B05',
-        });
-
-        const files = [];
-
-        if (!config.delete) {
-          files.push({
-            attachment: content,
-            name: `SPOILER_${name}`,
-          });
-        }
-
-        request.push(
-          channel.send({ embeds: [embed], files }),
-        );
-
-        if (msg.deletable && !msg.deleted) {
-          request.push(msg.delete());
-        }
-      }
-
-      if (process.env.NODE_ENV === 'development') {
-        const devEmbed = new MessageEmbed({
-          author: {
-            name: 'pleasantcord',
-            iconURL: process.env.IMAGE_URL,
-          },
-          title: '[DEV] Image Labels',
-          fields: [
-            {
-              name: 'Labels',
-              value: classification.map(({ name, accuracy }) => {
-                return `${name} — ${(accuracy * 100).toFixed(2)}%`;
-              }).join('\n'),
-            },
-            {
-              name: 'Elapsed Time',
-              value: `${(performance.now() - start).toFixed(2)} ms`,
-            },
-          ],
-          color: '#2674C2',
-        });
-
-        request.push(channel.send({ embeds: [devEmbed] }));
-      }
-
-      return Promise.all(request);
+      return {
+        source: url,
+        categories,
+        time: isDev ? performance.now() - start : undefined,
+      };
     });
 
-  await Promise.all(moderations);
+    tasks.push(classification);
+  });
+
+  for await (const { source, categories, time } of tasks) {
+    const isNSFW = categories.some((cat) => {
+      return config.categories.includes(cat.name) &&
+        cat.accuracy >= config.accuracy;
+    });
+
+    const promises = [];
+
+    if (isNSFW) {
+      // make sure that all queued tasks are killed
+      tasks.forEach(t => t.cancel());
+
+      const category = categories.find(
+        cat => config.categories.includes(cat.name),
+      ) as Category;
+
+      const fields = [
+        {
+          name: 'Author',
+          value: msg.author.toString(),
+        },
+        {
+          name: 'Category',
+          value: category.name,
+          inline: true,
+        },
+        {
+          name: 'Accuracy',
+          value: `${(category.accuracy * 100).toFixed(2)}%`,
+          inline: true,
+        },
+      ];
+
+      if (msg.content) {
+        fields.push(
+          {
+            name: 'Contents',
+            value: msg.content,
+            inline: false,
+          },
+        );
+      }
+
+      const embed = new MessageEmbed({
+        author: {
+          name: 'pleasantcord',
+          iconURL: process.env.IMAGE_URL,
+        },
+        title: 'Possible NSFW Contents Detected',
+        fields,
+        color: process.env.NODE_ENV === 'development' ?
+          '#2674C2' :
+          '#FF9B05',
+      });
+
+      promises.push(channel.send({ embeds: [embed] }));
+
+      const files = [];
+
+      if (!config.delete) {
+        files.push({
+          attachment: source,
+          name: `SPOILER_${name}`,
+        });
+
+        promises.push(
+          channel.send({ files }),
+        );
+      }
+
+      if (msg.deletable && !msg.deleted) {
+        promises.push(
+          msg.delete(),
+        );
+      }
+    }
+
+    if (process.env.NODE_ENV === 'development') {
+      const devEmbed = new MessageEmbed({
+        author: {
+          name: 'pleasantcord',
+          iconURL: process.env.IMAGE_URL,
+        },
+        title: '[DEV] Image Labels',
+        fields: [
+          {
+            name: 'Labels',
+            value: categories.map(({ name, accuracy }) => {
+              return `${name} — ${(accuracy * 100).toFixed(2)}%`;
+            }).join('\n'),
+          },
+          {
+            name: 'Elapsed Time',
+            value: `${(time as number).toFixed(2)} ms`,
+          },
+        ],
+        color: '#2674C2',
+      });
+
+      promises.push(channel.send({ embeds: [devEmbed] }));
+    }
+
+    await Promise.all(promises);
+
+    if (isNSFW) {
+      break;
+    }
+  }
 }
 
 export default {
