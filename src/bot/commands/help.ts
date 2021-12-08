@@ -31,8 +31,12 @@ export default {
           value: commands.join('\n'),
         },
         {
+          name: 'Configuration',
+          value: `You can configure \`pleasantcord\`'s behavior on your server from [our dashboard](https://pleasantcord.namchee.dev)`,
+        },
+        {
           name: 'Contribution',
-          value: `Contribute to \`pleasantcord\`'s development on [GitHub](https://github.com/Namchee/pleasantcord)`,
+          value: `You can contribute to \`pleasantcord\`'s development on [GitHub](https://github.com/Namchee/pleasantcord)`,
         },
       ],
       color: process.env.NODE_ENV === 'development' ?
