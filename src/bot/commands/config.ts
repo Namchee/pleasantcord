@@ -35,6 +35,10 @@ export default {
           name: 'Delete NSFW Contents',
           value: config.delete ? 'Yes' : 'No',
         },
+        {
+          name: 'Dashboard Link',
+          value: '[https://pleasantcord.namchee.dev](https://pleasantcord.namchee.dev)',
+        },
       ],
       color: process.env.NODE_ENV === 'development' ?
         '#2674C2' :
