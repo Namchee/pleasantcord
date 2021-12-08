@@ -20,3 +20,5 @@ jobs:
         run: yarn install --frozen-lockfile
       - name: Lint code
         run: yarn lint
+      - name: Restart the bot
+        run: yarn restart
