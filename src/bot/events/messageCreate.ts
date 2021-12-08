@@ -222,7 +222,7 @@ async function moderateContent(
       if (!config.delete) {
         files.push({
           attachment: source,
-          name: `SPOILER_${name}`,
+          name: `SPOILER_NSFW.jpg`,
         });
 
         promises.push(
