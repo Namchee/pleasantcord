@@ -58,7 +58,7 @@ async function moderateContent(
     if (!!contentType && ATTACHMENT_CONTENT_TYPE.includes(contentType)) {
       contents.push({
         type: contentType === 'image/gif' ? 'gif' : 'image',
-        name: name || 'nsfw-attachment',
+        name: name || 'nsfw-attachment.jpg',
         url,
       });
     }
@@ -69,7 +69,7 @@ async function moderateContent(
       case 'image': {
         contents.push({
           type: 'image',
-          name: 'nsfw-embed',
+          name: 'nsfw-embed.jpg',
           url: url as string,
         });
 
@@ -78,7 +78,7 @@ async function moderateContent(
       case 'gifv': {
         contents.push({
           type: 'gif',
-          name: 'nsfw-embed',
+          name: 'nsfw-embed.gif',
           url: url as string,
         });
 
@@ -88,7 +88,7 @@ async function moderateContent(
         if (image) {
           contents.push({
             type: 'image',
-            name: 'nsfw-embed',
+            name: 'nsfw-embed.jpg',
             url: image.url,
           });
 
@@ -98,7 +98,7 @@ async function moderateContent(
         if (video && thumbnail) {
           contents.push({
             type: 'image',
-            name: 'nsfw-embed',
+            name: 'nsfw-embed.jpg',
             url: thumbnail.url,
           });
 
@@ -138,7 +138,7 @@ async function moderateContent(
     ClassificationResult
   >[] = [];
 
-  contents.forEach(({ url, type }) => {
+  contents.forEach(({ name, url, type }) => {
     const classification = workers.queue(async (classifier) => {
       let start = 0;
 
@@ -151,6 +151,7 @@ async function moderateContent(
         await classifier.classifyImage(url);
 
       return {
+        name,
         source: url,
         categories,
         time: isDev ? performance.now() - start : undefined,
@@ -160,7 +161,7 @@ async function moderateContent(
     tasks.push(classification);
   });
 
-  for await (const { source, categories, time } of tasks) {
+  for await (const { name, source, categories, time } of tasks) {
     const isNSFW = categories.some((cat) => {
       return config.categories.includes(cat.name) &&
         cat.accuracy >= config.accuracy;
@@ -222,7 +223,7 @@ async function moderateContent(
       if (!config.delete) {
         files.push({
           attachment: source,
-          name: `SPOILER_NSFW.jpg`,
+          name: `SPOILER_${name}`,
         });
 
         promises.push(

@@ -45,6 +45,7 @@ export interface CommandHandler {
  * Returned from classification result from thread
  */
 export interface ClassificationResult {
+  name: string;
   source: string;
   categories: Category[];
   time?: number;
