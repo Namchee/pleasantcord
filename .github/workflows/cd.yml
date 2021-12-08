@@ -21,6 +21,6 @@ jobs:
         run: yarn lint:fix
       - name: Build the files
         run: yarn build
-      # - name: Reload the bot
-        # run: yarn restart
+      - name: Reload the bot
+        run: yarn restart
       
