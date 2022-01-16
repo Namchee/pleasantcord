@@ -1,4 +1,4 @@
-import { Awaited, Client, ClientEvents, Message } from 'discord.js';
+import { Client, ClientEvents, Message } from 'discord.js';
 
 import { ConfigurationService } from '../service/config';
 import { RateLimiter } from '../service/rate-limit';
@@ -15,7 +15,7 @@ export interface BotContext {
 export interface EventHandler {
   event: keyof ClientEvents;
   once?: boolean;
-  fn: (ctx: BotContext) => Awaited<void>;
+  fn: (ctx: BotContext) => Promise<void>;
 }
 
 /**
@@ -26,7 +26,7 @@ export interface EventHandler {
 export type CommandHandlerFunction = (
   ctx: BotContext,
   msg: Message,
-) => Awaited<void>;
+) => Promise<void>;
 
 /**
  * Command handler.
