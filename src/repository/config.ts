@@ -54,7 +54,6 @@ implements ConfigurationRepository {
     };
   }
 
-
   public setBotId(id: string): void {
     this.userId = id;
   }
@@ -79,7 +78,7 @@ implements ConfigurationRepository {
     }
 
     const json = await result.json();
-    return json['data'];
+    return json['data'] as Configuration | null;
   }
 
   public async createConfig(
