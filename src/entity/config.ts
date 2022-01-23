@@ -1,6 +1,5 @@
 import { Label } from '../entity/content';
 
-
 // pleasantcord's server configuration. Unique per server.
 export interface Configuration {
   // Minimum accuracy level to be classified as NSFW
