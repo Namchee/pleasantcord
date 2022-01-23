@@ -1,10 +1,10 @@
 import fetch from 'node-fetch';
+import NodeCache from 'node-cache';
 
 import { Configuration } from '../entity/config';
 import { Logger } from '../utils/logger';
 
 import type { HeadersInit } from 'node-fetch';
-import NodeCache from 'node-cache';
 import { FIVE_MINUTES } from '../constants/time';
 import { APIResponse } from '../entity/api';
 
