@@ -6,6 +6,7 @@ import { Logger } from '../utils/logger';
 import type { HeadersInit } from 'node-fetch';
 import NodeCache from 'node-cache';
 import { FIVE_MINUTES } from '../constants/time';
+import { APIResponse } from '../entity/api';
 
 export interface ConfigurationCache {
   getConfig: (id: string) => Configuration | null;
@@ -67,18 +68,19 @@ implements ConfigurationRepository {
       },
     );
 
+    const json = (await result.json()) as APIResponse<Configuration>;
+
     if (!result.ok) {
       Logger.getInstance().logBot(
         new Error(
-          `Failed to get configuration for server ${id}: ${result.statusText}`,
+          `Failed to get configuration for server ${id}: ${json.error}`,
         ),
       );
 
       return null;
     }
 
-    const json = await result.json();
-    return json['data'] as Configuration | null;
+    return json.data;
   }
 
   public async createConfig(
