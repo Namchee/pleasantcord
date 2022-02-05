@@ -1,12 +1,13 @@
-import fetch from 'node-fetch';
+import fetch from 'isomorphic-unfetch';
 import NodeCache from 'node-cache';
 
-import { Configuration } from '../entity/config';
-import { Logger } from '../utils/logger';
+import { Logger } from './../utils/logger';
 
-import type { HeadersInit } from 'node-fetch';
-import { FIVE_MINUTES } from '../constants/time';
-import { APIResponse } from '../entity/api';
+import { FIVE_MINUTES } from './../constants/time';
+
+import type { APIResponse } from './../entity/api';
+import type { Configuration } from './../entity/config';
+
 
 export interface ConfigurationCache {
   getConfig: (id: string) => Configuration | null;
@@ -42,15 +43,14 @@ implements ConfigurationCache {
 
 export class CloudflareConfigurationRepository
 implements ConfigurationRepository {
+  private headers: Record<string, string>;
   private userId: string;
 
   public constructor(
     private readonly url: string,
     private readonly apiKey: string,
-  ) { }
-
-  private get headers(): HeadersInit {
-    return {
+  ) {
+    this.headers = {
       Authorization: `pleasantcord ${this.apiKey}/${this.userId}`,
     };
   }

@@ -4,8 +4,8 @@ import * as tf from '@tensorflow/tfjs-node';
 import { NSFWJS, load } from 'nsfwjs';
 import { expose } from 'threads/worker';
 
-import { Category, Label } from '@/entity/content';
-import { fetchContent } from '@/utils/fetcher';
+import { Category, Label } from './../entity/content';
+import { fetchContent } from './../utils/fetcher';
 
 let model: NSFWJS;
 
