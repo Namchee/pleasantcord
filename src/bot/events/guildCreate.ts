@@ -1,8 +1,9 @@
 import { Guild } from 'discord.js';
 
-import { BASE_CONFIG } from '../../entity/config';
-import { BotContext } from '../types';
-import { handleError } from './../utils';
+import { BASE_CONFIG } from '@/entity/config';
+import { handleError } from '@/bot/utils';
+
+import type { BotContext } from '@/bot/types';
 
 export default {
   event: 'guildCreate',
