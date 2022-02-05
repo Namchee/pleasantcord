@@ -1,10 +1,23 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import {
+  afterEach,
+  describe,
+  expect,
+  it,
+  vi,
+  beforeAll,
+  afterAll,
+} from 'vitest';
 
 import NodeCache from 'node-cache';
 
 import { BASE_CONFIG } from '@/entity/config';
-import { LocalConfigurationCache } from '@/repository/config';
+import {
+  CloudflareConfigurationRepository,
+  LocalConfigurationCache,
+} from '@/repository/config';
 import { FIVE_MINUTES } from '@/constants/time';
+import { apiServer } from '@/mocks/server';
+import { Logger } from '@/utils/logger';
 
 describe('LocalConfigurationCache', () => {
   describe('getConfig', () => {
@@ -70,6 +83,90 @@ describe('LocalConfigurationCache', () => {
 
       expect(delSpy).toHaveBeenCalledTimes(1);
       expect(delSpy).toHaveBeenLastCalledWith('123');
+    });
+  });
+});
+
+describe('CloudflareConfigurationRepository', () => {
+  const url = 'http://api.test/api';
+
+  beforeAll(() => {
+    apiServer.listen();
+    process.env.DSN = 'https://public@sentry.example.com/1';
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    apiServer.resetHandlers();
+  });
+
+  afterAll(() => {
+    apiServer.close();
+  });
+
+  describe('getConfig', () => {
+    it('should return a configuration object', async () => {
+      const repository = new CloudflareConfigurationRepository(url, '');
+
+      const config = await repository.getConfig('123');
+
+      expect(config).toEqual({
+        server_id: 123,
+        ...BASE_CONFIG,
+      });
+    });
+
+    it('should return null', async () => {
+      const repository = new CloudflareConfigurationRepository(url, '');
+
+      const loggerSpy = vi.spyOn(Logger.getInstance(), 'logBot');
+
+      const config = await repository.getConfig('456');
+
+      expect(config).toEqual(null);
+      expect(loggerSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('createConfig', () => {
+    it('should create a configuration', async () => {
+      const repository = new CloudflareConfigurationRepository(url, '');
+
+      const config = await repository.createConfig('123', BASE_CONFIG);
+
+      expect(config).toBe(true);
+    });
+
+    it('should return false', async () => {
+      const repository = new CloudflareConfigurationRepository(url, '');
+
+      const loggerSpy = vi.spyOn(Logger.getInstance(), 'logBot');
+
+      const config = await repository.createConfig('456', BASE_CONFIG);
+
+      expect(config).toBe(false);
+      expect(loggerSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('deleteConfig', () => {
+    it('should create a configuration', async () => {
+      const repository = new CloudflareConfigurationRepository(url, '');
+
+      const config = await repository.deleteConfig('123');
+
+      expect(config).toBe(true);
+    });
+
+    it('should return false', async () => {
+      const repository = new CloudflareConfigurationRepository(url, '');
+
+      const loggerSpy = vi.spyOn(Logger.getInstance(), 'logBot');
+
+      const config = await repository.deleteConfig('456');
+
+      expect(config).toBe(false);
+      expect(loggerSpy).toHaveBeenCalledTimes(1);
     });
   });
 });

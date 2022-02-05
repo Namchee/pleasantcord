@@ -1,3 +1,4 @@
+import { BASE_CONFIG } from '@/entity/config';
 import { rest } from 'msw';
 
 export const handlers = [
@@ -8,9 +9,7 @@ export const handlers = [
         status: 200,
         data: {
           server_id: 123,
-          accuracy: 0.15,
-          categories: ['Sexy', 'Hentai', 'Porn'],
-          delete: true,
+          ...BASE_CONFIG,
         },
       }),
     );
@@ -24,6 +23,49 @@ export const handlers = [
         data: null,
         error: 'Foo bar',
       }),
+    );
+  }),
+
+  rest.post('http://api.test/api/config', (req, res, ctx) => {
+    const body = JSON.parse(req.body as string);
+
+    if (body.server_id === '456') {
+      return res(
+        ctx.status(500),
+        ctx.json({
+          status: 500,
+          data: null,
+          error: 'Foo bar',
+        }),
+      );
+    }
+
+    return res(
+      ctx.status(204),
+    );
+  }),
+
+  rest.delete('http://api.test/api/config/123', (req, res, ctx) => {
+    return res(
+      ctx.status(204),
+    );
+  }),
+
+  rest.delete('http://api.test/api/config/456', (req, res, ctx) => {
+    return res(
+      ctx.status(500),
+      ctx.json({
+        status: 500,
+        data: null,
+        error: 'Foo bar',
+      }),
+    );
+  }),
+
+  // shut sentry
+  rest.post('https://sentry.example.com/api/1/store/', (req, res, ctx) => {
+    return res(
+      ctx.status(204),
     );
   }),
 ];

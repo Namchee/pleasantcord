@@ -43,14 +43,15 @@ implements ConfigurationCache {
 
 export class CloudflareConfigurationRepository
 implements ConfigurationRepository {
-  private headers: Record<string, string>;
   private userId: string;
 
   public constructor(
     private readonly url: string,
     private readonly apiKey: string,
-  ) {
-    this.headers = {
+  ) { }
+
+  private get headers(): Record<string, string> {
+    return {
       Authorization: `pleasantcord ${this.apiKey}/${this.userId}`,
     };
   }
@@ -87,7 +88,7 @@ implements ConfigurationRepository {
     id: string,
     config: Configuration,
   ): Promise<boolean> {
-    const { ok, statusText } = await fetch(
+    const response = await fetch(
       `${this.url}/config`,
       {
         method: 'POST',
@@ -99,15 +100,17 @@ implements ConfigurationRepository {
       },
     );
 
-    if (!ok) {
+    if (!response.ok) {
+      const json = (await response.json()) as APIResponse<Configuration>;
+
       Logger.getInstance().logBot(
         new Error(
-          `Failed to create configuration for server ${id}: ${statusText}`,
+          `Failed to create configuration for server ${id}: ${json.error}`,
         ),
       );
     }
 
-    return ok;
+    return response.ok;
   }
 
   public async deleteConfig(id: string): Promise<boolean> {
