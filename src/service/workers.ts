@@ -5,7 +5,7 @@ import { NSFWJS, load } from 'nsfwjs';
 import { expose } from 'threads/worker';
 
 import { Category, Label } from './../entity/content';
-import { fetchContent } from './../utils/fetcher';
+import fetcher from './../utils/fetcher';
 
 let model: NSFWJS;
 
@@ -24,7 +24,7 @@ const getModel = async () => {
 
 const classifier = {
   classifyImage: async (source: string): Promise<Category[]> => {
-    const buffer = await fetchContent(source);
+    const buffer = await fetcher.fetchContent(source);
     const model = await getModel();
 
     let predictions = 1;
@@ -52,7 +52,7 @@ const classifier = {
   },
 
   classifyGIF: async (source: string): Promise<Category[]> => {
-    const buffer = await fetchContent(source);
+    const buffer = await fetcher.fetchContent(source);
     const model = await getModel();
 
     const categories = await model.classifyGif(buffer, {
