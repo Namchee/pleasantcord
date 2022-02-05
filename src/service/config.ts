@@ -1,8 +1,9 @@
-import { Configuration } from '../entity/config';
 import {
   ConfigurationCache,
   ConfigurationRepository,
-} from '../repository/config';
+} from '@/repository/config';
+
+import type { Configuration } from '@/entity/config';
 
 export class ConfigurationService {
   public constructor(
