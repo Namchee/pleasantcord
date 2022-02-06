@@ -40,7 +40,7 @@ const fetchers = {
 
       return response.buffer();
     } catch (err) {
-      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV !== 'production') {
         console.error(err);
       }
 
