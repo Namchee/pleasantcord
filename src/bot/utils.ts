@@ -1,10 +1,14 @@
 import { readdirSync } from 'fs';
 import { resolve } from 'path';
-import { Constants, DiscordAPIError, MessageEmbed } from 'discord.js';
+import { Constants, MessageEmbed } from 'discord.js';
 
 import { CommandHandler, EventHandler } from './types';
 import { Logger } from '../utils/logger';
 import { PERMISSION_ERRORS } from '../constants/error';
+import { RED } from '../constants/color';
+
+// this cannot be tested at the moment. Context: https://github.com/vitest-dev/vitest/issues/110
+/* c8 ignore start */
 
 /**
  * Get all available commands from command files.
@@ -55,6 +59,8 @@ export function getEvents(): EventHandler[] {
   return events;
 }
 
+/* c8 ignore end */
+
 /**
  * Catch all errors thrown by the bot and construct the appropriate
  * error message. Will report the error when an unexpected errors
@@ -71,27 +77,27 @@ export function handleError(
       name: 'pleasantcord',
       iconURL: process.env.IMAGE_URL,
     },
-    color: '#CD2B31',
+    color: RED,
   });
 
-  if (err instanceof DiscordAPIError) {
-    if (err.code === Constants.APIErrors.UNKNOWN_MESSAGE) {
-      // this is caused by double deletion, kindly ignore this
-      return null;
-    }
+  const code: number = (err as any).code ? (err as any).code : 0;
 
-    if (PERMISSION_ERRORS.includes(err.code)) {
-      errorMessage.setTitle('Insufficient Permissions');
-      errorMessage.setDescription(
-        `\`pleasantcord\` lacks the required permissions to perform its duties`,
-      );
+  if (code === Constants.APIErrors.UNKNOWN_MESSAGE) {
+    // this is caused by double deletion, kindly ignore this
+    return null;
+  }
 
-      errorMessage.addField(
-        'Solution',
-        // eslint-disable-next-line max-len
-        `Please make sure that \`pleasantcord\` has all the required permissions as stated in the documentation to manage this server and please make sure that \`pleasantcord\` has sufficient access rights to target channels`,
-      );
-    }
+  if (PERMISSION_ERRORS.includes(code)) {
+    errorMessage.setTitle('Insufficient Permissions');
+    errorMessage.setDescription(
+      `\`pleasantcord\` lacks the required permissions to perform its duties`,
+    );
+
+    errorMessage.addField(
+      'Solution',
+      // eslint-disable-next-line max-len
+      `Please make sure that \`pleasantcord\` has all the required permissions as stated in the documentation to manage this server and please make sure that \`pleasantcord\` has sufficient access rights to target channels`,
+    );
   } else {
     Logger.getInstance().logBot(err);
 
