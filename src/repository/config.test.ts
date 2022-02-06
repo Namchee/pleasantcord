@@ -120,6 +120,7 @@ describe('CloudflareConfigurationRepository', () => {
       const repository = new CloudflareConfigurationRepository(url, '');
 
       const loggerSpy = vi.spyOn(Logger.getInstance(), 'logBot');
+      loggerSpy.mockImplementationOnce(() => vi.fn());
 
       const config = await repository.getConfig('456');
 
@@ -141,6 +142,7 @@ describe('CloudflareConfigurationRepository', () => {
       const repository = new CloudflareConfigurationRepository(url, '');
 
       const loggerSpy = vi.spyOn(Logger.getInstance(), 'logBot');
+      loggerSpy.mockImplementationOnce(() => vi.fn());
 
       const config = await repository.createConfig('456', BASE_CONFIG);
 
@@ -162,6 +164,7 @@ describe('CloudflareConfigurationRepository', () => {
       const repository = new CloudflareConfigurationRepository(url, '');
 
       const loggerSpy = vi.spyOn(Logger.getInstance(), 'logBot');
+      loggerSpy.mockImplementationOnce(() => vi.fn());
 
       const config = await repository.deleteConfig('456');
 

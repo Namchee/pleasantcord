@@ -1,5 +1,7 @@
-import { BASE_CONFIG } from '@/entity/config';
+/* c8 ignore start */
 import { rest } from 'msw';
+
+import { BASE_CONFIG } from '@/entity/config';
 
 export const handlers = [
   rest.get('http://api.test/api/config/123', (req, res, ctx) => {
@@ -69,3 +71,5 @@ export const handlers = [
     );
   }),
 ];
+
+/* c8 ignore end */
