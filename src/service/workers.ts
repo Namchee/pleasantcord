@@ -22,69 +22,72 @@ const getModel = async () => {
   return model;
 };
 
-const classifier = {
-  classifyImage: async (source: string): Promise<Category[]> => {
-    const buffer = await fetcher.fetchContent(source);
-    const model = await getModel();
+export async function classifyImage(source: string): Promise<Category[]> {
+  const buffer = await fetcher.fetchContent(source);
+  const model = await getModel();
 
-    let predictions = 1;
+  let predictions = 1;
 
-    if (process.env.NODE_ENV === 'development') {
-      predictions = 5;
-    }
-    const decodedImage = tf.node.decodeImage(buffer, 3) as tf.Tensor3D;
+  if (process.env.NODE_ENV !== 'production') {
+    predictions = 5;
+  }
+  const decodedImage = tf.node.decodeImage(buffer, 3) as tf.Tensor3D;
 
-    const classification = await model.classify(decodedImage, predictions);
-    // prevent memory leak
-    decodedImage.dispose();
-    const categories = classification.map((c) => {
-      return {
-        name: c.className,
-        accuracy: c.probability,
-      };
-    });
-
-    categories.sort((a, b) => {
-      return a.accuracy > b.accuracy ? -1 : 1;
-    });
-
-    return categories;
-  },
-
-  classifyGIF: async (source: string): Promise<Category[]> => {
-    const buffer = await fetcher.fetchContent(source);
-    const model = await getModel();
-
-    const categories = await model.classifyGif(buffer, {
-      topk: 1,
-    });
-
-    const frequency: Record<Label, number> = {
-      Hentai: 0,
-      Porn: 0,
-      Neutral: 0,
-      Drawing: 0,
-      Sexy: 0,
+  const classification = await model.classify(decodedImage, predictions);
+  // prevent memory leak
+  decodedImage.dispose();
+  const categories = classification.map((c) => {
+    return {
+      name: c.className,
+      accuracy: c.probability,
     };
+  });
 
-    categories.forEach((cat) => {
-      frequency[cat[0].className]++;
-    });
+  categories.sort((a, b) => {
+    return a.accuracy > b.accuracy ? -1 : 1;
+  });
 
-    const result = Object.entries(frequency).map((value): Category => {
-      const cat = value[0] as Label;
-      return {
-        name: cat,
-        accuracy: (frequency[cat] / categories.length),
-      };
-    }).sort((a, b) => a.accuracy > b.accuracy ? -1 : 1);
+  return categories;
+}
 
-    if (process.env.NODE_ENV !== 'development') {
-      return result.slice(0, 1);
-    }
+export async function classifyGIF(source: string): Promise<Category[]> {
+  const buffer = await fetcher.fetchContent(source);
+  const model = await getModel();
 
-    return result;
-  },
+  const categories = await model.classifyGif(buffer, {
+    topk: 1,
+  });
+
+  const frequency: Record<Label, number> = {
+    Hentai: 0,
+    Porn: 0,
+    Neutral: 0,
+    Drawing: 0,
+    Sexy: 0,
+  };
+
+  categories.forEach((cat) => {
+    frequency[cat[0].className]++;
+  });
+
+  const result = Object.entries(frequency).map((value): Category => {
+    const cat = value[0] as Label;
+    return {
+      name: cat,
+      accuracy: (frequency[cat] / categories.length),
+    };
+  }).sort((a, b) => a.accuracy > b.accuracy ? -1 : 1);
+
+  if (process.env.NODE_ENV !== 'development') {
+    return result.slice(0, 1);
+  }
+
+  return result;
+}
+
+const classifier = {
+  classifyImage,
+  classifyGIF,
 };
 
 export type Classifier = typeof classifier;
