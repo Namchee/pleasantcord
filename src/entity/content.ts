@@ -18,3 +18,20 @@ export interface Category {
   name: Label;
   accuracy: number;
 }
+
+/**
+ * Sort categories by their accuracy in descending order and
+ * label in ascending order
+ *
+ * @param {Category[]} categories list of categories
+ * @returns sorted categories in described order
+ */
+export function sortCategories(categories: Category[]): Category[] {
+  return categories.sort((a, b) => {
+    if (a.accuracy !== b.accuracy) {
+      return a.accuracy > b.accuracy ? -1 : 1;
+    }
+
+    return a.name < b.name ? -1 : 1;
+  });
+}
