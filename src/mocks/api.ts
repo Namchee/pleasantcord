@@ -13,7 +13,7 @@ export const handlers = [
           server_id: 123,
           ...BASE_CONFIG,
         },
-      }),
+      })
     );
   }),
 
@@ -24,7 +24,7 @@ export const handlers = [
         status: 500,
         data: null,
         error: 'Foo bar',
-      }),
+      })
     );
   }),
 
@@ -38,19 +38,15 @@ export const handlers = [
           status: 500,
           data: null,
           error: 'Foo bar',
-        }),
+        })
       );
     }
 
-    return res(
-      ctx.status(204),
-    );
+    return res(ctx.status(204));
   }),
 
   rest.delete('http://api.test/api/config/123', (req, res, ctx) => {
-    return res(
-      ctx.status(204),
-    );
+    return res(ctx.status(204));
   }),
 
   rest.delete('http://api.test/api/config/456', (req, res, ctx) => {
@@ -60,15 +56,13 @@ export const handlers = [
         status: 500,
         data: null,
         error: 'Foo bar',
-      }),
+      })
     );
   }),
 
   // shut sentry
   rest.post('https://sentry.example.com/api/1/store/', (req, res, ctx) => {
-    return res(
-      ctx.status(204),
-    );
+    return res(ctx.status(204));
   }),
 ];
 

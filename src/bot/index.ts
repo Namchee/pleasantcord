@@ -9,15 +9,14 @@ import { getEvents } from './utils';
  * Bootstrap the bot client with all dependencies and
  * events.
  *
- * @param {NSFWJS} model NSFW model
- * @param {ConfigurationRepository} configRepository configuration
- * repository.
+ * @param {ConfigurationService} service configuration service
+ * @param {RateLimiter} rateLimiter rate limiter
  * @returns {Promise<Client>} bootstraped client which is ready
  * to listen and respond to events.
  */
 export async function bootstrapBot(
   service: ConfigurationService,
-  rateLimiter: RateLimiter,
+  rateLimiter: RateLimiter
 ): Promise<Client> {
   const client = new Client({
     // weirdly, both are required.

@@ -24,7 +24,7 @@ export interface Category {
  * label in ascending order
  *
  * @param {Category[]} categories list of categories
- * @returns sorted categories in described order
+ * @returns {Category[]} sorted categories in described order
  */
 export function sortCategories(categories: Category[]): Category[] {
   return categories.sort((a, b) => {

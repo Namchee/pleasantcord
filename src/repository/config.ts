@@ -8,7 +8,6 @@ import { FIVE_MINUTES } from './../constants/time';
 import type { APIResponse } from './../entity/api';
 import type { Configuration } from './../entity/config';
 
-
 export interface ConfigurationCache {
   getConfig: (id: string) => Configuration | null;
   setConfig: (id: string, config: Configuration) => void;
@@ -22,9 +21,8 @@ export interface ConfigurationRepository {
   deleteConfig: (id: string) => Promise<boolean>;
 }
 
-export class LocalConfigurationCache
-implements ConfigurationCache {
-  public constructor(private readonly cache: NodeCache) { }
+export class LocalConfigurationCache implements ConfigurationCache {
+  public constructor(private readonly cache: NodeCache) {}
 
   public getConfig(id: string): Configuration | null {
     const config = this.cache.get(id);
@@ -42,13 +40,14 @@ implements ConfigurationCache {
 }
 
 export class CloudflareConfigurationRepository
-implements ConfigurationRepository {
+  implements ConfigurationRepository
+{
   private userId: string;
 
   public constructor(
     private readonly url: string,
-    private readonly apiKey: string,
-  ) { }
+    private readonly apiKey: string
+  ) {}
 
   private get headers(): Record<string, string> {
     return {
@@ -61,21 +60,16 @@ implements ConfigurationRepository {
   }
 
   public async getConfig(id: string): Promise<Configuration | null> {
-    const result = await fetch(
-      `${this.url}/config/${id}`,
-      {
-        method: 'GET',
-        headers: this.headers,
-      },
-    );
+    const result = await fetch(`${this.url}/config/${id}`, {
+      method: 'GET',
+      headers: this.headers,
+    });
 
     const json = (await result.json()) as APIResponse<Configuration>;
 
     if (!result.ok) {
       Logger.getInstance().logBot(
-        new Error(
-          `Failed to get configuration for server ${id}: ${json.error}`,
-        ),
+        new Error(`Failed to get configuration for server ${id}: ${json.error}`)
       );
 
       return null;
@@ -86,27 +80,24 @@ implements ConfigurationRepository {
 
   public async createConfig(
     id: string,
-    config: Configuration,
+    config: Configuration
   ): Promise<boolean> {
-    const response = await fetch(
-      `${this.url}/config`,
-      {
-        method: 'POST',
-        headers: this.headers,
-        body: JSON.stringify({
-          server_id: id,
-          ...config,
-        }),
-      },
-    );
+    const response = await fetch(`${this.url}/config`, {
+      method: 'POST',
+      headers: this.headers,
+      body: JSON.stringify({
+        server_id: id,
+        ...config,
+      }),
+    });
 
     if (!response.ok) {
       const json = (await response.json()) as APIResponse<Configuration>;
 
       Logger.getInstance().logBot(
         new Error(
-          `Failed to create configuration for server ${id}: ${json.error}`,
-        ),
+          `Failed to create configuration for server ${id}: ${json.error}`
+        )
       );
     }
 
@@ -114,19 +105,16 @@ implements ConfigurationRepository {
   }
 
   public async deleteConfig(id: string): Promise<boolean> {
-    const { ok, statusText } = await fetch(
-      `${this.url}/config/${id}`,
-      {
-        method: 'DELETE',
-        headers: this.headers,
-      },
-    );
+    const { ok, statusText } = await fetch(`${this.url}/config/${id}`, {
+      method: 'DELETE',
+      headers: this.headers,
+    });
 
     if (!ok) {
       Logger.getInstance().logBot(
         new Error(
-          `Failed to delete configuration for server ${id}: ${statusText}`,
-        ),
+          `Failed to delete configuration for server ${id}: ${statusText}`
+        )
       );
     }
 

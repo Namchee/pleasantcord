@@ -9,9 +9,9 @@ import type { Category, Label } from './../entity/content';
  * @returns {Category[]} list of categories
  */
 export function mapClassificationsToCategories(
-  classifications: predictionType[],
+  classifications: predictionType[]
 ): Category[] {
-  return classifications.map((c) => {
+  return classifications.map(c => {
     return {
       name: c.className,
       accuracy: c.probability,
@@ -25,10 +25,10 @@ export function mapClassificationsToCategories(
  * videos or GIFs.
  *
  * @param {predictionType[][]} predictions NSFWJS's list of predicitions
- * @return {Category[]} list of categories
+ * @returns {Category[]} list of categories
  */
 export function aggregatePrediction(
-  predictions: predictionType[][],
+  predictions: predictionType[][]
 ): Category[] {
   const frequency: Record<Label, number> = {
     Drawing: 0,
@@ -38,7 +38,7 @@ export function aggregatePrediction(
     Sexy: 0,
   };
 
-  predictions.forEach((cat) => {
+  predictions.forEach(cat => {
     frequency[cat[0].className]++;
   });
 
@@ -47,7 +47,7 @@ export function aggregatePrediction(
 
     return {
       name: cat,
-      accuracy: (frequency[cat] / predictions.length),
+      accuracy: frequency[cat] / predictions.length,
     };
   });
 

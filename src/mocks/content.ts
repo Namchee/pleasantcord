@@ -5,7 +5,7 @@ export const handlers = [
     return res(
       ctx.status(200),
       ctx.set('Content-Type', 'image/png'),
-      ctx.body(Buffer.from('data:image/png;base64, asdljafhsSa')),
+      ctx.body(Buffer.from('data:image/png;base64, asdljafhsSa'))
     );
   }),
 
@@ -25,8 +25,7 @@ export const handlers = [
       <body>
           
       </body>
-      </html>`,
-      ),
+      </html>`)
     );
   }),
 
@@ -34,7 +33,7 @@ export const handlers = [
     return res(
       ctx.status(200),
       ctx.set('Content-Type', 'image/gif'),
-      ctx.body(Buffer.from('data:image/gif;base64, loremipsumdolorsilamet')),
+      ctx.body(Buffer.from('data:image/gif;base64, loremipsumdolorsilamet'))
     );
   }),
 
@@ -54,8 +53,7 @@ export const handlers = [
       <body>
           
       </body>
-      </html>`,
-      ),
+      </html>`)
     );
   }),
 
@@ -63,7 +61,7 @@ export const handlers = [
     return res(
       ctx.status(200),
       ctx.set('Content-Type', 'image/gif'),
-      ctx.body(Buffer.from('data:image/gif;base64, loremipsumdolorsilamet')),
+      ctx.body(Buffer.from('data:image/gif;base64, loremipsumdolorsilamet'))
     );
   }),
 
@@ -71,7 +69,7 @@ export const handlers = [
     return res(
       ctx.status(200),
       ctx.set('Content-Type', 'image/webp'),
-      ctx.body(Buffer.from('data:image/webp;base64, loremipsumdolorsilamet')),
+      ctx.body(Buffer.from('data:image/webp;base64, loremipsumdolorsilamet'))
     );
   }),
 ];

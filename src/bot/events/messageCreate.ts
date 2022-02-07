@@ -1,8 +1,4 @@
-import {
-  Message,
-  MessageEmbed,
-  TextChannel,
-} from 'discord.js';
+import { Message, MessageEmbed, TextChannel } from 'discord.js';
 import { performance } from 'perf_hooks';
 import { ModuleThread, Pool, spawn, Worker } from 'threads';
 import { QueuedTask } from 'threads/dist/master/pool-types';
@@ -31,8 +27,8 @@ commandHandlers.forEach((handler: CommandHandler) => {
   commandMap[handler.command] = handler.fn;
 });
 
-const workers = Pool(
-  () => spawn<Classifier>(new Worker(`../../service/workers`)),
+const workers = Pool(() =>
+  spawn<Classifier>(new Worker(`../../service/workers`))
 );
 
 /**
@@ -45,7 +41,7 @@ const workers = Pool(
  */
 async function moderateContent(
   { service, rateLimiter }: BotContext,
-  msg: Message,
+  msg: Message
 ): Promise<void> {
   const channel = msg.channel as TextChannel;
 
@@ -129,26 +125,25 @@ async function moderateContent(
     config = realConfig;
   } else {
     Logger.getInstance().logBot(
-      new Error(`Failed to get configuration for server ${msg.guildId}}`),
+      new Error(`Failed to get configuration for server ${msg.guildId}}`)
     );
   }
 
-  const tasks: QueuedTask<
-    ModuleThread<Classifier>,
-    ClassificationResult
-  >[] = [];
+  const tasks: QueuedTask<ModuleThread<Classifier>, ClassificationResult>[] =
+    [];
 
   contents.forEach(({ name, url, type }) => {
-    const classification = workers.queue(async (classifier) => {
+    const classification = workers.queue(async classifier => {
       let start = 0;
 
       if (isDev) {
         start = performance.now();
       }
 
-      const categories = type === 'gif' ?
-        await classifier.classifyGIF(url) :
-        await classifier.classifyImage(url);
+      const categories =
+        type === 'gif'
+          ? await classifier.classifyGIF(url)
+          : await classifier.classifyImage(url);
 
       return {
         name,
@@ -162,9 +157,10 @@ async function moderateContent(
   });
 
   for await (const { name, source, categories, time } of tasks) {
-    const isNSFW = categories.some((cat) => {
-      return config.categories.includes(cat.name) &&
-        cat.accuracy >= config.accuracy;
+    const isNSFW = categories.some(cat => {
+      return (
+        config.categories.includes(cat.name) && cat.accuracy >= config.accuracy
+      );
     });
 
     const promises = [];
@@ -173,8 +169,8 @@ async function moderateContent(
       // make sure that all queued tasks are killed
       tasks.forEach(t => t.cancel());
 
-      const category = categories.find(
-        cat => config.categories.includes(cat.name),
+      const category = categories.find(cat =>
+        config.categories.includes(cat.name)
       ) as Category;
 
       const fields = [
@@ -195,13 +191,11 @@ async function moderateContent(
       ];
 
       if (msg.content) {
-        fields.push(
-          {
-            name: 'Contents',
-            value: msg.content,
-            inline: false,
-          },
-        );
+        fields.push({
+          name: 'Contents',
+          value: msg.content,
+          inline: false,
+        });
       }
 
       const embed = new MessageEmbed({
@@ -211,9 +205,7 @@ async function moderateContent(
         },
         title: 'Possible NSFW Contents Detected',
         fields,
-        color: process.env.NODE_ENV === 'development' ?
-          '#2674C2' :
-          '#FF9B05',
+        color: process.env.NODE_ENV === 'development' ? '#2674C2' : '#FF9B05',
       });
 
       promises.push(channel.send({ embeds: [embed] }));
@@ -226,15 +218,11 @@ async function moderateContent(
           name: `SPOILER_${name}`,
         });
 
-        promises.push(
-          channel.send({ files }),
-        );
+        promises.push(channel.send({ files }));
       }
 
       if (msg.deletable && !msg.deleted) {
-        promises.push(
-          msg.delete(),
-        );
+        promises.push(msg.delete());
       }
     }
 
@@ -248,9 +236,11 @@ async function moderateContent(
         fields: [
           {
             name: 'Labels',
-            value: categories.map(({ name, accuracy }) => {
-              return `${name} — ${(accuracy * 100).toFixed(2)}%`;
-            }).join('\n'),
+            value: categories
+              .map(({ name, accuracy }) => {
+                return `${name} — ${(accuracy * 100).toFixed(2)}%`;
+              })
+              .join('\n'),
           },
           {
             name: 'Elapsed Time',

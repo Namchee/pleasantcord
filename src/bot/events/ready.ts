@@ -11,9 +11,7 @@ export default {
 
     try {
       // set required authentication data
-      service.repository.setBotId(
-        client.user?.id as string,
-      );
+      service.repository.setBotId(client.user?.id as string);
 
       client.user?.setPresence({
         status: 'online',

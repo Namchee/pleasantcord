@@ -25,7 +25,7 @@ export interface EventHandler {
  */
 export type CommandHandlerFunction = (
   ctx: BotContext,
-  msg: Message,
+  msg: Message
 ) => Promise<void>;
 
 /**

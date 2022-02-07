@@ -39,9 +39,7 @@ export default {
           value: `You can contribute to \`pleasantcord\`'s development on [GitHub](https://github.com/Namchee/pleasantcord)`,
         },
       ],
-      color: process.env.NODE_ENV === 'development' ?
-        '#2674C2' :
-        '#FFA31A',
+      color: process.env.NODE_ENV === 'development' ? '#2674C2' : '#FFA31A',
     });
 
     return channel.send({ embeds: [embed] });

@@ -40,7 +40,9 @@ describe('handleError', () => {
     expect(err?.author?.iconURL).toBe(url);
     expect(err?.color).toBe(colorCode);
     expect(err?.title).toBe('Ouch!');
-    expect(err?.description).toBe('Unfortunately, `pleasantcord` has encountered an unexpected error. Don\'t worry, the error has been reported to the system and will be resolved as soon as possible.\n\nIf this issue persists, please submit an issue to [GitHub](https://github.com/Namchee/pleasantcord/issues) or join [our support server](https://discord.gg/Pj4aGp8Aky) and submit your bug report on the appropriate channel.');
+    expect(err?.description).toBe(
+      "Unfortunately, `pleasantcord` has encountered an unexpected error. Don't worry, the error has been reported to the system and will be resolved as soon as possible.\n\nIf this issue persists, please submit an issue to [GitHub](https://github.com/Namchee/pleasantcord/issues) or join [our support server](https://discord.gg/Pj4aGp8Aky) and submit your bug report on the appropriate channel."
+    );
   });
 
   it('should ignore message deletion error', () => {
@@ -64,7 +66,7 @@ describe('handleError', () => {
     expect(err?.color).toBe(colorCode);
     expect(err?.title).toBe('Insufficient Permissions');
     expect(err?.description).toBe(
-      `\`pleasantcord\` lacks the required permissions to perform its duties`,
+      `\`pleasantcord\` lacks the required permissions to perform its duties`
     );
     expect(err?.fields.length).toBe(1);
   });
@@ -82,7 +84,7 @@ describe('handleError', () => {
     expect(err?.color).toBe(colorCode);
     expect(err?.title).toBe('Insufficient Permissions');
     expect(err?.description).toBe(
-      `\`pleasantcord\` lacks the required permissions to perform its duties`,
+      `\`pleasantcord\` lacks the required permissions to perform its duties`
     );
     expect(err?.fields.length).toBe(1);
   });
@@ -100,7 +102,7 @@ describe('handleError', () => {
     expect(err?.color).toBe(colorCode);
     expect(err?.title).toBe('Insufficient Permissions');
     expect(err?.description).toBe(
-      `\`pleasantcord\` lacks the required permissions to perform its duties`,
+      `\`pleasantcord\` lacks the required permissions to perform its duties`
     );
     expect(err?.fields.length).toBe(1);
   });

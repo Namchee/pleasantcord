@@ -1,50 +1,35 @@
 module.exports = {
-  'env': {
-    'browser': true,
-    'es6': true,
-    'node': true,
+  env: {
+    browser: true,
+    es6: true,
+    node: true,
   },
-  'extends': [
+  extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
+    'plugin:jsdoc/recommended',
     'google',
+    'prettier',
   ],
-  'globals': {
-    'Atomics': 'readonly',
-    'SharedArrayBuffer': 'readonly',
+  globals: {
+    Atomics: 'readonly',
+    SharedArrayBuffer: 'readonly',
   },
-  'parser': '@typescript-eslint/parser',
-  'parserOptions': {
-    'ecmaVersion': 2018,
-    'sourceType': 'module',
+  parser: '@typescript-eslint/parser',
+  parserOptions: {
+    ecmaVersion: 2018,
+    sourceType: 'module',
   },
-  'plugins': [
-    'jsdoc',
-  ],
-  'rules': {
-    'indent': [
+  plugins: ['@typescript-eslint', 'jsdoc', 'prettier'],
+  rules: {
+    'indent': 'off',
+    'linebreak-style': [
+      // change this accordingly
       'error',
-      2,
-      {
-        'SwitchCase': 1,
-      },
-    ],
-    'linebreak-style': [ // change this accordingly
-      'warn',
       'windows',
     ],
-    'object-curly-spacing': [
-      'error',
-      'always',
-    ],
-    'arrow-parens': [
-      'error',
-      'as-needed',
-      {
-        'requireForBlockBody': true,
-      },
-    ],
+    'object-curly-spacing': ['error', 'always'],
     'require-jsdoc': 'off', // favor eslint-plugin-jsdoc
     'valid-jsdoc': 'off', // favor eslint-plugin-jsdoc
     'new-cap': 'off', // prevent decorator issues
@@ -53,5 +38,6 @@ module.exports = {
     '@typescript-eslint/no-var-requires': 'off', // commonjs issue
     '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/camelcase': 'off', // prevent camelCase false alarm
+    'prettier/prettier': ['error'],
   },
 };

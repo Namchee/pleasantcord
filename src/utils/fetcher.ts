@@ -22,7 +22,7 @@ const fetchers = {
 
         const $ = cheerio.load(body);
         const url = new URL(
-          $('meta[property="og:url"]').first().attr()['content'],
+          $('meta[property="og:url"]').first().attr()['content']
         );
 
         if (url.hostname.match('giphy')) {
