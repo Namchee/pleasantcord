@@ -13,28 +13,33 @@ import { Content } from '@/entity/content';
 // this cannot be tested at the moment. Context: https://github.com/vitest-dev/vitest/issues/110
 /* c8 ignore start */
 
+// cache this
+let commandList: CommandHandler[];
+
 /**
  * Get all available commands from command files.
  *
  * @returns {CommandHandler[]} list of command handlers.
  */
 export function getCommands(): CommandHandler[] {
-  const basePath = resolve(__dirname, 'commands');
-  const commandFiles = readdirSync(basePath);
+  if (!commandList) {
+    const basePath = resolve(__dirname, 'commands');
+    const commandFiles = readdirSync(basePath);
 
-  const commands = commandFiles.map((commandFile: string) => {
-    const file = require(resolve(basePath, commandFile));
+    commandList = commandFiles.map((commandFile: string) => {
+      const file = require(resolve(basePath, commandFile));
 
-    const { command, description, fn } = file.default as CommandHandler;
+      const { command, description, fn } = file.default as CommandHandler;
 
-    return {
-      command,
-      description,
-      fn,
-    };
-  });
+      return {
+        command,
+        description,
+        fn,
+      };
+    });
+  }
 
-  return commands;
+  return commandList;
 }
 
 /**
