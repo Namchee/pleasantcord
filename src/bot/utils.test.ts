@@ -1,7 +1,7 @@
 import { describe, it, afterEach, beforeEach, vi, expect } from 'vitest';
 import { Constants, MessageEmbed } from 'discord.js';
 
-import { handleError } from '@/bot/utils';
+import { getCommand, handleError } from '@/bot/utils';
 import { Logger } from '@/utils/logger';
 import { RED } from '@/constants/color';
 
@@ -105,5 +105,21 @@ describe('handleError', () => {
       `\`pleasantcord\` lacks the required permissions to perform its duties`
     );
     expect(err?.fields.length).toBe(1);
+  });
+});
+
+describe('getCommand', () => {
+  it('should return actual command', () => {
+    const msg = 'pc!help';
+    const cmd = getCommand(msg);
+
+    expect(cmd).toBe('help');
+  });
+
+  it('should get the first argument only', () => {
+    const msg = 'pc!help lorem ipsum';
+    const cmd = getCommand(msg);
+
+    expect(cmd).toBe('help');
   });
 });

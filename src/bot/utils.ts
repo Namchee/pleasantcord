@@ -1,11 +1,14 @@
 import { readdirSync } from 'fs';
 import { resolve } from 'path';
-import { Constants, MessageEmbed } from 'discord.js';
+import { Constants, Message, MessageEmbed } from 'discord.js';
 
 import { CommandHandler, EventHandler } from './types';
 import { Logger } from '../utils/logger';
+
 import { PERMISSION_ERRORS } from '../constants/error';
 import { RED } from '../constants/color';
+import { PREFIX } from '../constants/command';
+import { Content } from '@/entity/content';
 
 // this cannot be tested at the moment. Context: https://github.com/vitest-dev/vitest/issues/110
 /* c8 ignore start */
@@ -104,4 +107,24 @@ export function handleError(err: Error): MessageEmbed | null {
   }
 
   return errorMessage;
+}
+
+/**
+ * Get actual command from user message
+ *
+ * @param {string} msg user message
+ * @returns {string} command name
+ */
+export function getCommand(msg: string): string {
+  return msg.slice(PREFIX.length).trim().split(/ +/)[0];
+}
+
+/**
+ * Get all detectable contents from a user message
+ *
+ * @param {Message} msg user message
+ * @returns {Content[]} list of detectable contents
+ */
+export function getDetectableContents(msg: Message): Content[] {
+  return [];
 }

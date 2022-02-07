@@ -1,20 +1,27 @@
-import { Message, MessageEmbed, TextChannel } from 'discord.js';
 import { performance } from 'perf_hooks';
+
+import { Message, MessageEmbed, TextChannel } from 'discord.js';
 import { ModuleThread, Pool, spawn, Worker } from 'threads';
 import { QueuedTask } from 'threads/dist/master/pool-types';
 
-import { ATTACHMENT_CONTENT_TYPE } from '../../constants/content';
+import { Classifier } from '../../service/workers';
+
 import { BASE_CONFIG } from '../../entity/config';
 import { Category, Content } from '../../entity/content';
-import { Classifier } from '../../service/workers';
+
+import { BLUE, ORANGE, RED } from '../../constants/color';
+import { PREFIX } from '../../constants/command';
+import { ATTACHMENT_CONTENT_TYPE } from '../../constants/content';
+
+import { handleError, getCommands, getCommand } from '../utils';
 import { Logger } from '../../utils/logger';
+
 import {
   CommandHandler,
   BotContext,
   CommandHandlerFunction,
   ClassificationResult,
 } from '../types';
-import { handleError, getCommands } from '../utils';
 
 /**
  * Get all available commands from command files and
@@ -108,7 +115,7 @@ async function moderateContent(
     return;
   }
 
-  const isDev = process.env.NODE_ENV === 'development';
+  const isDev = process.env.NODE_ENV !== 'production';
   const rateLimitKey = `${msg.guildId as string}:${msg.channelId}`;
 
   if (rateLimiter.isRateLimited(rateLimitKey) && !isDev) {
@@ -205,7 +212,7 @@ async function moderateContent(
         },
         title: 'Possible NSFW Contents Detected',
         fields,
-        color: process.env.NODE_ENV === 'development' ? '#2674C2' : '#FF9B05',
+        color: process.env.NODE_ENV !== 'production' ? BLUE : ORANGE,
       });
 
       promises.push(channel.send({ embeds: [embed] }));
@@ -226,7 +233,7 @@ async function moderateContent(
       }
     }
 
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV !== 'production') {
       const devEmbed = new MessageEmbed({
         author: {
           name: 'pleasantcord',
@@ -263,45 +270,43 @@ async function moderateContent(
 
 export default {
   event: 'messageCreate',
-  fn: async (ctx: BotContext, msg: Message): Promise<Message | void> => {
+  fn: async (
+    ctx: BotContext,
+    msg: Message
+  ): Promise<Message<boolean> | void> => {
     try {
-      const prefix = 'pc!';
-
       if (!msg.guild || !msg.channel.isText() || msg.author.bot) {
         return;
       }
 
-      if (msg.content.startsWith(prefix)) {
-        const args = msg.content.slice(prefix.length).trim().split(/ +/);
-        const commandHandler = commandMap[args[0]];
+      if (msg.content.startsWith(PREFIX)) {
+        const commandHandler = commandMap[getCommand(msg.content)];
 
         if (commandHandler) {
-          await commandHandler(ctx, msg);
-        } else {
-          const unknownEmbed = new MessageEmbed({
-            author: {
-              name: 'pleasantcord',
-              iconURL: process.env.IMAGE_URL,
-            },
-            color: '#E53E3E',
-            title: 'Unknown Command',
-            description:
-              // eslint-disable-next-line max-len
-              `**pleasantcord** doesn't recognize the command that have been just sent.\nPlease refer to **${prefix}help** to show all available **pleasantcords's** commands.`,
-          });
-
-          await msg.channel.send({ embeds: [unknownEmbed] });
+          return commandHandler(ctx, msg);
         }
 
-        return;
+        const unknownEmbed = new MessageEmbed({
+          author: {
+            name: 'pleasantcord',
+            iconURL: process.env.IMAGE_URL,
+          },
+          color: RED,
+          title: 'Unknown Command',
+          description:
+            // eslint-disable-next-line max-len
+            `**pleasantcord** doesn't recognize the command that have been just sent.\nPlease refer to **${PREFIX}help** to show all available **pleasantcords's** commands.`,
+        });
+
+        return msg.channel.send({ embeds: [unknownEmbed] });
       }
 
-      await moderateContent(ctx, msg);
+      return moderateContent(ctx, msg);
     } catch (err) {
       const errorEmbed = handleError(err as Error);
 
       if (errorEmbed) {
-        msg.channel.send({ embeds: [errorEmbed] });
+        return msg.channel.send({ embeds: [errorEmbed] });
       }
     }
   },
