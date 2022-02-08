@@ -2,8 +2,6 @@ import fetch from 'node-fetch';
 import cheerio from 'cheerio';
 import sharp from 'sharp';
 
-import { URL } from 'url';
-
 const fetchers = {
   /**
    * Fetch supported contents from either Discord's CDN or an
@@ -21,16 +19,13 @@ const fetchers = {
         const body = await response.text();
 
         const $ = cheerio.load(body);
-        const url = new URL(
-          $('meta[property="og:url"]').first().attr()['content']
-        );
+        let url = $('meta[property="og:image"]').first().attr()['content'];
 
-        if (url.hostname.match('giphy')) {
-          // redirect the link to Giphy's CDN
-          url.hostname = 'i.giphy.com';
+        if (url.endsWith('.mp4')) {
+          url = url.replace('.mp4', '.gif');
         }
 
-        return fetchers.fetchContent(url.toString());
+        return fetchers.fetchContent(url);
       }
 
       if (header?.match('image/webp')) {

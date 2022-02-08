@@ -1,6 +1,9 @@
 import { readdirSync } from 'fs';
 import { resolve } from 'path';
+import { URL } from 'url';
 import { Constants, Message, MessageEmbed } from 'discord.js';
+
+import { Content } from '../entity/content';
 
 import { CommandHandler, EventHandler } from './types';
 import { Logger } from '../utils/logger';
@@ -8,7 +11,11 @@ import { Logger } from '../utils/logger';
 import { PERMISSION_ERRORS } from '../constants/error';
 import { RED } from '../constants/color';
 import { PREFIX } from '../constants/command';
-import { Content } from '@/entity/content';
+import {
+  CONTENT_EXTENSION,
+  CONTENT_TYPE,
+  GIF_PROVIDER,
+} from '../constants/content';
 
 // this cannot be tested at the moment. Context: https://github.com/vitest-dev/vitest/issues/110
 /* c8 ignore start */
@@ -125,11 +132,79 @@ export function getCommand(msg: string): string {
 }
 
 /**
- * Get all detectable contents from a user message
+ * Get all supported contents from a user message
  *
  * @param {Message} msg user message
  * @returns {Content[]} list of detectable contents
  */
-export function getDetectableContents(msg: Message): Content[] {
-  return [];
+export function getSupportedContents(msg: Message): Content[] {
+  const contents: Content[] = [];
+
+  msg.attachments.forEach(({ url, name, contentType }) => {
+    if (!!contentType && CONTENT_TYPE.includes(contentType)) {
+      contents.push({
+        type: contentType === 'image/gif' ? 'gif' : 'image',
+        name: name || 'attachment.jpg',
+        url,
+      });
+    }
+  });
+
+  msg.embeds.forEach(({ url, image, thumbnail }) => {
+    if (url) {
+      const { pathname, host } = new URL(url);
+
+      // this is probably a GIF
+      if (GIF_PROVIDER.some(p => host.match(p))) {
+        contents.push({
+          type: 'gif',
+          name: 'embed.gif',
+          url: url,
+        });
+      } else {
+        // check the extensions
+        const extension = pathname.split('.').pop();
+
+        if (extension && CONTENT_EXTENSION.includes(extension)) {
+          const type = extension == 'gif' ? 'gif' : 'image';
+
+          contents.push({
+            type: type,
+            name: `embed.${type}`,
+            url: url,
+          });
+        }
+      }
+
+      return;
+    }
+
+    if (image) {
+      const { pathname } = new URL(image.url);
+      const extension = pathname.split('.').pop();
+
+      contents.push({
+        type: 'image',
+        name: `embed.${extension}`,
+        url: image.url,
+      });
+
+      return;
+    }
+
+    if (thumbnail) {
+      const { pathname } = new URL(thumbnail.url);
+      const extension = pathname.split('.').pop();
+
+      contents.push({
+        type: 'image',
+        name: `embed.${extension}`,
+        url: thumbnail.url,
+      });
+
+      return;
+    }
+  });
+
+  return contents;
 }

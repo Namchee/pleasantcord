@@ -20,7 +20,7 @@ export const handlers = [
           <meta http-equiv="X-UA-Compatible" content="IE=edge">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>Definitely Giphy</title>
-          <meta property="og:url" content="http://www.giphy.com/test.gif" />
+          <meta property="og:image" content="http://i.giphy.com/test.gif" />
       </head>
       <body>
           
@@ -48,7 +48,7 @@ export const handlers = [
           <meta http-equiv="X-UA-Compatible" content="IE=edge">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>Definitely Giphy</title>
-          <meta property="og:url" content="http://www.giphy.com/test.gif" />
+          <meta property="og:image" content="http://c.tenor.com/test.gif" />
       </head>
       <body>
           
@@ -57,7 +57,7 @@ export const handlers = [
     );
   }),
 
-  rest.get('http://www.tenor.com/test.gif', (req, res, ctx) => {
+  rest.get('http://c.tenor.com/test.gif', (req, res, ctx) => {
     return res(
       ctx.status(200),
       ctx.set('Content-Type', 'image/gif'),

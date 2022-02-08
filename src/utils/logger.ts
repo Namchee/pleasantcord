@@ -48,7 +48,7 @@ export class Logger {
       console.error(err);
     }
 
-    captureException(err);
+    // captureException(err);
   }
 
   /**

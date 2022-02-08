@@ -11,9 +11,13 @@ import { Category, Content } from '../../entity/content';
 
 import { BLUE, ORANGE, RED } from '../../constants/color';
 import { PREFIX } from '../../constants/command';
-import { ATTACHMENT_CONTENT_TYPE } from '../../constants/content';
 
-import { handleError, getCommands, getCommand } from '../utils';
+import {
+  handleError,
+  getCommands,
+  getCommand,
+  getSupportedContents,
+} from '../utils';
 import { Logger } from '../../utils/logger';
 
 import {
@@ -56,9 +60,12 @@ async function moderateContent(
     return;
   }
 
-  const contents: Content[] = [];
+  console.log(msg);
+
+  const contents: Content[] = getSupportedContents(msg);
+  /*
   msg.attachments.forEach(({ url, name, contentType }) => {
-    if (!!contentType && ATTACHMENT_CONTENT_TYPE.includes(contentType)) {
+    if (!!contentType && CONTENT_TYPE.includes(contentType)) {
       contents.push({
         type: contentType === 'image/gif' ? 'gif' : 'image',
         name: name || 'nsfw-attachment.jpg',
@@ -110,6 +117,7 @@ async function moderateContent(
       }
     }
   });
+  */
 
   if (contents.length === 0) {
     return;
@@ -146,6 +154,8 @@ async function moderateContent(
       if (isDev) {
         start = performance.now();
       }
+
+      console.log(type === 'gif');
 
       const categories =
         type === 'gif'

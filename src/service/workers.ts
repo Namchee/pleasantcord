@@ -1,4 +1,3 @@
-
 import * as tf from '@tensorflow/tfjs-node';
 
 import { NSFWJS, load } from 'nsfwjs';
@@ -18,10 +17,7 @@ let model: NSFWJS;
 
 const getModel = async () => {
   if (!model) {
-    const nsfwModel = await load(
-      'file://tfjs-models/',
-      { size: 299 },
-    );
+    const nsfwModel = await load('file://tfjs-models/', { size: 299 });
 
     model = nsfwModel;
   }

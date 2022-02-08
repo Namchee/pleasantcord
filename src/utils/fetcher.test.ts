@@ -65,13 +65,16 @@ describe('fetchContent', () => {
     const content = await fetcher.fetchContent('http://www.tenor.com/test');
 
     expect(spy).toHaveBeenCalledTimes(2);
+    expect(spy).toHaveBeenLastCalledWith('http://c.tenor.com/test.gif');
     expect(cheerioSpy).toHaveBeenCalledTimes(1);
     expect(content).toBeInstanceOf(Buffer);
   });
 
   it('shoud return a WebP Buffer', async () => {
     const spy = vi.spyOn(fetcher, 'fetchContent');
-    const content = await fetcher.fetchContent('http://www.google.com/test.webp');
+    const content = await fetcher.fetchContent(
+      'http://www.google.com/test.webp'
+    );
 
     expect(spy).toHaveBeenCalledTimes(1);
     expect(buffer).toHaveBeenCalledTimes(1);
