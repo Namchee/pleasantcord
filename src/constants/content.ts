@@ -12,4 +12,4 @@ export const CONTENT_TYPE = [
 export const CONTENT_EXTENSION = ['gif', 'jpeg', 'jpg', 'png', 'webp'];
 
 // List of supported GIF providers
-export const GIF_PROVIDER = ['tenor', 'giphy'];
+export const GIF_PROVIDER = ['tenor', 'giphy', 'gfycat'];

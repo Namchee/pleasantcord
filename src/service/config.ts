@@ -8,7 +8,7 @@ import type { Configuration } from './../entity/config';
 export class ConfigurationService {
   public constructor(
     public readonly cache: ConfigurationCache,
-    public readonly repository: ConfigurationRepository,
+    public readonly repository: ConfigurationRepository
   ) {}
 
   public async getConfig(id: string): Promise<Configuration | null> {

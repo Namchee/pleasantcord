@@ -154,8 +154,10 @@ export function getSupportedContents(msg: Message): Content[] {
     if (url) {
       const { pathname, host } = new URL(url);
 
-      // this is probably a GIF
+      // Override if the source is from known GIF provider
       if (GIF_PROVIDER.some(p => host.match(p))) {
+        url = url.replace('.mp4', '.gif');
+
         contents.push({
           type: 'gif',
           name: 'embed.gif',
