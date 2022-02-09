@@ -19,7 +19,7 @@ const fetchers = {
         const body = await response.text();
 
         const $ = cheerio.load(body);
-        let url = $('meta[property="og:url"]').first().attr()['content'];
+        let url = $('meta[property="og:image"]').first().attr()['content'];
 
         if (url.endsWith('.mp4')) {
           url = url.replace('.mp4', '.gif');
