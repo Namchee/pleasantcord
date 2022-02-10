@@ -83,7 +83,7 @@ async function classifyGIF(buffer: Buffer): Promise<Category[]> {
  * @returns {Promise<Category[]>} content labels, sorted
  * by descending accuracy
  */
-export const classify = async (source: string): Promise<Category[]> => {
+const classify = async (source: string): Promise<Category[]> => {
   const { mime, data } = await fetchContent(source);
 
   if (!SUPPORTED_CONTENTS.includes(mime)) {

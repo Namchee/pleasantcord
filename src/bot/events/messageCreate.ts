@@ -60,8 +60,6 @@ async function moderateContent(
     return;
   }
 
-  console.log(msg);
-
   const contents: Content[] = getSupportedContents(msg);
 
   if (contents.length === 0) {
