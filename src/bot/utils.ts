@@ -1,6 +1,5 @@
 import { readdirSync } from 'fs';
 import { resolve } from 'path';
-import { URL } from 'url';
 import { Constants, Message, MessageEmbed } from 'discord.js';
 
 import { Content } from '../entity/content';
@@ -11,11 +10,7 @@ import { Logger } from '../utils/logger';
 import { PERMISSION_ERRORS } from '../constants/error';
 import { RED } from '../constants/color';
 import { PREFIX } from '../constants/command';
-import {
-  CONTENT_EXTENSION,
-  CONTENT_TYPE,
-  GIF_PROVIDER,
-} from '../constants/content';
+import { CLASSIFIABLE_CONTENTS } from '../constants/content';
 
 // this cannot be tested at the moment. Context: https://github.com/vitest-dev/vitest/issues/110
 /* c8 ignore start */
@@ -141,70 +136,20 @@ export function getSupportedContents(msg: Message): Content[] {
   const contents: Content[] = [];
 
   msg.attachments.forEach(({ url, name, contentType }) => {
-    if (!!contentType && CONTENT_TYPE.includes(contentType)) {
+    if (!!contentType && CLASSIFIABLE_CONTENTS.includes(contentType)) {
       contents.push({
-        type: contentType === 'image/gif' ? 'gif' : 'image',
-        name: name || 'attachment.jpg',
+        name: name || 'attachment',
         url,
       });
     }
   });
 
-  msg.embeds.forEach(({ url, image, thumbnail }) => {
-    if (url) {
-      const { pathname, host } = new URL(url);
-
-      // Override if the source is from known GIF provider
-      if (GIF_PROVIDER.some(p => host.match(p))) {
-        url = url.replace('.mp4', '.gif');
-
-        contents.push({
-          type: 'gif',
-          name: 'embed.gif',
-          url: url,
-        });
-      } else {
-        // check the extensions
-        const extension = pathname.split('.').pop();
-
-        if (extension && CONTENT_EXTENSION.includes(extension)) {
-          const type = extension == 'gif' ? 'gif' : 'image';
-
-          contents.push({
-            type: type,
-            name: `embed.${type}`,
-            url: url,
-          });
-        }
-      }
-
-      return;
-    }
-
-    if (image) {
-      const { pathname } = new URL(image.url);
-      const extension = pathname.split('.').pop();
-
+  msg.embeds.forEach(({ url, image, video, thumbnail }) => {
+    if (url && (image || video || thumbnail)) {
       contents.push({
-        type: 'image',
-        name: `embed.${extension}`,
-        url: image.url,
+        name: 'embed-content',
+        url: url,
       });
-
-      return;
-    }
-
-    if (thumbnail) {
-      const { pathname } = new URL(thumbnail.url);
-      const extension = pathname.split('.').pop();
-
-      contents.push({
-        type: 'image',
-        name: `embed.${extension}`,
-        url: thumbnail.url,
-      });
-
-      return;
     }
   });
 

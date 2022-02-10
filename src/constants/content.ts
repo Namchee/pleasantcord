@@ -1,15 +1,17 @@
-// List of supported image files to be moderated when sent by attachments.
-// Should support all visual contents that also supported
-// by Discord.
-export const CONTENT_TYPE = [
+// List of classifiable content MIME types
+
+export const CLASSIFIABLE_CONTENTS = [
   'image/jpeg',
   'image/png',
   'image/webp',
   'image/gif',
 ];
 
-// List of supported content extensions
-export const CONTENT_EXTENSION = ['gif', 'jpeg', 'jpg', 'png', 'webp'];
-
-// List of supported GIF providers
-export const GIF_PROVIDER = ['tenor', 'giphy', 'gfycat'];
+// List of supported content MIME types
+// Should support all visual contents that also supported
+// by Discord.
+export const SUPPORTED_CONTENTS = [
+  ...CLASSIFIABLE_CONTENTS,
+  'video/mp4',
+  'video/webm',
+];

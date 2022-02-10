@@ -35,21 +35,19 @@ describe('Logger', () => {
       // empty
     });
 
-    Logger.getInstance().logBot(
-      new Error('foo bar'),
-    );
+    Logger.getInstance().logBot(new Error('foo bar'));
 
     expect(errorSpy).toHaveBeenCalledTimes(1);
     expect(errorSpy).toHaveBeenCalledWith(new Error('[bot]: foo bar'));
-    expect((captureException as MockedFunction<any>)).toHaveBeenCalledTimes(1);
-    expect((captureException as MockedFunction<any>)).toHaveBeenCalledWith(
-      new Error('[bot]: foo bar'),
+    expect(captureException as MockedFunction<any>).toHaveBeenCalledTimes(1);
+    expect(captureException as MockedFunction<any>).toHaveBeenCalledWith(
+      new Error('[bot]: foo bar')
     );
   });
 
   it('should be able to be closed', async () => {
     await Logger.getInstance().closeLogger();
 
-    expect((close as MockedFunction<any>)).toHaveBeenCalledTimes(1);
+    expect(close as MockedFunction<any>).toHaveBeenCalledTimes(1);
   });
 });

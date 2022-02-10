@@ -1,7 +1,7 @@
 import { performance } from 'perf_hooks';
 
 import { Message, MessageEmbed, TextChannel } from 'discord.js';
-import { ModuleThread, Pool, spawn, Worker } from 'threads';
+import { Pool, spawn, Worker, FunctionThread } from 'threads';
 import { QueuedTask } from 'threads/dist/master/pool-types';
 
 import { Classifier } from '../../service/workers';
@@ -63,61 +63,6 @@ async function moderateContent(
   console.log(msg);
 
   const contents: Content[] = getSupportedContents(msg);
-  /*
-  msg.attachments.forEach(({ url, name, contentType }) => {
-    if (!!contentType && CONTENT_TYPE.includes(contentType)) {
-      contents.push({
-        type: contentType === 'image/gif' ? 'gif' : 'image',
-        name: name || 'nsfw-attachment.jpg',
-        url,
-      });
-    }
-  });
-  // for unexplained reason, `type` is deprecated although it isn't
-  msg.embeds.forEach(({ type, url, image, video, thumbnail }) => {
-    switch (type) {
-      case 'image': {
-        contents.push({
-          type: 'image',
-          name: 'nsfw-embed.jpg',
-          url: url as string,
-        });
-
-        break;
-      }
-      case 'gifv': {
-        contents.push({
-          type: 'gif',
-          name: 'nsfw-embed.gif',
-          url: url as string,
-        });
-
-        break;
-      }
-      case 'rich': {
-        if (image) {
-          contents.push({
-            type: 'image',
-            name: 'nsfw-embed.jpg',
-            url: image.url,
-          });
-
-          break;
-        }
-
-        if (video && thumbnail) {
-          contents.push({
-            type: 'image',
-            name: 'nsfw-embed.jpg',
-            url: thumbnail.url,
-          });
-
-          break;
-        }
-      }
-    }
-  });
-  */
 
   if (contents.length === 0) {
     return;
@@ -144,10 +89,9 @@ async function moderateContent(
     );
   }
 
-  const tasks: QueuedTask<ModuleThread<Classifier>, ClassificationResult>[] =
-    [];
+  const tasks: QueuedTask<FunctionThread, ClassificationResult>[] = [];
 
-  contents.forEach(({ name, url, type }) => {
+  contents.forEach(({ name, url }) => {
     const classification = workers.queue(async classifier => {
       let start = 0;
 
@@ -155,12 +99,7 @@ async function moderateContent(
         start = performance.now();
       }
 
-      console.log(type === 'gif');
-
-      const categories =
-        type === 'gif'
-          ? await classifier.classifyGIF(url)
-          : await classifier.classifyImage(url);
+      const categories = await classifier(url);
 
       return {
         name,
@@ -174,6 +113,10 @@ async function moderateContent(
   });
 
   for await (const { name, source, categories, time } of tasks) {
+    if (!categories.length) {
+      continue;
+    }
+
     const isNSFW = categories.some(cat => {
       return (
         config.categories.includes(cat.name) && cat.accuracy >= config.accuracy
@@ -264,7 +207,7 @@ async function moderateContent(
             value: `${(time as number).toFixed(2)} ms`,
           },
         ],
-        color: '#2674C2',
+        color: BLUE,
       });
 
       promises.push(channel.send({ embeds: [devEmbed] }));

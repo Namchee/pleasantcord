@@ -6,7 +6,6 @@ export type Label = 'Drawing' | 'Hentai' | 'Porn' | 'Neutral' | 'Sexy';
  * Separated by content type.
  */
 export interface Content {
-  type: 'gif' | 'image';
   name: string;
   url: string;
 }
