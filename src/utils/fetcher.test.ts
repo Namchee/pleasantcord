@@ -26,6 +26,21 @@ vi.mock('sharp', () => {
   };
 });
 
+const fs = vi.fn(() => new Uint8Array());
+const run = vi.fn();
+
+vi.mock('@ffmpeg/ffmpeg', () => {
+  return {
+    createFFmpeg: () => {
+      return {
+        load: vi.fn(),
+        FS: fs,
+        run: run,
+      };
+    },
+  };
+});
+
 describe('fetchContent', () => {
   beforeAll(() => {
     contentServer.listen();
@@ -78,6 +93,18 @@ describe('fetchContent', () => {
 
     expect(mime).toBe('image/jpeg');
     expect(data).toBeInstanceOf(Buffer);
+  });
+
+  it('should return a GIF Buffer for video files', async () => {
+    const { mime, data } = await fetchContent(
+      'http://www.ganteng.com/video.mp4'
+    );
+
+    expect(mime).toBe('image/gif');
+    expect(data).toBeInstanceOf(Buffer);
+
+    expect(fs).toHaveBeenCalledTimes(2);
+    expect(run).toHaveBeenCalledTimes(1);
   });
 
   // simulate error by mocking cheerio

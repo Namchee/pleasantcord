@@ -37,6 +37,14 @@ export const handlers = [
     );
   }),
 
+  rest.get('http://www.ganteng.com/video.mp4', (req, res, ctx) => {
+    return res(
+      ctx.status(200),
+      ctx.set('Content-Type', 'video/mp4'),
+      ctx.body(Buffer.from('data:video/mp4;base64, loremipsumdolorsilamet'))
+    );
+  }),
+
   rest.get('http://www.tenor.com/test', (req, res, ctx) => {
     return res(
       ctx.status(200),
