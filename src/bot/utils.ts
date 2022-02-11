@@ -5,7 +5,7 @@ import { Constants, Message, MessageEmbed, TextChannel } from 'discord.js';
 import { Pool, spawn, FunctionThread, Worker } from 'threads';
 import { QueuedTask } from 'threads/dist/master/pool-types';
 
-import { Category, Content } from '../entity/content';
+import { Content } from '../entity/content';
 
 import {
   BotContext,
@@ -246,7 +246,7 @@ export async function moderateContent(
       continue;
     }
 
-    const isNSFW = categories.some(cat => {
+    const nsfwCategory = categories.find(cat => {
       return (
         config.categories.includes(cat.name) && cat.accuracy >= config.accuracy
       );
@@ -254,13 +254,9 @@ export async function moderateContent(
 
     const promises = [];
 
-    if (isNSFW) {
+    if (nsfwCategory) {
       // make sure that all queued tasks are killed
       tasks.forEach(t => t.cancel());
-
-      const category = categories.find(cat =>
-        config.categories.includes(cat.name)
-      ) as Category;
 
       const fields = [
         {
@@ -269,12 +265,12 @@ export async function moderateContent(
         },
         {
           name: 'Category',
-          value: category.name,
+          value: nsfwCategory.name,
           inline: true,
         },
         {
           name: 'Accuracy',
-          value: `${(category.accuracy * 100).toFixed(2)}%`,
+          value: `${(nsfwCategory.accuracy * 100).toFixed(2)}%`,
           inline: true,
         },
       ];
@@ -344,7 +340,7 @@ export async function moderateContent(
 
     await Promise.all(promises);
 
-    if (isNSFW) {
+    if (nsfwCategory) {
       break;
     }
   }
