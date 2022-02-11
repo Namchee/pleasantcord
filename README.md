@@ -66,23 +66,14 @@ Command | Description
 ### What's the default behavior of `pleasantcord`?
 
 By default, `pleasantcord` will classify any image contents as NSFW when it has `Hentai` or `Porn` label with more than 75% accuracy and delete it from any **text channel** that isn't configured to be a NSFW channel.
-### Can I use a custom moderation configuration for `pleasantcord`?
-
-For now, no you can't. In the future, it will be possible to configure the behavior yourself. Stay tuned!
 
 ### The GIF classification is so slow!
 
-We are aware of this issue. GIF classification is still a beta feature right now. We are looking to enhance the performance in future release.
+We are aware of this issue. We are looking to enhance the performance in future release.
 
 ### Animated `webp` and `png` throw errors!
 
-Discord cannot display them correctly, yet there's no way to distinguish them from normal non-animated one as they share the same header. Don't worry, we are aware of this and working to fix this issue.
-
-### `pleasantcord` doesn't work on Twitter's GIF
-
-Twitter's GIFs are actually sent as an MP4 video. Unfortunately, that kind of behavior made Twitter's GIFs are indistinguishable from actual video which possibly has gigantic size that *may* slow down the bot by *a lot* so we actually skipped Twitter's GIF (or any GIFs coming from rich embeds!).
-
-For now, the best of both worlds is simply checking the thumbnails for NSFW contents.
+Discord cannot display them correctly, yet there's no way to distinguish them from normal non-animated one as they share the same header.
 
 ### The classification is incorrect!
 
