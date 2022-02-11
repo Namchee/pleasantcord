@@ -1,9 +1,18 @@
 import { describe, it, afterEach, beforeEach, vi, expect } from 'vitest';
-import { Constants, MessageEmbed } from 'discord.js';
+import { Constants, Message, MessageEmbed } from 'discord.js';
 
-import { getCommand, handleError } from '@/bot/utils';
+import { getCommand, getSupportedContents, handleError } from '@/bot/utils';
 import { Logger } from '@/utils/logger';
 import { RED } from '@/constants/color';
+import { PLACEHOLDER_NAME } from '@/constants/content';
+
+// Disable threads in unit test
+vi.mock('threads', () => {
+  return {
+    Pool: vi.fn(),
+    Worker: vi.fn(),
+  };
+});
 
 class MockError extends Error {
   public constructor(message: string, public readonly code?: number) {
@@ -121,5 +130,109 @@ describe('getCommand', () => {
     const cmd = getCommand(msg);
 
     expect(cmd).toBe('help');
+  });
+});
+
+describe('getSupportedContents', () => {
+  it('should get all supported attachments', () => {
+    const msg = {
+      attachments: new Map([
+        [
+          '123',
+          {
+            url: 'foo',
+            name: 'bar',
+            contentType: 'image/jpeg',
+          },
+        ],
+        [
+          '233',
+          {
+            url: 'lorem',
+            name: 'ipsum',
+            contentType: 'image/png',
+          },
+        ],
+        [
+          '42352345',
+          {
+            url: 'a',
+            name: 'b',
+            contentType: 'video/mkv',
+          },
+        ],
+        [
+          '234312412341234',
+          {
+            url: 'c',
+            name: 'd',
+            contentType: '',
+          },
+        ],
+      ]),
+      embeds: [],
+    } as unknown as Message;
+
+    const contents = getSupportedContents(msg);
+
+    expect(contents.length).toBe(2);
+    expect(contents).toContainEqual({
+      name: 'bar',
+      url: 'foo',
+    });
+    expect(contents).toContainEqual({
+      name: 'ipsum',
+      url: 'lorem',
+    });
+  });
+
+  it('should get all supported embeds', () => {
+    const msg = {
+      embeds: [
+        new MessageEmbed({
+          video: {
+            url: 'foo',
+          },
+          image: {
+            url: 'wrong',
+          },
+        }),
+        new MessageEmbed({
+          image: {
+            url: 'bar',
+          },
+        }),
+        new MessageEmbed({
+          thumbnail: {
+            url: 'baz',
+          },
+        }),
+        new MessageEmbed({
+          url: 'caz',
+        }),
+        new MessageEmbed(),
+      ],
+      attachments: new Map(),
+    } as unknown as Message;
+
+    const contents = getSupportedContents(msg);
+
+    expect(contents.length).toBe(4);
+    expect(contents).toContainEqual({
+      name: PLACEHOLDER_NAME,
+      url: 'foo',
+    });
+    expect(contents).toContainEqual({
+      name: PLACEHOLDER_NAME,
+      url: 'bar',
+    });
+    expect(contents).toContainEqual({
+      name: PLACEHOLDER_NAME,
+      url: 'baz',
+    });
+    expect(contents).toContainEqual({
+      name: PLACEHOLDER_NAME,
+      url: 'caz',
+    });
   });
 });

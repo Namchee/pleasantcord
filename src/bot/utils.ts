@@ -25,7 +25,7 @@ import { CLASSIFIABLE_CONTENTS, PLACEHOLDER_NAME } from '../constants/content';
 
 import { Logger } from '../utils/logger';
 
-const workers = Pool(() => spawn<Classifier>(new Worker(`../service/workers`)));
+const workers = Pool(() => spawn<Classifier>(new Worker('../service/workers')));
 
 // this cannot be tested at the moment. Context: https://github.com/vitest-dev/vitest/issues/110
 /* c8 ignore start */
@@ -164,7 +164,7 @@ export function getSupportedContents(msg: Message): Content[] {
 
     if (contentUrl) {
       contents.push({
-        name: 'embed-content',
+        name: PLACEHOLDER_NAME,
         url: contentUrl,
       });
     }
