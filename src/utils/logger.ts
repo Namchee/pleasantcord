@@ -13,9 +13,8 @@ export class Logger {
     init({
       dsn,
       sampleRate: 0.75,
-      environment: process.env.NODE_ENV === 'development' ?
-        'development' :
-        'production',
+      environment:
+        process.env.NODE_ENV === 'development' ? 'development' : 'production',
     });
   }
 
@@ -44,7 +43,7 @@ export class Logger {
    * @param {Error} err error object
    */
   private captureError(err: Error): void {
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV !== 'production') {
       // note to self: stop removing stacktraces!
       console.error(err);
     }

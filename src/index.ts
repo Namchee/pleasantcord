@@ -35,7 +35,7 @@ if (process.env.NODE_ENV === 'development') {
 
   const repository = new CloudflareConfigurationRepository(
     `${apiUrl}/api`,
-    apiKey,
+    apiKey
   );
   const cache = new LocalConfigurationCache(configCache);
   const rateLimiter = new LocalRateLimiter(rateLimitStore);
@@ -49,13 +49,13 @@ if (process.env.NODE_ENV === 'development') {
     await Logger.getInstance().closeLogger();
   };
 
-  process.on('uncaughtException', async (err) => {
+  process.on('uncaughtException', async err => {
     Logger.getInstance().logBot(err);
     await cleanup();
     process.exit(1);
   });
 
-  process.on('unhandledRejection', async (reason) => {
+  process.on('unhandledRejection', async reason => {
     Logger.getInstance().logBot(reason as Error);
     await cleanup();
     process.exit(1);

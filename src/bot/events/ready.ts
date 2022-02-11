@@ -5,15 +5,13 @@ export default {
   event: 'ready',
   once: true,
   fn: async ({ client, service }: BotContext): Promise<void> => {
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV !== 'production') {
       console.log(`pleasantcord is now ready to moderate servers`);
     }
 
     try {
       // set required authentication data
-      service.repository.setBotId(
-        client.user?.id as string,
-      );
+      service.repository.setBotId(client.user?.id as string);
 
       client.user?.setPresence({
         status: 'online',

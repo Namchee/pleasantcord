@@ -1,5 +1,7 @@
 import { Message, MessageEmbed } from 'discord.js';
 
+import { BLUE, ORANGE } from '../../constants/color';
+
 import { BotContext } from '../types';
 
 export default {
@@ -11,9 +13,7 @@ export default {
     const config = await service.getConfig(guild?.id as string);
 
     if (!config) {
-      throw new Error(
-        `Failed to get configuration for server ${msg.guildId}`,
-      );
+      throw new Error(`Failed to get configuration for server ${msg.guildId}`);
     }
 
     const embed = new MessageEmbed({
@@ -37,12 +37,11 @@ export default {
         },
         {
           name: 'Dashboard Link',
-          value: '[https://pleasantcord.namchee.dev](https://pleasantcord.namchee.dev)',
+          value:
+            '[https://pleasantcord.namchee.dev](https://pleasantcord.namchee.dev)',
         },
       ],
-      color: process.env.NODE_ENV === 'development' ?
-        '#2674C2' :
-        '#FF9B05',
+      color: process.env.NODE_ENV === 'development' ? BLUE : ORANGE,
     });
 
     return channel.send({ embeds: [embed] });

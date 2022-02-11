@@ -1,7 +1,9 @@
 import { Message, MessageEmbed } from 'discord.js';
 
-import { BotContext, CommandHandler } from '../types';
+import { BLUE, ORANGE } from '../../constants/color';
 import { getCommands } from '../utils';
+
+import type { BotContext, CommandHandler } from '../types';
 
 export default {
   command: 'help',
@@ -39,9 +41,7 @@ export default {
           value: `You can contribute to \`pleasantcord\`'s development on [GitHub](https://github.com/Namchee/pleasantcord)`,
         },
       ],
-      color: process.env.NODE_ENV === 'development' ?
-        '#2674C2' :
-        '#FFA31A',
+      color: process.env.NODE_ENV === 'development' ? BLUE : ORANGE,
     });
 
     return channel.send({ embeds: [embed] });
