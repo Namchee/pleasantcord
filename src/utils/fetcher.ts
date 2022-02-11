@@ -80,9 +80,16 @@ async function extractImageFromHTML(response: Response): Promise<ContentData> {
   const body = await response.text();
 
   const $ = cheerio.load(body);
-  const url = $('meta[property="og:image"]').first().attr()['content'];
+  const url = $('meta[property="og:image"]').first().attr();
 
-  return fetchContent(url);
+  if (url) {
+    return fetchContent(url['content']);
+  }
+
+  return {
+    mime: '',
+    data: Buffer.from(''),
+  };
 }
 
 /**
