@@ -1,5 +1,7 @@
 import { Message, MessageEmbed } from 'discord.js';
 
+import { BLUE, ORANGE } from '../../constants/color';
+
 import { BotContext } from '../types';
 
 export default {
@@ -39,7 +41,7 @@ export default {
             '[https://pleasantcord.namchee.dev](https://pleasantcord.namchee.dev)',
         },
       ],
-      color: process.env.NODE_ENV === 'development' ? '#2674C2' : '#FF9B05',
+      color: process.env.NODE_ENV === 'development' ? BLUE : ORANGE,
     });
 
     return channel.send({ embeds: [embed] });
