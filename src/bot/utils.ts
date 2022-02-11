@@ -310,7 +310,7 @@ export async function moderateContent(
         promises.push(channel.send({ files }));
       }
 
-      if (msg.deletable && !msg.deleted) {
+      if (msg.deletable) {
         promises.push(msg.delete());
       }
     }
