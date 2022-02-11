@@ -15,3 +15,6 @@ export const SUPPORTED_CONTENTS = [
   'video/mp4',
   'video/webm',
 ];
+
+// Placeholder name for those who doesn't have it
+export const PLACEHOLDER_NAME = 'content';

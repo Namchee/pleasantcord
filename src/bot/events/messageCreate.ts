@@ -34,8 +34,6 @@ export default {
         return;
       }
 
-      console.log(msg);
-
       if (msg.content.startsWith(PREFIX)) {
         const commandHandler = commandMap[getCommand(msg.content)];
 

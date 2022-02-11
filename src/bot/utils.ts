@@ -21,7 +21,7 @@ import { BASE_CONFIG } from './../entity/config';
 import { PERMISSION_ERRORS } from '../constants/error';
 import { BLUE, ORANGE, RED } from '../constants/color';
 import { PREFIX } from '../constants/command';
-import { CLASSIFIABLE_CONTENTS } from '../constants/content';
+import { CLASSIFIABLE_CONTENTS, PLACEHOLDER_NAME } from '../constants/content';
 
 import { Logger } from '../utils/logger';
 
@@ -153,17 +153,19 @@ export function getSupportedContents(msg: Message): Content[] {
   msg.attachments.forEach(({ url, name, contentType }) => {
     if (!!contentType && CLASSIFIABLE_CONTENTS.includes(contentType)) {
       contents.push({
-        name: name || 'attachment',
+        name: name || PLACEHOLDER_NAME,
         url,
       });
     }
   });
 
   msg.embeds.forEach(({ url, image, video, thumbnail }) => {
-    if (url && (image || video || thumbnail)) {
+    const contentUrl = video?.url || image?.url || thumbnail?.url || url || '';
+
+    if (contentUrl) {
       contents.push({
         name: 'embed-content',
-        url: url,
+        url: contentUrl,
       });
     }
   });
