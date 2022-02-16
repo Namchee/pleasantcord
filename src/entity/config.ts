@@ -1,6 +1,6 @@
 import { Label } from '../entity/content';
 
-type ModelType = 'MobileNet' | 'Inception';
+export type ModelType = 'MobileNet' | 'Inception';
 
 // pleasantcord's server configuration. Unique per server.
 export interface Configuration {

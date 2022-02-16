@@ -228,7 +228,7 @@ export async function moderateContent(
         start = performance.now();
       }
 
-      const categories = await classifier(url);
+      const categories = await classifier(url, config.model);
 
       return {
         name,
@@ -330,6 +330,10 @@ export async function moderateContent(
           {
             name: 'Elapsed Time',
             value: `${(time as number).toFixed(2)} ms`,
+          },
+          {
+            name: 'Model',
+            value: config.model,
           },
         ],
         color: BLUE,
