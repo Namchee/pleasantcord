@@ -23,7 +23,9 @@ let model: NSFWJS;
  */
 async function getModel(): Promise<NSFWJS> {
   if (!model) {
-    const nsfwModel = await load('file://tfjs-models/', { size: 299 });
+    const nsfwModel = await load('file://tfjs-models/inception/', {
+      size: 299,
+    });
 
     model = nsfwModel;
   }
