@@ -80,4 +80,23 @@ export const handlers = [
       ctx.body(Buffer.from('data:image/webp;base64, loremipsumdolorsilamet'))
     );
   }),
+
+  rest.get('http://www.test.com/unsupported', (req, res, ctx) => {
+    return res(
+      ctx.status(200),
+      ctx.set('Content-Type', 'text/html'),
+      ctx.body(`<!DOCTYPE html>
+      <html lang="en">
+      <head>
+          <meta charset="UTF-8">
+          <meta http-equiv="X-UA-Compatible" content="IE=edge">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Definitely Unsupported</title>
+      </head>
+      <body>
+          
+      </body>
+      </html>`)
+    );
+  }),
 ];

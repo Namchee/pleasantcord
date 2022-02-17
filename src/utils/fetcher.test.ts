@@ -107,6 +107,19 @@ describe('fetchContent', () => {
     expect(run).toHaveBeenCalledTimes(1);
   });
 
+  it('should not return anything if content is not supported', async () => {
+    const cheerioSpy = vi.spyOn(cheerio, 'load');
+
+    const { mime, data } = await fetchContent(
+      'http://www.test.com/unsupported'
+    );
+
+    expect(mime).toBe('');
+    expect(data).toBeInstanceOf(Buffer);
+
+    expect(cheerioSpy).toHaveBeenCalledTimes(1);
+  });
+
   // simulate error by mocking cheerio
   it('should throw an error', async () => {
     const cheerioSpy = vi.spyOn(cheerio, 'load');

@@ -28,12 +28,18 @@ export default {
           value: `${(config?.accuracy * 100).toFixed(2)}%`,
         },
         {
-          name: 'NSFW Categories',
+          name: 'Categories',
           value: config.categories.join('\n'),
+          inline: true,
         },
         {
-          name: 'Delete NSFW Contents',
-          value: config.delete ? 'Yes' : 'No',
+          name: 'Action',
+          value: config.delete ? 'Delete' : 'Blur',
+          inline: true,
+        },
+        {
+          name: 'Model',
+          value: config.model,
         },
         {
           name: 'Dashboard Link',
