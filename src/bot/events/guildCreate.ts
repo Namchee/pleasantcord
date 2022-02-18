@@ -7,7 +7,7 @@ import type { BotContext } from './../types';
 
 export default {
   event: 'guildCreate',
-  fn: async ({ service }: BotContext, guild: Guild): Promise<void> => {
+  fn: async ({ client, service }: BotContext, guild: Guild): Promise<void> => {
     try {
       // create guild config when the bot enters a guild.
       await service.createConfig(guild.id, BASE_CONFIG);
