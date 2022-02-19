@@ -1,4 +1,11 @@
-import { Client, ClientEvents, Message } from 'discord.js';
+import {
+  Client,
+  ClientEvents,
+  Guild,
+  Message,
+  MessageEmbed,
+  TextChannel,
+} from 'discord.js';
 
 import { ConfigurationService } from '../service/config';
 import { RateLimiter } from '../service/rate-limit';
@@ -18,15 +25,23 @@ export interface EventHandler {
   fn: (ctx: BotContext) => Promise<void>;
 }
 
+// Required parameters for command handlers
+export interface CommandHandlerParams {
+  guild: Guild;
+  channel: TextChannel;
+  timestamp: number;
+}
+
 /**
  * Command handler function.
  * Used in `messageCreate` event when the message
- * is prefixed with `pc!` with the correct command.
+ * is prefixed with `pc!` with the correct command OR
+ * on `interactionCreate` with slash commands
  */
 export type CommandHandlerFunction = (
   ctx: BotContext,
-  msg: Message
-) => Promise<void>;
+  params: CommandHandlerParams
+) => Promise<MessageEmbed>;
 
 /**
  * Command handler.

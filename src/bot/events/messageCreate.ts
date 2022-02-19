@@ -1,6 +1,5 @@
-import { Message, MessageEmbed } from 'discord.js';
+import { Message, MessageEmbed, TextChannel } from 'discord.js';
 
-import { RED } from '../../constants/color';
 import { PREFIX } from '../../constants/command';
 
 import {
@@ -10,7 +9,13 @@ import {
   moderateContent,
 } from '../utils';
 
-import { CommandHandler, BotContext, CommandHandlerFunction } from '../types';
+import {
+  CommandHandler,
+  BotContext,
+  CommandHandlerFunction,
+  CommandHandlerParams,
+} from '../types';
+import { UNKNOWN_COMMAND_EMBED } from '@/constants/embeds';
 
 /**
  * Get all available commands from command files and
@@ -36,24 +41,18 @@ export default {
 
       if (msg.content.startsWith(PREFIX)) {
         const commandHandler = commandMap[getCommand(msg.content)];
+        let embed: MessageEmbed = UNKNOWN_COMMAND_EMBED;
 
         if (commandHandler) {
-          return commandHandler(ctx, msg);
+          const params: CommandHandlerParams = {
+            guild: msg.guild,
+            channel: msg.channel as TextChannel,
+            timestamp: msg.createdTimestamp,
+          };
+          embed = await commandHandler(ctx, params);
         }
 
-        const unknownEmbed = new MessageEmbed({
-          author: {
-            name: 'pleasantcord',
-            iconURL: process.env.IMAGE_URL,
-          },
-          color: RED,
-          title: 'Unknown Command',
-          description:
-            // eslint-disable-next-line max-len
-            `**pleasantcord** doesn't recognize the command that have been just sent.\nPlease refer to **${PREFIX}help** to show all available **pleasantcords's** commands.`,
-        });
-
-        return msg.channel.send({ embeds: [unknownEmbed] });
+        return msg.channel.send({ embeds: [embed] });
       }
 
       return moderateContent(ctx, msg);
