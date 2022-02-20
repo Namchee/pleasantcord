@@ -1,6 +1,8 @@
 import { Message } from 'discord.js';
 
-import { handleError, moderateContent } from '../utils';
+import { moderateContent } from '../service/classifier';
+
+import { handleError } from '../utils';
 
 import { BotContext } from '../types';
 

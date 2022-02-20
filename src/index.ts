@@ -2,15 +2,20 @@ import { config } from 'dotenv';
 
 import NodeCache from 'node-cache';
 
-import { Logger } from './utils/logger';
 import { bootstrapBot } from './bot';
+import { workers } from './bot/service/classifier';
+
+import { ConfigurationService } from './service/config';
+import { LocalRateLimiter } from './service/rate-limit';
+
 import {
   CloudflareConfigurationRepository,
   LocalConfigurationCache,
 } from './repository/config';
+
+import { Logger } from './utils/logger';
+
 import { FIVE_MINUTES, THREE_SECONDS } from './constants/time';
-import { ConfigurationService } from './service/config';
-import { LocalRateLimiter } from './service/rate-limit';
 
 if (process.env.NODE_ENV === 'development') {
   config();
@@ -46,6 +51,7 @@ if (process.env.NODE_ENV === 'development') {
 
   const cleanup = async (): Promise<void> => {
     client.destroy();
+    workers.terminate();
     await Logger.getInstance().closeLogger();
   };
 

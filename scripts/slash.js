@@ -23,15 +23,9 @@ if (!process.env.DISCORD_TOKEN || !process.env.DISCORD_ID) {
 
     const rest = new REST({ version: '9' }).setToken(process.env.DISCORD_TOKEN);
 
-    await rest.put(
-      Routes.applicationGuildCommands(
-        process.env.DISCORD_ID,
-        '871723788599980084'
-      ),
-      {
-        body: commands,
-      }
-    );
+    await rest.put(Routes.applicationCommands(process.env.DISCORD_ID), {
+      body: commands,
+    });
 
     console.log('Command has been registered successfully');
   } catch (err) {

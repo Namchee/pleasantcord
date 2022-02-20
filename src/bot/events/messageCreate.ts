@@ -1,11 +1,8 @@
 import { Message, MessageEmbed, TextChannel } from 'discord.js';
 
-import {
-  handleError,
-  getMessageCommand,
-  moderateContent,
-  getCommandMap,
-} from '../utils';
+import { moderateContent } from '../service/classifier';
+
+import { handleError, getMessageCommand, getCommandMap } from '../utils';
 
 import { BotContext, CommandHandlerParams } from '../types';
 
