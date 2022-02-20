@@ -11,6 +11,7 @@ import {
   BotContext,
   ClassificationResult,
   CommandHandler,
+  CommandHandlerFunction,
   EventHandler,
 } from './types';
 
@@ -32,6 +33,7 @@ const workers = Pool(() => spawn<Classifier>(new Worker('../service/workers')));
 
 // cache this
 let commandList: CommandHandler[];
+let commandMap: Record<string, CommandHandlerFunction>;
 
 /**
  * Get all available commands from command files.
@@ -57,6 +59,24 @@ export function getCommands(): CommandHandler[] {
   }
 
   return commandList;
+}
+
+/**
+ * Get command map for user interaction.
+ *
+ * @returns {Record<string, CommandHandlerFunction>} mapped commands
+ */
+export function getCommandMap(): Record<string, CommandHandlerFunction> {
+  if (!commandMap) {
+    const commands = getCommands();
+    commandMap = {};
+
+    commands.forEach((handler: CommandHandler) => {
+      commandMap[handler.command] = handler.fn;
+    });
+  }
+
+  return commandMap;
 }
 
 /**
@@ -137,7 +157,7 @@ export function handleError(err: Error): MessageEmbed | null {
  * @param {string} msg user message
  * @returns {string} command name
  */
-export function getCommand(msg: string): string {
+export function getMessageCommand(msg: string): string {
   return msg.slice(PREFIX.length).trim().split(/ +/)[0];
 }
 

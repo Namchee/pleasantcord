@@ -2,31 +2,15 @@ import { Message, MessageEmbed, TextChannel } from 'discord.js';
 
 import {
   handleError,
-  getCommands,
-  getCommand,
+  getMessageCommand,
   moderateContent,
+  getCommandMap,
 } from '../utils';
 
-import {
-  CommandHandler,
-  BotContext,
-  CommandHandlerFunction,
-  CommandHandlerParams,
-} from '../types';
+import { BotContext, CommandHandlerParams } from '../types';
 
 import { PREFIX } from '../../constants/command';
 import { UNKNOWN_COMMAND_EMBED } from '../../constants/embeds';
-
-/**
- * Get all available commands from command files and
- * register all commands to a simple object map.
- */
-const commandMap: Record<string, CommandHandlerFunction> = {};
-const commandHandlers = getCommands();
-
-commandHandlers.forEach((handler: CommandHandler) => {
-  commandMap[handler.command] = handler.fn;
-});
 
 export default {
   event: 'messageCreate',
@@ -40,16 +24,17 @@ export default {
       }
 
       if (msg.content.startsWith(PREFIX)) {
-        const commandHandler = commandMap[getCommand(msg.content)];
+        const commandMap = getCommandMap();
+        const handler = commandMap[getMessageCommand(msg.content)];
         let embed: MessageEmbed = UNKNOWN_COMMAND_EMBED;
 
-        if (commandHandler) {
+        if (handler) {
           const params: CommandHandlerParams = {
             guild: msg.guild,
             channel: msg.channel as TextChannel,
             timestamp: msg.createdTimestamp,
           };
-          embed = await commandHandler(ctx, params);
+          embed = await handler(ctx, params);
         }
 
         return msg.channel.send({ embeds: [embed] });
