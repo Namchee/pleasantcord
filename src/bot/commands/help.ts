@@ -1,22 +1,21 @@
-import { Message, MessageEmbed } from 'discord.js';
+import { MessageEmbed } from 'discord.js';
 
-import { BLUE, ORANGE } from '../../constants/color';
 import { getCommands } from '../utils';
 
-import type { BotContext, CommandHandler } from '../types';
+import { BLUE, ORANGE } from '../../constants/color';
+
+import type { CommandHandler } from '../types';
 
 export default {
   command: 'help',
   description: 'Show the help message',
-  fn: (_: BotContext, msg: Message): Promise<Message> => {
-    const { channel } = msg;
-
+  fn: async (): Promise<MessageEmbed> => {
     const rawCommands = getCommands();
     const commands = rawCommands.map((command: CommandHandler) => {
       return `\`pc!${command.command}\` — ${command.description}`;
     });
 
-    const embed = new MessageEmbed({
+    return new MessageEmbed({
       author: {
         name: 'pleasantcord',
         iconURL: process.env.IMAGE_URL,
@@ -43,7 +42,5 @@ export default {
       ],
       color: process.env.NODE_ENV === 'development' ? BLUE : ORANGE,
     });
-
-    return channel.send({ embeds: [embed] });
   },
 };

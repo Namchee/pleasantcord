@@ -5,4 +5,5 @@ module.exports = {
   arrowParens: 'avoid',
   parser: 'typescript',
   endOfLine: 'auto',
+  tabWidth: 2,
 };

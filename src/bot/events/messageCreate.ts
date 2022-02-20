@@ -1,27 +1,13 @@
-import { Message, MessageEmbed } from 'discord.js';
+import { Message, MessageEmbed, TextChannel } from 'discord.js';
 
-import { RED } from '../../constants/color';
+import { moderateContent } from '../service/classifier';
+
+import { handleError, getMessageCommand, getCommandMap } from '../utils';
+
+import { BotContext, CommandHandlerParams } from '../types';
+
 import { PREFIX } from '../../constants/command';
-
-import {
-  handleError,
-  getCommands,
-  getCommand,
-  moderateContent,
-} from '../utils';
-
-import { CommandHandler, BotContext, CommandHandlerFunction } from '../types';
-
-/**
- * Get all available commands from command files and
- * register all commands to a simple object map.
- */
-const commandMap: Record<string, CommandHandlerFunction> = {};
-const commandHandlers = getCommands();
-
-commandHandlers.forEach((handler: CommandHandler) => {
-  commandMap[handler.command] = handler.fn;
-});
+import { UNKNOWN_COMMAND_EMBED } from '../../constants/embeds';
 
 export default {
   event: 'messageCreate',
@@ -35,25 +21,20 @@ export default {
       }
 
       if (msg.content.startsWith(PREFIX)) {
-        const commandHandler = commandMap[getCommand(msg.content)];
+        const commandMap = getCommandMap();
+        const handler = commandMap[getMessageCommand(msg.content)];
+        let embed: MessageEmbed = UNKNOWN_COMMAND_EMBED;
 
-        if (commandHandler) {
-          return commandHandler(ctx, msg);
+        if (handler) {
+          const params: CommandHandlerParams = {
+            guild: msg.guild,
+            channel: msg.channel as TextChannel,
+            timestamp: msg.createdTimestamp,
+          };
+          embed = await handler(ctx, params);
         }
 
-        const unknownEmbed = new MessageEmbed({
-          author: {
-            name: 'pleasantcord',
-            iconURL: process.env.IMAGE_URL,
-          },
-          color: RED,
-          title: 'Unknown Command',
-          description:
-            // eslint-disable-next-line max-len
-            `**pleasantcord** doesn't recognize the command that have been just sent.\nPlease refer to **${PREFIX}help** to show all available **pleasantcords's** commands.`,
-        });
-
-        return msg.channel.send({ embeds: [unknownEmbed] });
+        return msg.channel.send({ embeds: [embed] });
       }
 
       return moderateContent(ctx, msg);

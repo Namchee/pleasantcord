@@ -1,7 +1,7 @@
 import { resolve } from 'path';
-import { Message, MessageEmbed } from 'discord.js';
+import { MessageEmbed } from 'discord.js';
 
-import { BotContext } from '../types';
+import { BotContext, CommandHandlerParams } from '../types';
 import { BLUE, ORANGE } from '../../constants/color';
 
 const packageInfo = require(resolve(process.cwd(), 'package.json'));
@@ -9,8 +9,11 @@ const packageInfo = require(resolve(process.cwd(), 'package.json'));
 export default {
   command: 'status',
   description: 'Show the bot status',
-  fn: async ({ client }: BotContext, msg: Message): Promise<Message> => {
-    const time = Date.now() - msg.createdTimestamp;
+  fn: async (
+    { client }: BotContext,
+    { timestamp }: CommandHandlerParams
+  ): Promise<MessageEmbed> => {
+    const time = Date.now() - timestamp;
 
     let packageVersion: string = packageInfo.dependencies['discord.js'];
 
@@ -39,7 +42,7 @@ export default {
       },
     ];
 
-    const embed: MessageEmbed = new MessageEmbed({
+    return new MessageEmbed({
       author: {
         name: 'pleasantcord',
         iconURL: process.env.IMAGE_URL,
@@ -48,7 +51,5 @@ export default {
       fields,
       color: process.env.NODE_ENV === 'development' ? BLUE : ORANGE,
     });
-
-    return msg.channel.send({ embeds: [embed] });
   },
 };

@@ -1,7 +1,11 @@
 import { describe, it, afterEach, beforeEach, vi, expect } from 'vitest';
 import { Constants, Message, MessageEmbed } from 'discord.js';
 
-import { getCommand, getSupportedContents, handleError } from '@/bot/utils';
+import {
+  getMessageCommand,
+  getSupportedContents,
+  handleError,
+} from '@/bot/utils';
 import { Logger } from '@/utils/logger';
 import { RED } from '@/constants/color';
 import { PLACEHOLDER_NAME } from '@/constants/content';
@@ -120,14 +124,14 @@ describe('handleError', () => {
 describe('getCommand', () => {
   it('should return actual command', () => {
     const msg = 'pc!help';
-    const cmd = getCommand(msg);
+    const cmd = getMessageCommand(msg);
 
     expect(cmd).toBe('help');
   });
 
   it('should get the first argument only', () => {
     const msg = 'pc!help lorem ipsum';
-    const cmd = getCommand(msg);
+    const cmd = getMessageCommand(msg);
 
     expect(cmd).toBe('help');
   });

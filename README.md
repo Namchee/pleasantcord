@@ -41,7 +41,7 @@ This bot aims to fix that by automatically detecting potential NSFW images and a
 
 ## Installation
 
-Invite this bot to your server by clicking [this link](https://discord.com/api/oauth2/authorize?client_id=750668307555942482&permissions=10240&scope=bot).
+Invite this bot to your server by clicking [this link](https://discord.com/api/oauth2/authorize?client_id=750668307555942482&permissions=10240&scope=applications.commands%20bot).
 
 The bot itself requires the following permission in your server, make sure that the bot has **all** the permissions below:
 
