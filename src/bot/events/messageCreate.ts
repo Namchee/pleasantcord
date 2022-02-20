@@ -1,7 +1,5 @@
 import { Message, MessageEmbed, TextChannel } from 'discord.js';
 
-import { PREFIX } from '../../constants/command';
-
 import {
   handleError,
   getCommands,
@@ -15,7 +13,9 @@ import {
   CommandHandlerFunction,
   CommandHandlerParams,
 } from '../types';
-import { UNKNOWN_COMMAND_EMBED } from '@/constants/embeds';
+
+import { PREFIX } from '../../constants/command';
+import { UNKNOWN_COMMAND_EMBED } from '../../constants/embeds';
 
 /**
  * Get all available commands from command files and
