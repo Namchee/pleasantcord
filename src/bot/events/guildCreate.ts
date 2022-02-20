@@ -1,10 +1,14 @@
 import { Guild, MessageEmbed, TextChannel } from 'discord.js';
 
+import { Credentials, registerSlashCommands } from '../service/command';
+
 import { BASE_CONFIG } from './../../entity/config';
+
 import { handleError } from './../utils';
 
 import type { BotContext } from './../types';
-import { Credentials, registerSlashCommands } from '../service/command';
+
+import { DEFAULT_CHANNEL } from './../../constants/channel';
 
 export default {
   event: 'guildCreate',
@@ -23,7 +27,7 @@ export default {
       const embed = handleError(err as Error) as MessageEmbed;
 
       const defaultChannel = guild.channels.cache.find(
-        chan => chan.name.toLowerCase() === 'general'
+        chan => chan.name.toLowerCase() === DEFAULT_CHANNEL
       ) as TextChannel;
 
       await defaultChannel.send({ embeds: [embed] });
