@@ -9,6 +9,7 @@ import {
 import { Logger } from '@/utils/logger';
 import { RED } from '@/constants/color';
 import { PLACEHOLDER_NAME } from '@/constants/content';
+import { RecoverableError } from '@/exceptions/recoverable';
 
 // Disable threads in unit test
 vi.mock('threads', () => {
@@ -54,8 +55,28 @@ describe('handleError', () => {
     expect(err?.color).toBe(colorCode);
     expect(err?.title).toBe('Ouch!');
     expect(err?.description).toBe(
-      "Unfortunately, `pleasantcord` has encountered an unexpected error. Don't worry, the error has been reported to the system and will be resolved as soon as possible.\n\nIf this issue persists, please submit an issue to [GitHub](https://github.com/Namchee/pleasantcord/issues) or join [our support server](https://discord.gg/Pj4aGp8Aky) and submit your bug report on the appropriate channel."
+      'Unfortunately, `pleasantcord` has encountered an unexpected error. The error has been reported to the system and will be resolved as soon as possible.\n\nIf this issue persists, please submit an issue to [GitHub](https://github.com/Namchee/pleasantcord/issues) or join [our support server](https://discord.gg/Pj4aGp8Aky) and submit your bug report on the appropriate channel.'
     );
+  });
+
+  it('should handle recoverable errors', () => {
+    const loggerSpy = vi.spyOn(Logger.getInstance(), 'logBot');
+    loggerSpy.mockImplementationOnce(() => vi.fn());
+
+    const error = new RecoverableError('Hey, this error can easily be solved!');
+
+    const err = handleError(error);
+
+    const colorCode = parseInt(RED.slice(1), 16);
+
+    expect(loggerSpy).toHaveBeenCalledTimes(1);
+    expect(loggerSpy).toHaveBeenCalledWith(error);
+    expect(err).toBeInstanceOf(MessageEmbed);
+    expect(err?.author?.name).toBe('pleasantcord');
+    expect(err?.author?.iconURL).toBe(url);
+    expect(err?.color).toBe(colorCode);
+    expect(err?.title).toBe('Ouch!');
+    expect(err?.description).toBe('Hey, this error can easily be solved!');
   });
 
   it('should ignore message deletion error', () => {
