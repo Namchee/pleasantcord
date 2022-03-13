@@ -14,8 +14,6 @@ import { ModelType } from './../entity/config';
 import { sortCategories } from './../entity/content';
 import type { Category } from './../entity/content';
 
-import { SUPPORTED_CONTENTS } from './../constants/content';
-
 let mobilenet: NSFWJS;
 let inception: NSFWJS;
 
@@ -129,16 +127,18 @@ async function classifyGIF(
  *
  * @param {string} source content URL
  * @param {ModelType} model NSFW model to be used
+ * @param {string[]} content targeted content MIME types
  * @returns {Promise<Category[]>} content labels, sorted
  * by descending accuracy
  */
 const classify = async (
   source: string,
-  model: ModelType
+  model: ModelType,
+  content: string[]
 ): Promise<Category[]> => {
   const { mime, data } = await fetchContent(source);
 
-  if (!SUPPORTED_CONTENTS.includes(mime)) {
+  if (!content.includes(mime)) {
     return [];
   }
 
@@ -149,7 +149,8 @@ const classify = async (
 
 export type Classifier = (
   source: string,
-  model: ModelType
+  model: ModelType,
+  content: string[]
 ) => Promise<Category[]>;
 
 expose(classify);

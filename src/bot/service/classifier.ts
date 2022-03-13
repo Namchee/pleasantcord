@@ -4,7 +4,7 @@ import { QueuedTask } from 'threads/dist/master/pool-types';
 
 import { Classifier } from './../../service/workers';
 
-import { BASE_CONFIG } from './../../entity/config';
+import { BASE_CONFIG, getContentTypeFromConfig } from './../../entity/config';
 import { Content } from './../../entity/content';
 
 import { BLUE, ORANGE } from './../../constants/color';
@@ -12,7 +12,6 @@ import { BLUE, ORANGE } from './../../constants/color';
 import { BotContext, ClassificationResult } from '../types';
 
 import { getFilterableContents } from '../utils';
-import { Logger } from './../../utils/logger';
 
 export const workers = Pool(() =>
   spawn<Classifier>(new Worker('../../service/workers'))
@@ -51,16 +50,12 @@ export async function moderateContent(
   rateLimiter.rateLimit(rateLimitKey);
 
   let config = BASE_CONFIG;
-
   const realConfig = await service.getConfig(msg.guildId as string);
-
   if (realConfig) {
     config = realConfig;
-  } else {
-    Logger.getInstance().logBot(
-      new Error(`Failed to get configuration for server ${msg.guildId}}`)
-    );
   }
+
+  const classifiableContent = getContentTypeFromConfig(config);
 
   const tasks: QueuedTask<FunctionThread, ClassificationResult>[] = [];
 
@@ -72,7 +67,11 @@ export async function moderateContent(
         start = performance.now();
       }
 
-      const categories = await classifier(url, config.model);
+      const categories = await classifier(
+        url,
+        config.model,
+        classifiableContent
+      );
 
       return {
         name,

@@ -1,5 +1,7 @@
 import { MessageEmbed } from 'discord.js';
 
+import { BASE_CONFIG } from './../../entity/config';
+
 import { BLUE, ORANGE } from '../../constants/color';
 
 import { BotContext, CommandHandlerParams } from '../types';
@@ -11,10 +13,10 @@ export default {
     { service }: BotContext,
     { guild }: CommandHandlerParams
   ): Promise<MessageEmbed> => {
-    const config = await service.getConfig(guild.id);
+    let config = await service.getConfig(guild.id);
 
     if (!config) {
-      throw new Error(`Failed to get configuration for server ${guild.id}`);
+      config = BASE_CONFIG;
     }
 
     return new MessageEmbed({
@@ -27,6 +29,7 @@ export default {
         {
           name: 'Threshold',
           value: `${(config?.accuracy * 100).toFixed(2)}%`,
+          inline: true,
         },
         {
           name: 'Categories',
@@ -34,9 +37,13 @@ export default {
           inline: true,
         },
         {
+          name: 'Content Types',
+          value: config.content.join(', '),
+          inline: true,
+        },
+        {
           name: 'Action',
           value: config.delete ? 'Delete' : 'Blur',
-          inline: true,
         },
         {
           name: 'Model',
