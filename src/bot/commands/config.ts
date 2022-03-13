@@ -1,10 +1,9 @@
 import { MessageEmbed } from 'discord.js';
 
-import { BASE_CONFIG } from './../../entity/config';
-
 import { BLUE, ORANGE } from '../../constants/color';
 
 import { BotContext, CommandHandlerParams } from '../types';
+import { RecoverableError } from './../../exceptions/recoverable';
 
 export default {
   command: 'config',
@@ -13,10 +12,12 @@ export default {
     { service }: BotContext,
     { guild }: CommandHandlerParams
   ): Promise<MessageEmbed> => {
-    let config = await service.getConfig(guild.id);
+    const config = await service.getConfig(guild.id);
 
     if (!config) {
-      config = BASE_CONFIG;
+      throw new RecoverableError(
+        'Configuration data does not exist for this server. Please re-invite the bot to automatically fix this problem.'
+      );
     }
 
     return new MessageEmbed({

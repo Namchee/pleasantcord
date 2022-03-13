@@ -12,6 +12,7 @@ import { PREFIX } from '../constants/command';
 import { PLACEHOLDER_NAME, SUPPORTED_CONTENTS } from '../constants/content';
 
 import { Logger } from '../utils/logger';
+import { RecoverableError } from '@/exceptions/recoverable';
 
 // this cannot be tested at the moment. Context: https://github.com/vitest-dev/vitest/issues/110
 /* c8 ignore start */
@@ -129,7 +130,9 @@ export function handleError(err: Error): MessageEmbed | null {
 
     errorMessage.setTitle('Ouch!');
     errorMessage.setDescription(
-      "Unfortunately, `pleasantcord` has encountered an unexpected error. Don't worry, the error has been reported to the system and will be resolved as soon as possible.\n\nIf this issue persists, please submit an issue to [GitHub](https://github.com/Namchee/pleasantcord/issues) or join [our support server](https://discord.gg/Pj4aGp8Aky) and submit your bug report on the appropriate channel."
+      err instanceof RecoverableError
+        ? err.message
+        : 'Unfortunately, `pleasantcord` has encountered an unexpected error. The error has been reported to the system and will be resolved as soon as possible.\n\nIf this issue persists, please submit an issue to [GitHub](https://github.com/Namchee/pleasantcord/issues) or join [our support server](https://discord.gg/Pj4aGp8Aky) and submit your bug report on the appropriate channel.'
     );
   }
 
