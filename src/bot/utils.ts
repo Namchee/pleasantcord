@@ -9,7 +9,7 @@ import { CommandHandler, CommandHandlerFunction, EventHandler } from './types';
 import { PERMISSION_ERRORS } from '../constants/error';
 import { RED } from '../constants/color';
 import { PREFIX } from '../constants/command';
-import { CLASSIFIABLE_CONTENTS, PLACEHOLDER_NAME } from '../constants/content';
+import { PLACEHOLDER_NAME, SUPPORTED_CONTENTS } from '../constants/content';
 
 import { Logger } from '../utils/logger';
 
@@ -152,11 +152,11 @@ export function getMessageCommand(msg: string): string {
  * @param {Message} msg user message
  * @returns {Content[]} list of detectable contents
  */
-export function getSupportedContents(msg: Message): Content[] {
+export function getFilterableContents(msg: Message): Content[] {
   const contents: Content[] = [];
 
   msg.attachments.forEach(({ url, name, contentType }) => {
-    if (!!contentType && CLASSIFIABLE_CONTENTS.includes(contentType)) {
+    if (!!contentType && SUPPORTED_CONTENTS.includes(contentType)) {
       contents.push({
         name: name || PLACEHOLDER_NAME,
         url,

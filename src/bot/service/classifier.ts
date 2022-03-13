@@ -11,7 +11,7 @@ import { BLUE, ORANGE } from './../../constants/color';
 
 import { BotContext, ClassificationResult } from '../types';
 
-import { getSupportedContents } from '../utils';
+import { getFilterableContents } from '../utils';
 import { Logger } from './../../utils/logger';
 
 export const workers = Pool(() =>
@@ -36,8 +36,7 @@ export async function moderateContent(
     return;
   }
 
-  const contents: Content[] = getSupportedContents(msg);
-
+  const contents: Content[] = getFilterableContents(msg);
   if (contents.length === 0) {
     return;
   }

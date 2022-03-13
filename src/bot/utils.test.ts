@@ -3,7 +3,7 @@ import { Constants, Message, MessageEmbed } from 'discord.js';
 
 import {
   getMessageCommand,
-  getSupportedContents,
+  getFilterableContents,
   handleError,
 } from '@/bot/utils';
 import { Logger } from '@/utils/logger';
@@ -137,7 +137,7 @@ describe('getCommand', () => {
   });
 });
 
-describe('getSupportedContents', () => {
+describe('getFilterableContents', () => {
   it('should get all supported attachments', () => {
     const msg = {
       attachments: new Map([
@@ -177,7 +177,7 @@ describe('getSupportedContents', () => {
       embeds: [],
     } as unknown as Message;
 
-    const contents = getSupportedContents(msg);
+    const contents = getFilterableContents(msg);
 
     expect(contents.length).toBe(2);
     expect(contents).toContainEqual({
@@ -219,7 +219,7 @@ describe('getSupportedContents', () => {
       attachments: new Map(),
     } as unknown as Message;
 
-    const contents = getSupportedContents(msg);
+    const contents = getFilterableContents(msg);
 
     expect(contents.length).toBe(4);
     expect(contents).toContainEqual({
