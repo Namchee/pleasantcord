@@ -4,6 +4,8 @@ import { Constants, Message, MessageEmbed } from 'discord.js';
 
 import { Content } from '../entity/content';
 
+import { RecoverableError } from '../exceptions/recoverable';
+
 import { CommandHandler, CommandHandlerFunction, EventHandler } from './types';
 
 import { PERMISSION_ERRORS } from '../constants/error';
@@ -12,7 +14,6 @@ import { PREFIX } from '../constants/command';
 import { PLACEHOLDER_NAME, SUPPORTED_CONTENTS } from '../constants/content';
 
 import { Logger } from '../utils/logger';
-import { RecoverableError } from '@/exceptions/recoverable';
 
 // this cannot be tested at the moment. Context: https://github.com/vitest-dev/vitest/issues/110
 /* c8 ignore start */
@@ -157,6 +158,8 @@ export function getMessageCommand(msg: string): string {
  */
 export function getFilterableContents(msg: Message): Content[] {
   const contents: Content[] = [];
+
+  console.log(msg);
 
   msg.attachments.forEach(({ url, name, contentType }) => {
     if (!!contentType && SUPPORTED_CONTENTS.includes(contentType)) {
