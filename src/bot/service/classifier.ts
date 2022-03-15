@@ -35,24 +35,26 @@ export async function moderateContent(
     return;
   }
 
-  const contents: Content[] = getFilterableContents(msg);
-  if (contents.length === 0) {
-    return;
-  }
-
   const isDev = process.env.NODE_ENV !== 'production';
   const rateLimitKey = `${msg.guildId as string}:${msg.channelId}`;
 
   if (rateLimiter.isRateLimited(rateLimitKey) && !isDev) {
     return;
   }
-
   rateLimiter.rateLimit(rateLimitKey);
 
   let config = BASE_CONFIG;
   const realConfig = await service.getConfig(msg.guildId as string);
   if (realConfig) {
     config = realConfig;
+  }
+
+  const contents: Content[] = getFilterableContents(
+    msg,
+    config.content.includes('Sticker')
+  );
+  if (contents.length === 0) {
+    return;
   }
 
   const classifiableContent = getContentTypeFromConfig(config);

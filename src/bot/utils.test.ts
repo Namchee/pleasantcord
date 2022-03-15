@@ -1,5 +1,5 @@
 import { describe, it, afterEach, beforeEach, vi, expect } from 'vitest';
-import { Constants, Message, MessageEmbed } from 'discord.js';
+import { Collection, Constants, Message, MessageEmbed } from 'discord.js';
 
 import {
   getMessageCommand,
@@ -258,6 +258,34 @@ describe('getFilterableContents', () => {
     expect(contents).toContainEqual({
       name: PLACEHOLDER_NAME,
       url: 'caz',
+    });
+  });
+
+  it('should get all stickers and emoji', () => {
+    const msg = {
+      content: '<:ayy:305818615712579584> foo bar <:ayy:305818615712579584>',
+      stickers: new Collection([
+        [
+          '123',
+          {
+            url: 'https://foo.bar',
+          },
+        ],
+      ]),
+      attachments: new Map(),
+      embeds: [],
+    } as unknown as Message;
+
+    const contents = getFilterableContents(msg, true);
+
+    expect(contents.length).toBe(3);
+    expect(contents).toContainEqual({
+      name: PLACEHOLDER_NAME,
+      url: 'https://cdn.discordapp.com/emojis/305818615712579584.png',
+    });
+    expect(contents).toContainEqual({
+      name: PLACEHOLDER_NAME,
+      url: 'https://foo.bar',
     });
   });
 });

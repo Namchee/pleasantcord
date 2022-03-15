@@ -1,5 +1,7 @@
 import { ContentType } from '../entity/config';
 
+export const CDN = `https://cdn.discordapp.com/emojis`;
+
 // List of supported content MIME types
 // Should support all visual contents that also supported
 // by Discord.
@@ -19,5 +21,5 @@ export const PLACEHOLDER_NAME = 'content';
 export const CONTENT_TYPE_MAP: Record<ContentType, string[]> = {
   Image: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
   Video: ['video/mp4', 'video/webm'],
-  Sticker: [],
+  Sticker: ['image/png'],
 };

@@ -11,7 +11,11 @@ import { CommandHandler, CommandHandlerFunction, EventHandler } from './types';
 import { PERMISSION_ERRORS } from '../constants/error';
 import { RED } from '../constants/color';
 import { PREFIX } from '../constants/command';
-import { PLACEHOLDER_NAME, SUPPORTED_CONTENTS } from '../constants/content';
+import {
+  CDN,
+  PLACEHOLDER_NAME,
+  SUPPORTED_CONTENTS,
+} from '../constants/content';
 
 import { Logger } from '../utils/logger';
 
@@ -151,15 +155,32 @@ export function getMessageCommand(msg: string): string {
 }
 
 /**
+ * Get emoji ID from user message
+ *
+ * @param {string} content message contents
+ * @returns {string[]} array of Snowflare IDs
+ */
+function getEmojisFromText(content: string): string[] {
+  const pattern = /<:\w+:(\d+)>/g;
+
+  const group = [...content.matchAll(pattern)];
+
+  return group.map(val => val[1]);
+}
+
+/**
  * Get all supported contents from a user message
  *
  * @param {Message} msg user message
+ * @param {boolean} sticker whether stickers should be included or
+ * not
  * @returns {Content[]} list of detectable contents
  */
-export function getFilterableContents(msg: Message): Content[] {
+export function getFilterableContents(
+  msg: Message,
+  sticker = false
+): Content[] {
   const contents: Content[] = [];
-
-  console.log(msg);
 
   msg.attachments.forEach(({ url, name, contentType }) => {
     if (!!contentType && SUPPORTED_CONTENTS.includes(contentType)) {
@@ -180,6 +201,24 @@ export function getFilterableContents(msg: Message): Content[] {
       });
     }
   });
+
+  if (sticker) {
+    const emojis = getEmojisFromText(msg.content).map(id => {
+      return {
+        name: PLACEHOLDER_NAME,
+        url: `${CDN}/${id}.png`,
+      };
+    });
+
+    contents.push(...emojis);
+
+    msg.stickers.forEach(sticker => {
+      contents.push({
+        name: PLACEHOLDER_NAME,
+        url: sticker.url,
+      });
+    });
+  }
 
   return contents;
 }
