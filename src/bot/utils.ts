@@ -4,12 +4,18 @@ import { Constants, Message, MessageEmbed } from 'discord.js';
 
 import { Content } from '../entity/content';
 
+import { RecoverableError } from '../exceptions/recoverable';
+
 import { CommandHandler, CommandHandlerFunction, EventHandler } from './types';
 
 import { PERMISSION_ERRORS } from '../constants/error';
 import { RED } from '../constants/color';
 import { PREFIX } from '../constants/command';
-import { CLASSIFIABLE_CONTENTS, PLACEHOLDER_NAME } from '../constants/content';
+import {
+  CDN,
+  PLACEHOLDER_NAME,
+  SUPPORTED_CONTENTS,
+} from '../constants/content';
 
 import { Logger } from '../utils/logger';
 
@@ -129,7 +135,9 @@ export function handleError(err: Error): MessageEmbed | null {
 
     errorMessage.setTitle('Ouch!');
     errorMessage.setDescription(
-      "Unfortunately, `pleasantcord` has encountered an unexpected error. Don't worry, the error has been reported to the system and will be resolved as soon as possible.\n\nIf this issue persists, please submit an issue to [GitHub](https://github.com/Namchee/pleasantcord/issues) or join [our support server](https://discord.gg/Pj4aGp8Aky) and submit your bug report on the appropriate channel."
+      err instanceof RecoverableError
+        ? err.message
+        : 'Unfortunately, `pleasantcord` has encountered an unexpected error. The error has been reported to the system and will be resolved as soon as possible.\n\nIf this issue persists, please submit an issue to [GitHub](https://github.com/Namchee/pleasantcord/issues) or join [our support server](https://discord.gg/Pj4aGp8Aky) and submit your bug report on the appropriate channel.'
     );
   }
 
@@ -147,16 +155,35 @@ export function getMessageCommand(msg: string): string {
 }
 
 /**
+ * Get emoji ID from user message
+ *
+ * @param {string} content message contents
+ * @returns {string[]} array of Snowflare IDs
+ */
+function getEmojisFromText(content: string): string[] {
+  const pattern = /<:\w+:(\d+)>/g;
+
+  const group = [...content.matchAll(pattern)];
+
+  return group.map(val => val[1]);
+}
+
+/**
  * Get all supported contents from a user message
  *
  * @param {Message} msg user message
+ * @param {boolean} sticker whether stickers should be included or
+ * not
  * @returns {Content[]} list of detectable contents
  */
-export function getSupportedContents(msg: Message): Content[] {
+export function getFilterableContents(
+  msg: Message,
+  sticker = false
+): Content[] {
   const contents: Content[] = [];
 
   msg.attachments.forEach(({ url, name, contentType }) => {
-    if (!!contentType && CLASSIFIABLE_CONTENTS.includes(contentType)) {
+    if (!!contentType && SUPPORTED_CONTENTS.includes(contentType)) {
       contents.push({
         name: name || PLACEHOLDER_NAME,
         url,
@@ -174,6 +201,24 @@ export function getSupportedContents(msg: Message): Content[] {
       });
     }
   });
+
+  if (sticker) {
+    const emojis = getEmojisFromText(msg.content).map(id => {
+      return {
+        name: PLACEHOLDER_NAME,
+        url: `${CDN}/${id}.png`,
+      };
+    });
+
+    contents.push(...emojis);
+
+    msg.stickers.forEach(sticker => {
+      contents.push({
+        name: PLACEHOLDER_NAME,
+        url: sticker.url,
+      });
+    });
+  }
 
   return contents;
 }

@@ -1,14 +1,15 @@
 import { describe, it, afterEach, beforeEach, vi, expect } from 'vitest';
-import { Constants, Message, MessageEmbed } from 'discord.js';
+import { Collection, Constants, Message, MessageEmbed } from 'discord.js';
 
 import {
   getMessageCommand,
-  getSupportedContents,
+  getFilterableContents,
   handleError,
 } from '@/bot/utils';
 import { Logger } from '@/utils/logger';
 import { RED } from '@/constants/color';
 import { PLACEHOLDER_NAME } from '@/constants/content';
+import { RecoverableError } from '@/exceptions/recoverable';
 
 // Disable threads in unit test
 vi.mock('threads', () => {
@@ -54,8 +55,28 @@ describe('handleError', () => {
     expect(err?.color).toBe(colorCode);
     expect(err?.title).toBe('Ouch!');
     expect(err?.description).toBe(
-      "Unfortunately, `pleasantcord` has encountered an unexpected error. Don't worry, the error has been reported to the system and will be resolved as soon as possible.\n\nIf this issue persists, please submit an issue to [GitHub](https://github.com/Namchee/pleasantcord/issues) or join [our support server](https://discord.gg/Pj4aGp8Aky) and submit your bug report on the appropriate channel."
+      'Unfortunately, `pleasantcord` has encountered an unexpected error. The error has been reported to the system and will be resolved as soon as possible.\n\nIf this issue persists, please submit an issue to [GitHub](https://github.com/Namchee/pleasantcord/issues) or join [our support server](https://discord.gg/Pj4aGp8Aky) and submit your bug report on the appropriate channel.'
     );
+  });
+
+  it('should handle recoverable errors', () => {
+    const loggerSpy = vi.spyOn(Logger.getInstance(), 'logBot');
+    loggerSpy.mockImplementationOnce(() => vi.fn());
+
+    const error = new RecoverableError('Hey, this error can easily be solved!');
+
+    const err = handleError(error);
+
+    const colorCode = parseInt(RED.slice(1), 16);
+
+    expect(loggerSpy).toHaveBeenCalledTimes(1);
+    expect(loggerSpy).toHaveBeenCalledWith(error);
+    expect(err).toBeInstanceOf(MessageEmbed);
+    expect(err?.author?.name).toBe('pleasantcord');
+    expect(err?.author?.iconURL).toBe(url);
+    expect(err?.color).toBe(colorCode);
+    expect(err?.title).toBe('Ouch!');
+    expect(err?.description).toBe('Hey, this error can easily be solved!');
   });
 
   it('should ignore message deletion error', () => {
@@ -137,7 +158,7 @@ describe('getCommand', () => {
   });
 });
 
-describe('getSupportedContents', () => {
+describe('getFilterableContents', () => {
   it('should get all supported attachments', () => {
     const msg = {
       attachments: new Map([
@@ -177,7 +198,7 @@ describe('getSupportedContents', () => {
       embeds: [],
     } as unknown as Message;
 
-    const contents = getSupportedContents(msg);
+    const contents = getFilterableContents(msg);
 
     expect(contents.length).toBe(2);
     expect(contents).toContainEqual({
@@ -219,7 +240,7 @@ describe('getSupportedContents', () => {
       attachments: new Map(),
     } as unknown as Message;
 
-    const contents = getSupportedContents(msg);
+    const contents = getFilterableContents(msg);
 
     expect(contents.length).toBe(4);
     expect(contents).toContainEqual({
@@ -237,6 +258,34 @@ describe('getSupportedContents', () => {
     expect(contents).toContainEqual({
       name: PLACEHOLDER_NAME,
       url: 'caz',
+    });
+  });
+
+  it('should get all stickers and emoji', () => {
+    const msg = {
+      content: '<:ayy:305818615712579584> foo bar <:ayy:305818615712579584>',
+      stickers: new Collection([
+        [
+          '123',
+          {
+            url: 'https://foo.bar',
+          },
+        ],
+      ]),
+      attachments: new Map(),
+      embeds: [],
+    } as unknown as Message;
+
+    const contents = getFilterableContents(msg, true);
+
+    expect(contents.length).toBe(3);
+    expect(contents).toContainEqual({
+      name: PLACEHOLDER_NAME,
+      url: 'https://cdn.discordapp.com/emojis/305818615712579584.png',
+    });
+    expect(contents).toContainEqual({
+      name: PLACEHOLDER_NAME,
+      url: 'https://foo.bar',
     });
   });
 });

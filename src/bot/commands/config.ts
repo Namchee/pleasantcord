@@ -3,6 +3,7 @@ import { MessageEmbed } from 'discord.js';
 import { BLUE, ORANGE } from '../../constants/color';
 
 import { BotContext, CommandHandlerParams } from '../types';
+import { RecoverableError } from './../../exceptions/recoverable';
 
 export default {
   command: 'config',
@@ -14,7 +15,9 @@ export default {
     const config = await service.getConfig(guild.id);
 
     if (!config) {
-      throw new Error(`Failed to get configuration for server ${guild.id}`);
+      throw new RecoverableError(
+        'Configuration data does not exist for this server. Please re-invite the bot to automatically fix this problem.'
+      );
     }
 
     return new MessageEmbed({
@@ -27,6 +30,7 @@ export default {
         {
           name: 'Threshold',
           value: `${(config?.accuracy * 100).toFixed(2)}%`,
+          inline: true,
         },
         {
           name: 'Categories',
@@ -34,9 +38,13 @@ export default {
           inline: true,
         },
         {
+          name: 'Content Types',
+          value: config.content.join(', '),
+          inline: true,
+        },
+        {
           name: 'Action',
           value: config.delete ? 'Delete' : 'Blur',
-          inline: true,
         },
         {
           name: 'Model',
