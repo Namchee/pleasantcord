@@ -23,7 +23,7 @@ describe('getContentTypeFromConfig', () => {
   it('should return an empty array', () => {
     const config = {
       ...BASE_CONFIG,
-      content: [],
+      contents: [],
     };
 
     const mimes = getContentTypeFromConfig(config);
@@ -34,7 +34,7 @@ describe('getContentTypeFromConfig', () => {
   it('should return images only', () => {
     const config: Configuration = {
       ...BASE_CONFIG,
-      content: ['Image'],
+      contents: ['Image'],
     };
 
     const mimes = getContentTypeFromConfig(config);

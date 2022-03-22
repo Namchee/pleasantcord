@@ -16,7 +16,7 @@ export interface Configuration {
   // Model name to be used to classifify contents
   readonly model: ModelType;
   // Content type to be moderated
-  readonly content: ContentType[];
+  readonly contents: ContentType[];
 }
 
 // Default configuration for all servers.
@@ -25,7 +25,7 @@ export const BASE_CONFIG: Configuration = {
   categories: ['Hentai', 'Porn'],
   delete: true,
   model: 'MobileNet',
-  content: ['Image', 'Video'],
+  contents: ['Image', 'Video'],
 };
 
 /**
@@ -37,7 +37,7 @@ export const BASE_CONFIG: Configuration = {
 export function getContentTypeFromConfig(config: Configuration): string[] {
   const mime: string[] = [];
 
-  config.content.forEach(type => {
+  config.contents.forEach(type => {
     mime.push(...CONTENT_TYPE_MAP[type]);
   });
 
