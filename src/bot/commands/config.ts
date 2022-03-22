@@ -28,26 +28,25 @@ export default {
       title: 'Server Configuration',
       fields: [
         {
-          name: 'Threshold',
+          name: 'Minimum Threshold',
           value: `${(config?.accuracy * 100).toFixed(2)}%`,
-          inline: true,
         },
         {
-          name: 'Categories',
+          name: 'NSFW Categories',
           value: config.categories.join('\n'),
           inline: true,
         },
         {
-          name: 'Content Types',
-          value: config.content.join(', '),
+          name: 'Scanned Contents',
+          value: config.contents.join('\n'),
           inline: true,
         },
         {
           name: 'Action',
-          value: config.delete ? 'Delete' : 'Blur',
+          value: config.delete ? 'Delete' : 'Repost with blur',
         },
         {
-          name: 'Model',
+          name: 'Classifier Name',
           value: config.model,
         },
         {

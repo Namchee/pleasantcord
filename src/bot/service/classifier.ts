@@ -51,7 +51,7 @@ export async function moderateContent(
 
   const contents: Content[] = getFilterableContents(
     msg,
-    config.content.includes('Sticker')
+    config.contents.includes('Sticker')
   );
   if (contents.length === 0) {
     return;
