@@ -18,6 +18,11 @@ export const workers = Pool(() =>
 );
 
 /**
+ *
+ */
+export function classifyContent() {}
+
+/**
  * Check all supported content for NSFW contents
  * and react accordingly.
  *

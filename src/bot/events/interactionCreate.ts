@@ -9,9 +9,10 @@ export default {
   event: 'interactionCreate',
   fn: async (ctx: BotContext, interaction: Interaction) => {
     if (
-      !interaction.isCommand() ||
       !interaction.guild ||
-      !interaction.channel?.isText()
+      !interaction.channel?.isText() ||
+      !interaction.isCommand() ||
+      !interaction.isUserContextMenu()
     ) {
       return;
     }
