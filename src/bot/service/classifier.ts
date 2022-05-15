@@ -4,7 +4,11 @@ import { QueuedTask } from 'threads/dist/master/pool-types';
 
 import { Classifier } from './../../service/workers';
 
-import { BASE_CONFIG, getContentTypeFromConfig } from './../../entity/config';
+import {
+  BASE_CONFIG,
+  Configuration,
+  getContentTypeFromConfig,
+} from './../../entity/config';
 import { Content } from './../../entity/content';
 
 import { BLUE, ORANGE } from './../../constants/color';
@@ -18,9 +22,57 @@ export const workers = Pool(() =>
 );
 
 /**
+ * Classify contents from a user message
  *
+ * @param {Message} msg user message
+ * @param {Configuration} config server configuration
+ * @returns {QueuedTask<FunctionThread, ClassificationResult>[]} classification tasks
  */
-export function classifyContent() {}
+export function classifyContent(
+  msg: Message,
+  config: Configuration
+): QueuedTask<FunctionThread, ClassificationResult>[] {
+  const isDev = process.env.NODE_ENV !== 'production';
+
+  const contents: Content[] = getFilterableContents(
+    msg,
+    config.contents.includes('Sticker')
+  );
+  if (contents.length === 0) {
+    return [];
+  }
+
+  const classifiableContent = getContentTypeFromConfig(config);
+
+  const tasks: QueuedTask<FunctionThread, ClassificationResult>[] = [];
+
+  contents.forEach(({ name, url }) => {
+    const classification = workers.queue(async classifier => {
+      let start = 0;
+
+      if (isDev) {
+        start = performance.now();
+      }
+
+      const categories = await classifier(
+        url,
+        config.model,
+        classifiableContent
+      );
+
+      return {
+        name,
+        source: url,
+        categories,
+        time: isDev ? performance.now() - start : undefined,
+      };
+    });
+
+    tasks.push(classification);
+  });
+
+  return tasks;
+}
 
 /**
  * Check all supported content for NSFW contents
@@ -54,44 +106,9 @@ export async function moderateContent(
     config = realConfig;
   }
 
-  const contents: Content[] = getFilterableContents(
-    msg,
-    config.contents.includes('Sticker')
-  );
-  if (contents.length === 0) {
-    return;
-  }
+  const results = classifyContent(msg, config);
 
-  const classifiableContent = getContentTypeFromConfig(config);
-
-  const tasks: QueuedTask<FunctionThread, ClassificationResult>[] = [];
-
-  contents.forEach(({ name, url }) => {
-    const classification = workers.queue(async classifier => {
-      let start = 0;
-
-      if (isDev) {
-        start = performance.now();
-      }
-
-      const categories = await classifier(
-        url,
-        config.model,
-        classifiableContent
-      );
-
-      return {
-        name,
-        source: url,
-        categories,
-        time: isDev ? performance.now() - start : undefined,
-      };
-    });
-
-    tasks.push(classification);
-  });
-
-  for await (const { name, source, categories, time } of tasks) {
+  for await (const { name, source, categories, time } of results) {
     if (!categories.length) {
       continue;
     }
@@ -105,8 +122,7 @@ export async function moderateContent(
     const promises = [];
 
     if (nsfwCategory) {
-      // make sure that all queued tasks are killed
-      tasks.forEach(t => t.cancel());
+      results.forEach(result => result.cancel());
 
       const fields = [
         {
