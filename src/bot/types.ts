@@ -2,7 +2,6 @@ import {
   Client,
   ClientEvents,
   Guild,
-  Message,
   MessageEmbed,
   TextChannel,
 } from 'discord.js';

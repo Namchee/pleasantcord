@@ -9,7 +9,7 @@ import {
   Configuration,
   getContentTypeFromConfig,
 } from './../../entity/config';
-import { Content } from './../../entity/content';
+import { Category, Content } from './../../entity/content';
 
 import { BLUE, ORANGE } from './../../constants/color';
 
@@ -178,34 +178,13 @@ export async function moderateContent(
     }
 
     if (process.env.NODE_ENV !== 'production') {
-      const devEmbed = new MessageEmbed({
-        author: {
-          name: 'pleasantcord',
-          iconURL: process.env.IMAGE_URL,
-        },
-        title: '[DEV] Image Labels',
-        fields: [
-          {
-            name: 'Labels',
-            value: categories
-              .map(({ name, accuracy }) => {
-                return `${name} — ${(accuracy * 100).toFixed(2)}%`;
-              })
-              .join('\n'),
-          },
-          {
-            name: 'Elapsed Time',
-            value: `${(time as number).toFixed(2)} ms`,
-          },
-          {
-            name: 'Model',
-            value: config.model,
-          },
-        ],
-        color: BLUE,
-      });
+      const resultLog = generateClassificationResultLog(
+        categories,
+        config,
+        time || 0
+      );
 
-      promises.push(channel.send({ embeds: [devEmbed] }));
+      promises.push(channel.send({ embeds: [resultLog] }));
     }
 
     await Promise.all(promises);
@@ -214,4 +193,45 @@ export async function moderateContent(
       break;
     }
   }
+}
+
+/**
+ * Generate classification result log in form of `MessageEmbed`
+ *
+ * @param {Category[]} categories content categories
+ * @param {Configuration} config configuration object
+ * @param {number} time time needed to classify contents.
+ * @returns {MessageEmbed} classification result log
+ */
+export function generateClassificationResultLog(
+  categories: Category[],
+  config: Configuration,
+  time: number
+): MessageEmbed {
+  return new MessageEmbed({
+    author: {
+      name: 'pleasantcord',
+      iconURL: process.env.IMAGE_URL,
+    },
+    title: 'Content Classification Result',
+    fields: [
+      {
+        name: 'Labels',
+        value: categories
+          .map(({ name, accuracy }) => {
+            return `${name} — ${(accuracy * 100).toFixed(2)}%`;
+          })
+          .join('\n'),
+      },
+      {
+        name: 'Elapsed Time',
+        value: `${(time as number).toFixed(2)} ms`,
+      },
+      {
+        name: 'Model',
+        value: config.model,
+      },
+    ],
+    color: BLUE,
+  });
 }

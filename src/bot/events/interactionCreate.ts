@@ -17,6 +17,10 @@ export default {
       return;
     }
 
+    if (interaction.isMessageContextMenu()) {
+      interaction.targetMessage;
+    }
+
     try {
       const commandMap = getCommandMap();
       const handler = commandMap[interaction.commandName];

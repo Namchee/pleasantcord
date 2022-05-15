@@ -10,7 +10,7 @@ if (!process.env.DISCORD_TOKEN || !process.env.DISCORD_ID) {
 (async () => {
   try {
     const commands = [
-      new ContextMenuCommandBuilder().setName('Classify Content').setType(2),
+      new ContextMenuCommandBuilder().setName('Classify Content').setType(3),
     ].map(cmd => cmd.toJSON());
 
     const rest = new REST({ version: '9' }).setToken(process.env.DISCORD_TOKEN);
