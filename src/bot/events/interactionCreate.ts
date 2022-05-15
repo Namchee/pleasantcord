@@ -1,4 +1,4 @@
-import { Interaction, MessageEmbed, TextChannel } from 'discord.js';
+import { Interaction, Message, MessageEmbed, TextChannel } from 'discord.js';
 
 import { UNKNOWN_COMMAND_EMBED } from './../../constants/embeds';
 import { BotContext, CommandHandlerParams } from '../types';
@@ -12,13 +12,18 @@ export default {
       !interaction.guild ||
       !interaction.channel?.isText() ||
       !interaction.isCommand() ||
-      !interaction.isUserContextMenu()
+      !interaction.isMessageContextMenu()
     ) {
       return;
     }
 
-    if (interaction.isMessageContextMenu()) {
-      interaction.targetMessage;
+    let message = undefined;
+
+    if (
+      interaction.isMessageContextMenu() &&
+      interaction.targetMessage instanceof Message
+    ) {
+      message = interaction.targetMessage;
     }
 
     try {
@@ -32,6 +37,7 @@ export default {
           guild: interaction.guild,
           channel: interaction.channel as TextChannel,
           timestamp: interaction.createdTimestamp,
+          message,
         };
         embed = await handler(ctx, params);
       }

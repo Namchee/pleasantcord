@@ -2,6 +2,7 @@ import {
   Client,
   ClientEvents,
   Guild,
+  Message,
   MessageEmbed,
   TextChannel,
 } from 'discord.js';
@@ -29,6 +30,7 @@ export interface CommandHandlerParams {
   guild: Guild;
   channel: TextChannel;
   timestamp: number;
+  message?: Message;
 }
 
 /**

@@ -26,14 +26,14 @@ export const workers = Pool(() =>
  *
  * @param {Message} msg user message
  * @param {Configuration} config server configuration
+ * @param {boolean} time determines if elapsed time should be logged or not
  * @returns {QueuedTask<FunctionThread, ClassificationResult>[]} classification tasks
  */
 export function classifyContent(
   msg: Message,
-  config: Configuration
+  config: Configuration,
+  time = false
 ): QueuedTask<FunctionThread, ClassificationResult>[] {
-  const isDev = process.env.NODE_ENV !== 'production';
-
   const contents: Content[] = getFilterableContents(
     msg,
     config.contents.includes('Sticker')
@@ -50,7 +50,7 @@ export function classifyContent(
     const classification = workers.queue(async classifier => {
       let start = 0;
 
-      if (isDev) {
+      if (time) {
         start = performance.now();
       }
 
@@ -64,7 +64,7 @@ export function classifyContent(
         name,
         source: url,
         categories,
-        time: isDev ? performance.now() - start : undefined,
+        time: time ? performance.now() - start : undefined,
       };
     });
 
@@ -106,7 +106,7 @@ export async function moderateContent(
     config = realConfig;
   }
 
-  const results = classifyContent(msg, config);
+  const results = classifyContent(msg, config, isDev);
 
   for await (const { name, source, categories, time } of results) {
     if (!categories.length) {

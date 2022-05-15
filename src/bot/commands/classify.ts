@@ -1,5 +1,9 @@
 import { MessageEmbed } from 'discord.js';
-import { classifyContent, moderateContent } from '../service/classifier';
+import {
+  classifyContent,
+  generateClassificationResultLog,
+  moderateContent,
+} from '../service/classifier';
 
 import { BotContext, CommandHandlerParams } from '../types';
 import { RecoverableError } from './../../exceptions/recoverable';
@@ -10,8 +14,12 @@ export default {
     'Classify the selected content without performing content moderation',
   fn: async (
     ctx: BotContext,
-    { guild }: CommandHandlerParams
+    { guild, message }: CommandHandlerParams
   ): Promise<MessageEmbed> => {
+    if (!message) {
+      return;
+    }
+
     const config = await ctx.service.getConfig(guild.id);
 
     if (!config) {
@@ -20,9 +28,17 @@ export default {
       );
     }
 
-    const results = classifyContent(ctx, config);
+    const results = classifyContent(message, config, true);
+    const embeds: MessageEmbed[] = [];
 
     for await (const result of results) {
+      const embed = generateClassificationResultLog(
+        result.categories,
+        config,
+        result.time as number
+      );
+
+      embeds.push(embed);
     }
   },
 };
