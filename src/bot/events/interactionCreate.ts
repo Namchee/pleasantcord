@@ -11,8 +11,7 @@ export default {
     if (
       !interaction.guild ||
       !interaction.channel?.isText() ||
-      !interaction.isCommand() ||
-      !interaction.isMessageContextMenu()
+      !(interaction.isCommand() || interaction.isMessageContextMenu())
     ) {
       return;
     }

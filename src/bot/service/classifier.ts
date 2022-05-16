@@ -232,6 +232,6 @@ export function generateClassificationResultLog(
         value: config.model,
       },
     ],
-    color: BLUE,
+    color: process.env.NODE_ENV === 'production' ? ORANGE : BLUE,
   });
 }
