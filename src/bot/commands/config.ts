@@ -11,7 +11,7 @@ export default {
   fn: async (
     { service }: BotContext,
     { guild }: CommandHandlerParams
-  ): Promise<MessageEmbed> => {
+  ): Promise<MessageEmbed[]> => {
     const config = await service.getConfig(guild.id);
 
     if (!config) {
@@ -20,42 +20,44 @@ export default {
       );
     }
 
-    return new MessageEmbed({
-      author: {
-        name: 'pleasantcord',
-        iconURL: process.env.IMAGE_URL,
-      },
-      title: 'Server Configuration',
-      fields: [
-        {
-          name: 'Minimum Threshold',
-          value: `${(config?.accuracy * 100).toFixed(2)}%`,
+    return [
+      new MessageEmbed({
+        author: {
+          name: 'pleasantcord',
+          iconURL: process.env.IMAGE_URL,
         },
-        {
-          name: 'NSFW Categories',
-          value: config.categories.join('\n'),
-          inline: true,
-        },
-        {
-          name: 'Scanned Contents',
-          value: config.contents.join('\n'),
-          inline: true,
-        },
-        {
-          name: 'Action',
-          value: config.delete ? 'Delete' : 'Repost with blur',
-        },
-        {
-          name: 'Classifier Name',
-          value: config.model,
-        },
-        {
-          name: 'Dashboard Link',
-          value:
-            '[https://pleasantcord.namchee.dev](https://pleasantcord.namchee.dev)',
-        },
-      ],
-      color: process.env.NODE_ENV === 'development' ? BLUE : ORANGE,
-    });
+        title: 'Server Configuration',
+        fields: [
+          {
+            name: 'Minimum Threshold',
+            value: `${(config?.accuracy * 100).toFixed(2)}%`,
+          },
+          {
+            name: 'NSFW Categories',
+            value: config.categories.join('\n'),
+            inline: true,
+          },
+          {
+            name: 'Scanned Contents',
+            value: config.contents.join('\n'),
+            inline: true,
+          },
+          {
+            name: 'Action',
+            value: config.delete ? 'Delete' : 'Repost with blur',
+          },
+          {
+            name: 'Classifier Name',
+            value: config.model,
+          },
+          {
+            name: 'Dashboard Link',
+            value:
+              '[https://pleasantcord.namchee.dev](https://pleasantcord.namchee.dev)',
+          },
+        ],
+        color: process.env.NODE_ENV === 'development' ? BLUE : ORANGE,
+      }),
+    ];
   },
 };

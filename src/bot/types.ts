@@ -42,7 +42,7 @@ export interface CommandHandlerParams {
 export type CommandHandlerFunction = (
   ctx: BotContext,
   params: CommandHandlerParams
-) => Promise<MessageEmbed>;
+) => Promise<MessageEmbed[]>;
 
 /**
  * Command handler.

@@ -30,7 +30,7 @@ export default {
       const commandMap = getCommandMap();
       const handler = commandMap[interaction.commandName];
 
-      let embed: MessageEmbed = UNKNOWN_COMMAND_EMBED;
+      let embeds: MessageEmbed[] = [UNKNOWN_COMMAND_EMBED];
 
       if (handler) {
         const params: CommandHandlerParams = {
@@ -39,10 +39,10 @@ export default {
           timestamp: interaction.createdTimestamp,
           message,
         };
-        embed = await handler(ctx, params);
+        embeds = await handler(ctx, params);
       }
 
-      return interaction.reply({ embeds: [embed], ephemeral: true });
+      return interaction.reply({ embeds, ephemeral: true });
     } catch (err) {
       const errorEmbed = handleError(err as Error);
 

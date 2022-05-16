@@ -23,7 +23,8 @@ export default {
       if (msg.content.startsWith(PREFIX)) {
         const commandMap = getCommandMap();
         const handler = commandMap[getMessageCommand(msg.content)];
-        let embed: MessageEmbed = UNKNOWN_COMMAND_EMBED;
+
+        let embeds: MessageEmbed[] = [UNKNOWN_COMMAND_EMBED];
 
         if (handler) {
           const params: CommandHandlerParams = {
@@ -31,10 +32,10 @@ export default {
             channel: msg.channel as TextChannel,
             timestamp: msg.createdTimestamp,
           };
-          embed = await handler(ctx, params);
+          embeds = await handler(ctx, params);
         }
 
-        return msg.channel.send({ embeds: [embed] });
+        return msg.channel.send({ embeds });
       }
 
       return moderateContent(ctx, msg);

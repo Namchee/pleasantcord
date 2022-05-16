@@ -2,7 +2,6 @@ import { MessageEmbed } from 'discord.js';
 import {
   classifyContent,
   generateClassificationResultLog,
-  moderateContent,
 } from '../service/classifier';
 
 import { BotContext, CommandHandlerParams } from '../types';
@@ -15,7 +14,7 @@ export default {
   fn: async (
     ctx: BotContext,
     { guild, message }: CommandHandlerParams
-  ): Promise<MessageEmbed> => {
+  ): Promise<MessageEmbed[] | undefined> => {
     if (!message) {
       return;
     }
@@ -40,5 +39,7 @@ export default {
 
       embeds.push(embed);
     }
+
+    return embeds;
   },
 };
