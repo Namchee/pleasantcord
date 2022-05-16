@@ -41,12 +41,12 @@ export default {
         embeds = await handler(ctx, params);
       }
 
-      return interaction.reply({ embeds, ephemeral: true });
+      return interaction.reply({ embeds });
     } catch (err) {
       const errorEmbed = handleError(err as Error);
 
       if (errorEmbed) {
-        return interaction.reply({ embeds: [errorEmbed], ephemeral: true });
+        return interaction.reply({ embeds: [errorEmbed] });
       }
     }
   },
