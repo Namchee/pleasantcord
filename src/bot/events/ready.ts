@@ -1,6 +1,5 @@
-import { ApplicationCommandData, Client } from 'discord.js';
 import { BotContext } from '../types';
-import { getCommands, handleError } from './../utils';
+import { handleError } from './../utils';
 
 export default {
   event: 'ready',
@@ -11,7 +10,6 @@ export default {
     }
 
     try {
-      await initializeCommands(client);
       // set required authentication data
       service.repository.setBotId(client.user?.id as string);
 
@@ -29,26 +27,3 @@ export default {
     }
   },
 };
-
-/**
- * Set commands to all guilds.
- *
- * @param {Client} client discord.js client
- * @returns {Promise<any>[]} array of promises for setting guild commands.
- */
-function initializeCommands(client: Client): Promise<any>[] {
-  const commands = getCommands();
-  const guildCommands: ApplicationCommandData[] = Object.keys(commands).map(
-    (name: string) => {
-      const command = commands[name];
-
-      return {
-        name,
-        description: command.description,
-        type: command.type,
-      };
-    }
-  );
-
-  return client.guilds.cache.map(guild => guild.commands.set(guildCommands));
-}
