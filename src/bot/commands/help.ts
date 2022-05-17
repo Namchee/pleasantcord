@@ -4,14 +4,15 @@ import { getCommands } from '../utils';
 
 import { BLUE, ORANGE } from '../../constants/color';
 
-import type { CommandHandler } from '../types';
-
 export default {
   command: 'help',
   description: 'Show the help message',
+  type: 'CHAT_INPUT',
   fn: async (): Promise<MessageEmbed[]> => {
     const rawCommands = getCommands();
-    const commands = rawCommands.map((command: CommandHandler) => {
+    const commands = Object.keys(rawCommands).map((name: string) => {
+      const command = rawCommands[name];
+
       return `\`pc!${command.command}\` — ${command.description}`;
     });
 

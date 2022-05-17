@@ -2,7 +2,7 @@ import { describe, it, afterEach, beforeEach, vi, expect } from 'vitest';
 import { Collection, Constants, Message, MessageEmbed } from 'discord.js';
 
 import {
-  getMessageCommand,
+  getCommandFromMessage,
   getFilterableContents,
   handleError,
 } from '@/bot/utils';
@@ -145,14 +145,14 @@ describe('handleError', () => {
 describe('getCommand', () => {
   it('should return actual command', () => {
     const msg = 'pc!help';
-    const cmd = getMessageCommand(msg);
+    const cmd = getCommandFromMessage(msg);
 
     expect(cmd).toBe('help');
   });
 
   it('should get the first argument only', () => {
     const msg = 'pc!help lorem ipsum';
-    const cmd = getMessageCommand(msg);
+    const cmd = getCommandFromMessage(msg);
 
     expect(cmd).toBe('help');
   });

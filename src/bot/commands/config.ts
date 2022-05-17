@@ -8,6 +8,7 @@ import { RecoverableError } from './../../exceptions/recoverable';
 export default {
   command: 'config',
   description: 'Show configuration for the current server',
+  type: 'CHAT_INPUT',
   fn: async (
     { service }: BotContext,
     { guild }: CommandHandlerParams

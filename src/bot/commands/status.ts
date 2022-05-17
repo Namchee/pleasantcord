@@ -9,6 +9,7 @@ const packageInfo = require(resolve(process.cwd(), 'package.json'));
 export default {
   command: 'status',
   description: 'Show the bot status',
+  type: 'CHAT_INPUT',
   fn: async (
     { client }: BotContext,
     { timestamp }: CommandHandlerParams

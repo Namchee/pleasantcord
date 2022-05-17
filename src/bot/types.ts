@@ -52,6 +52,7 @@ export type CommandHandlerFunction = (
 export interface CommandHandler {
   command: string;
   description: string;
+  type: 'MESSAGE' | 'CHAT_INPUT';
   fn: CommandHandlerFunction;
 }
 

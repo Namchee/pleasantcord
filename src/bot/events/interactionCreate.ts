@@ -3,7 +3,7 @@ import { Interaction, Message, MessageEmbed, TextChannel } from 'discord.js';
 import { UNKNOWN_COMMAND_EMBED } from './../../constants/embeds';
 import { BotContext, CommandHandlerParams } from '../types';
 
-import { getCommandMap, handleError } from '../utils';
+import { getCommands, handleError } from '../utils';
 
 export default {
   event: 'interactionCreate',
@@ -26,8 +26,8 @@ export default {
     }
 
     try {
-      const commandMap = getCommandMap();
-      const handler = commandMap[interaction.commandName];
+      const commandMap = getCommands();
+      const handler = commandMap[interaction.commandName].fn;
 
       let embeds: MessageEmbed[] = [UNKNOWN_COMMAND_EMBED];
 

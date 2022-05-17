@@ -11,6 +11,7 @@ export default {
   command: 'Classify Content',
   description:
     'Classify the selected content without performing content moderation',
+  type: 'MESSAGE',
   fn: async (
     ctx: BotContext,
     { guild, message }: CommandHandlerParams
