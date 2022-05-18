@@ -10,11 +10,17 @@ export default {
   type: 'CHAT_INPUT',
   fn: async (): Promise<MessageEmbed[]> => {
     const rawCommands = getCommands();
-    const commands = Object.keys(rawCommands).map((name: string) => {
-      const command = rawCommands[name];
+    const commands = Object.keys(rawCommands)
+      .map((name: string) => {
+        const command = rawCommands[name];
 
-      return `\`pc!${command.command}\` — ${command.description}`;
-    });
+        if (command.type === 'MESSAGE') {
+          return '';
+        }
+
+        return `\`pc!${command.command}\` — ${command.description}`;
+      })
+      .filter(Boolean);
 
     return [
       new MessageEmbed({

@@ -1,4 +1,7 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
+import {
+  ContextMenuCommandBuilder,
+  SlashCommandBuilder,
+} from '@discordjs/builders';
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
 
@@ -30,6 +33,7 @@ export async function registerSlashCommands(
       new SlashCommandBuilder()
         .setName('help')
         .setDescription('Show the help menu of pleasantcord'),
+      new ContextMenuCommandBuilder().setName('Classify Content').setType(3),
     ].map(cmd => cmd.toJSON());
 
     const rest = new REST({ version: '9' }).setToken(token);
