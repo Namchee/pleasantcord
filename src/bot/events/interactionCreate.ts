@@ -1,6 +1,6 @@
 import { Interaction, Message, MessageEmbed, TextChannel } from 'discord.js';
 
-import { UNKNOWN_COMMAND_EMBED } from './../../constants/embeds';
+import { EMPTY_EMBED, UNKNOWN_COMMAND_EMBED } from './../../constants/embeds';
 import { BotContext, CommandHandlerParams } from '../types';
 
 import { getCommands, handleError } from '../utils';
@@ -38,7 +38,14 @@ export default {
           timestamp: interaction.createdTimestamp,
           message,
         };
-        embeds = await handler(ctx, params);
+
+        const handlerEmbeds = await handler(ctx, params);
+
+        if (handlerEmbeds.length) {
+          embeds = handlerEmbeds;
+        } else {
+          embeds = [EMPTY_EMBED];
+        }
       }
 
       return interaction.reply({ embeds });

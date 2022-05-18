@@ -18,7 +18,7 @@ export interface Credentials {
  * @param {string} creds.clientID Discord's client ID
  * @param {string} creds.token Discord's bot token
  */
-export async function registerSlashCommands(
+export async function registerCommands(
   guildID: string,
   { clientID, token }: Credentials
 ): Promise<void> {
@@ -43,6 +43,6 @@ export async function registerSlashCommands(
     });
   } catch (err) {
     const { message } = err as Error;
-    throw new Error(`Failed to register slash commands: ${message}`);
+    throw new Error(`Failed to register commands: ${message}`);
   }
 }
