@@ -6,7 +6,7 @@ import { Content } from '../entity/content';
 
 import { RecoverableError } from '../exceptions/recoverable';
 
-import { CommandHandler, CommandHandlerFunction, EventHandler } from './types';
+import { CommandHandler, EventHandler } from './types';
 
 import { PERMISSION_ERRORS } from '../constants/error';
 import { RED } from '../constants/color';
@@ -23,51 +23,30 @@ import { Logger } from '../utils/logger';
 /* c8 ignore start */
 
 // cache this
-let commandList: CommandHandler[];
-let commandMap: Record<string, CommandHandlerFunction>;
+let commands: Record<string, CommandHandler>;
 
 /**
  * Get all available commands from command files.
  *
- * @returns {CommandHandler[]} list of command handlers.
+ * @returns {Record<string, CommandHandler>[]} list of command handlers.
  */
-export function getCommands(): CommandHandler[] {
-  if (!commandList) {
+export function getCommands(): Record<string, CommandHandler> {
+  if (!commands) {
     const basePath = resolve(__dirname, 'commands');
     const commandFiles = readdirSync(basePath);
 
-    commandList = commandFiles.map((commandFile: string) => {
+    commands = {};
+
+    commandFiles.forEach((commandFile: string) => {
       const file = require(resolve(basePath, commandFile));
 
-      const { command, description, fn } = file.default as CommandHandler;
+      const command = file.default as CommandHandler;
 
-      return {
-        command,
-        description,
-        fn,
-      };
+      commands[command.command] = command;
     });
   }
 
-  return commandList;
-}
-
-/**
- * Get command map for user interaction.
- *
- * @returns {Record<string, CommandHandlerFunction>} mapped commands
- */
-export function getCommandMap(): Record<string, CommandHandlerFunction> {
-  if (!commandMap) {
-    const commands = getCommands();
-    commandMap = {};
-
-    commands.forEach((handler: CommandHandler) => {
-      commandMap[handler.command] = handler.fn;
-    });
-  }
-
-  return commandMap;
+  return commands;
 }
 
 /**
@@ -150,7 +129,7 @@ export function handleError(err: Error): MessageEmbed | null {
  * @param {string} msg user message
  * @returns {string} command name
  */
-export function getMessageCommand(msg: string): string {
+export function getCommandFromMessage(msg: string): string {
   return msg.slice(PREFIX.length).trim().split(/ +/)[0];
 }
 

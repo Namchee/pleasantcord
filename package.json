@@ -25,7 +25,8 @@
   "license": "MIT",
   "devDependencies": {
     "@types/eslint": "^6.1.8",
-    "@types/node": "^16.11.9",
+    "@types/node": "^17.0.34",
+    "@types/node-fetch": "^2.6.1",
     "@types/sharp": "^0.28.5",
     "@typescript-eslint/eslint-plugin": "^5.3.1",
     "@typescript-eslint/parser": "^5.3.1",

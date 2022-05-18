@@ -9,10 +9,11 @@ const packageInfo = require(resolve(process.cwd(), 'package.json'));
 export default {
   command: 'status',
   description: 'Show the bot status',
+  type: 'CHAT_INPUT',
   fn: async (
     { client }: BotContext,
     { timestamp }: CommandHandlerParams
-  ): Promise<MessageEmbed> => {
+  ): Promise<MessageEmbed[]> => {
     const time = Date.now() - timestamp;
 
     let packageVersion: string = packageInfo.dependencies['discord.js'];
@@ -42,14 +43,16 @@ export default {
       },
     ];
 
-    return new MessageEmbed({
-      author: {
-        name: 'pleasantcord',
-        iconURL: process.env.IMAGE_URL,
-      },
-      title: 'Status Report',
-      fields,
-      color: process.env.NODE_ENV === 'development' ? BLUE : ORANGE,
-    });
+    return [
+      new MessageEmbed({
+        author: {
+          name: 'pleasantcord',
+          iconURL: process.env.IMAGE_URL,
+        },
+        title: 'Status Report',
+        fields,
+        color: process.env.NODE_ENV === 'development' ? BLUE : ORANGE,
+      }),
+    ];
   },
 };

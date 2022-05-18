@@ -2,7 +2,7 @@ import { Message, MessageEmbed, TextChannel } from 'discord.js';
 
 import { moderateContent } from '../service/classifier';
 
-import { handleError, getMessageCommand, getCommandMap } from '../utils';
+import { handleError, getCommandFromMessage, getCommands } from '../utils';
 
 import { BotContext, CommandHandlerParams } from '../types';
 
@@ -21,9 +21,10 @@ export default {
       }
 
       if (msg.content.startsWith(PREFIX)) {
-        const commandMap = getCommandMap();
-        const handler = commandMap[getMessageCommand(msg.content)];
-        let embed: MessageEmbed = UNKNOWN_COMMAND_EMBED;
+        const commandMap = getCommands();
+        const handler = commandMap[getCommandFromMessage(msg.content)].fn;
+
+        let embeds: MessageEmbed[] = [UNKNOWN_COMMAND_EMBED];
 
         if (handler) {
           const params: CommandHandlerParams = {
@@ -31,10 +32,10 @@ export default {
             channel: msg.channel as TextChannel,
             timestamp: msg.createdTimestamp,
           };
-          embed = await handler(ctx, params);
+          embeds = await handler(ctx, params);
         }
 
-        return msg.channel.send({ embeds: [embed] });
+        return msg.channel.send({ embeds });
       }
 
       return moderateContent(ctx, msg);

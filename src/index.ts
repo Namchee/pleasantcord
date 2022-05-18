@@ -51,7 +51,7 @@ if (process.env.NODE_ENV === 'development') {
 
   const cleanup = async (): Promise<void> => {
     client.destroy();
-    workers.terminate(true);
+    await workers.terminate(true);
     await Logger.getInstance().closeLogger();
   };
 

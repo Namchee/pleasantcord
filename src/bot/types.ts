@@ -30,6 +30,7 @@ export interface CommandHandlerParams {
   guild: Guild;
   channel: TextChannel;
   timestamp: number;
+  message?: Message;
 }
 
 /**
@@ -41,7 +42,7 @@ export interface CommandHandlerParams {
 export type CommandHandlerFunction = (
   ctx: BotContext,
   params: CommandHandlerParams
-) => Promise<MessageEmbed>;
+) => Promise<MessageEmbed[]>;
 
 /**
  * Command handler.
@@ -51,6 +52,7 @@ export type CommandHandlerFunction = (
 export interface CommandHandler {
   command: string;
   description: string;
+  type: 'MESSAGE' | 'CHAT_INPUT';
   fn: CommandHandlerFunction;
 }
 
