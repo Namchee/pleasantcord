@@ -19,7 +19,7 @@ jobs:
         with:
           version: 7.1.1
       - name: Install dependencies
-        run: pnpm run install
+        run: pnpm install
       - name: Lint code
         run: pnpm run lint:fix
       - name: Test code
