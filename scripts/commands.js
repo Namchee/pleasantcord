@@ -1,5 +1,8 @@
 // @ts-check
-const { ContextMenuCommandBuilder } = require('@discordjs/builders');
+const {
+  SlashCommandBuilder,
+  ContextMenuCommandBuilder,
+} = require('@discordjs/builders');
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 
@@ -10,6 +13,15 @@ if (!process.env.DISCORD_TOKEN || !process.env.DISCORD_ID) {
 (async () => {
   try {
     const commands = [
+      new SlashCommandBuilder()
+        .setName('config')
+        .setDescription("Show pleasantcord's configuration for this guild"),
+      new SlashCommandBuilder()
+        .setName('status')
+        .setDescription("Show pleasantcord's global status"),
+      new SlashCommandBuilder()
+        .setName('help')
+        .setDescription('Show the help menu of pleasantcord'),
       new ContextMenuCommandBuilder().setName('Classify Content').setType(3),
     ].map(cmd => cmd.toJSON());
 
@@ -19,7 +31,7 @@ if (!process.env.DISCORD_TOKEN || !process.env.DISCORD_ID) {
       body: commands,
     });
 
-    console.log('Context menu commands has been registered successfully');
+    console.log('Application commands has been registered successfully');
   } catch (err) {
     console.error(err);
   }

@@ -22,7 +22,7 @@ jobs:
       - name: Build the files
         run: yarn build
       - name: Register slash commands
-        run: node scripts/slash.js
+        run: node scripts/commands.js
         env:
           DISCORD_ID: ${{ secrets.DISCORD_ID }}
           DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
