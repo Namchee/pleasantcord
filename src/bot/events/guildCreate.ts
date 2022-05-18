@@ -1,6 +1,6 @@
 import { Guild, MessageEmbed, TextChannel } from 'discord.js';
 
-import { Credentials, registerSlashCommands } from '../service/command';
+import { Credentials, registerCommands } from '../service/command';
 
 import { BASE_CONFIG } from './../../entity/config';
 
@@ -22,7 +22,7 @@ export default {
         token: client.token as string,
       };
 
-      return registerSlashCommands(guild.id, creds);
+      return registerCommands(guild.id, creds);
     } catch (err) {
       const embed = handleError(err as Error) as MessageEmbed;
 

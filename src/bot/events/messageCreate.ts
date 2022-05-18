@@ -7,7 +7,7 @@ import { handleError, getCommandFromMessage, getCommands } from '../utils';
 import { BotContext, CommandHandlerParams } from '../types';
 
 import { PREFIX } from '../../constants/command';
-import { UNKNOWN_COMMAND_EMBED } from '../../constants/embeds';
+import { EMPTY_EMBED } from '../../constants/embeds';
 
 export default {
   event: 'messageCreate',
@@ -24,7 +24,7 @@ export default {
         const commandMap = getCommands();
         const handler = commandMap[getCommandFromMessage(msg.content)].fn;
 
-        let embeds: MessageEmbed[] = [UNKNOWN_COMMAND_EMBED];
+        let embeds: MessageEmbed[] = [EMPTY_EMBED];
 
         if (handler) {
           const params: CommandHandlerParams = {
