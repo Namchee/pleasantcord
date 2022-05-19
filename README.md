@@ -11,7 +11,7 @@
   <a href="https://github.com/google/gts">
     <img src="https://img.shields.io/badge/code%20style-google-blueviolet.svg" title="CodeStyle: Google" alt="GTS Logo" />
   </a>
-  <a href="https://discord.com/api/oauth2/authorize?client_id=750668307555942482&permissions=10240&scope=bot">
+  <a href="https://discord.com/api/oauth2/authorize?client_id=750668307555942482&permissions=2147493888&scope=bot%20applications.commands">
     <img src="https://img.shields.io/badge/Discord-Invite-blue" title="Bot Invite Link" alt="Bot Invite Link" />
   </a>
   <a href="https://discord.gg/Pj4aGp8Aky">
