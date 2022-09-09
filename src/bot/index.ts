@@ -1,4 +1,4 @@
-import { Client, Intents } from 'discord.js';
+import { Client, IntentsBitField } from 'discord.js';
 
 import { ConfigurationService } from '../service/config';
 import { RateLimiter } from '../service/rate-limit';
@@ -19,8 +19,10 @@ export async function bootstrapBot(
   rateLimiter: RateLimiter
 ): Promise<Client> {
   const client = new Client({
-    // weirdly, both are required.
-    intents: [Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILDS],
+    intents: [
+      IntentsBitField.Flags.GuildMessages,
+      IntentsBitField.Flags.Guilds,
+    ],
   });
 
   const context: BotContext = {

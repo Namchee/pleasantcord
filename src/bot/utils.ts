@@ -1,6 +1,7 @@
 import { readdirSync } from 'fs';
 import { resolve } from 'path';
-import { Constants, Message, MessageEmbed } from 'discord.js';
+
+import { Message, EmbedBuilder, RESTJSONErrorCodes } from 'discord.js';
 
 import { Content } from '../entity/content';
 
@@ -81,10 +82,10 @@ export function getEvents(): EventHandler[] {
  * are caught.
  *
  * @param {Error} err error object
- * @returns {MessageEmbed} error message.
+ * @returns {EmbedBuilder} error message.
  */
-export function handleError(err: Error): MessageEmbed | null {
-  const errorMessage = new MessageEmbed({
+export function handleError(err: Error): EmbedBuilder | null {
+  const errorMessage = new EmbedBuilder({
     author: {
       name: 'pleasantcord',
       iconURL: process.env.IMAGE_URL,
@@ -94,7 +95,7 @@ export function handleError(err: Error): MessageEmbed | null {
 
   const code: number = (err as any).code ? (err as any).code : 0;
 
-  if (code === Constants.APIErrors.UNKNOWN_MESSAGE) {
+  if (code === RESTJSONErrorCodes.UnknownMessage) {
     // this is caused by double deletion, kindly ignore this
     return null;
   }
@@ -105,10 +106,12 @@ export function handleError(err: Error): MessageEmbed | null {
       `\`pleasantcord\` lacks the required permissions to perform its duties`
     );
 
-    errorMessage.addField(
-      'Solution',
-      `Please make sure that \`pleasantcord\` has all the required permissions as stated in the documentation to manage this server and please make sure that \`pleasantcord\` has sufficient access rights to target channels`
-    );
+    errorMessage.addFields([
+      {
+        name: 'Solution',
+        value: `Please make sure that \`pleasantcord\` has all the required permissions as stated in the documentation to manage this server and please make sure that \`pleasantcord\` has sufficient access rights to target channels`,
+      },
+    ]);
   } else {
     Logger.getInstance().logBot(err);
 

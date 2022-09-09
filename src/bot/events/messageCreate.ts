@@ -1,4 +1,4 @@
-import { Message, MessageEmbed, TextChannel } from 'discord.js';
+import { Message, EmbedBuilder, TextChannel } from 'discord.js';
 
 import { moderateContent } from '../service/classifier';
 
@@ -16,7 +16,7 @@ export default {
     msg: Message
   ): Promise<Message<boolean> | void> => {
     try {
-      if (!msg.guild || !msg.channel.isText() || msg.author.bot) {
+      if (!msg.guild || !msg.channel.isTextBased() || msg.author.bot) {
         return;
       }
 
@@ -24,7 +24,7 @@ export default {
         const commandMap = getCommands();
         const handler = commandMap[getCommandFromMessage(msg.content)].fn;
 
-        let embeds: MessageEmbed[] = [EMPTY_EMBED];
+        let embeds: EmbedBuilder[] = [EMPTY_EMBED];
 
         if (handler) {
           const params: CommandHandlerParams = {

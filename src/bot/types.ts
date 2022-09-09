@@ -3,7 +3,7 @@ import {
   ClientEvents,
   Guild,
   Message,
-  MessageEmbed,
+  EmbedBuilder,
   TextChannel,
 } from 'discord.js';
 
@@ -42,7 +42,7 @@ export interface CommandHandlerParams {
 export type CommandHandlerFunction = (
   ctx: BotContext,
   params: CommandHandlerParams
-) => Promise<MessageEmbed[]>;
+) => Promise<EmbedBuilder[]>;
 
 /**
  * Command handler.

@@ -1,5 +1,5 @@
 import { describe, it, afterEach, beforeEach, vi, expect } from 'vitest';
-import { Collection, Constants, Message, MessageEmbed } from 'discord.js';
+import { Collection, Constants, Message, EmbedBuilder } from 'discord.js';
 
 import {
   getCommandFromMessage,
@@ -49,12 +49,12 @@ describe('handleError', () => {
 
     expect(loggerSpy).toHaveBeenCalledTimes(1);
     expect(loggerSpy).toHaveBeenCalledWith(error);
-    expect(err).toBeInstanceOf(MessageEmbed);
-    expect(err?.author?.name).toBe('pleasantcord');
-    expect(err?.author?.iconURL).toBe(url);
-    expect(err?.color).toBe(colorCode);
-    expect(err?.title).toBe('Ouch!');
-    expect(err?.description).toBe(
+    expect(err).toBeInstanceOf(EmbedBuilder);
+    expect(err?.data.author?.name).toBe('pleasantcord');
+    expect(err?.data.author?.icon_url).toBe(url);
+    expect(err?.data.color).toBe(colorCode);
+    expect(err?.data.title).toBe('Ouch!');
+    expect(err?.data.description).toBe(
       'Unfortunately, `pleasantcord` has encountered an unexpected error. The error has been reported to the system and will be resolved as soon as possible.\n\nIf this issue persists, please submit an issue to [GitHub](https://github.com/Namchee/pleasantcord/issues) or join [our support server](https://discord.gg/Pj4aGp8Aky) and submit your bug report on the appropriate channel.'
     );
   });
@@ -71,7 +71,7 @@ describe('handleError', () => {
 
     expect(loggerSpy).toHaveBeenCalledTimes(1);
     expect(loggerSpy).toHaveBeenCalledWith(error);
-    expect(err).toBeInstanceOf(MessageEmbed);
+    expect(err).toBeInstanceOf(EmbedBuilder);
     expect(err?.author?.name).toBe('pleasantcord');
     expect(err?.author?.iconURL).toBe(url);
     expect(err?.color).toBe(colorCode);
@@ -94,7 +94,7 @@ describe('handleError', () => {
 
     const colorCode = parseInt(RED.slice(1), 16);
 
-    expect(err).toBeInstanceOf(MessageEmbed);
+    expect(err).toBeInstanceOf(EmbedBuilder);
     expect(err?.author?.name).toBe('pleasantcord');
     expect(err?.author?.iconURL).toBe(url);
     expect(err?.color).toBe(colorCode);
@@ -112,7 +112,7 @@ describe('handleError', () => {
 
     const colorCode = parseInt(RED.slice(1), 16);
 
-    expect(err).toBeInstanceOf(MessageEmbed);
+    expect(err).toBeInstanceOf(EmbedBuilder);
     expect(err?.author?.name).toBe('pleasantcord');
     expect(err?.author?.iconURL).toBe(url);
     expect(err?.color).toBe(colorCode);
@@ -130,7 +130,7 @@ describe('handleError', () => {
 
     const colorCode = parseInt(RED.slice(1), 16);
 
-    expect(err).toBeInstanceOf(MessageEmbed);
+    expect(err).toBeInstanceOf(EmbedBuilder);
     expect(err?.author?.name).toBe('pleasantcord');
     expect(err?.author?.iconURL).toBe(url);
     expect(err?.color).toBe(colorCode);
@@ -214,7 +214,7 @@ describe('getFilterableContents', () => {
   it('should get all supported embeds', () => {
     const msg = {
       embeds: [
-        new MessageEmbed({
+        new EmbedBuilder({
           video: {
             url: 'foo',
           },
@@ -222,20 +222,20 @@ describe('getFilterableContents', () => {
             url: 'wrong',
           },
         }),
-        new MessageEmbed({
+        new EmbedBuilder({
           image: {
             url: 'bar',
           },
         }),
-        new MessageEmbed({
+        new EmbedBuilder({
           thumbnail: {
             url: 'baz',
           },
         }),
-        new MessageEmbed({
+        new EmbedBuilder({
           url: 'caz',
         }),
-        new MessageEmbed(),
+        new EmbedBuilder(),
       ],
       attachments: new Map(),
     } as unknown as Message;

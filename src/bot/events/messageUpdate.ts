@@ -14,7 +14,7 @@ export default {
     msg: Message
   ): Promise<Message<boolean> | void> => {
     try {
-      if (!msg.guild || !msg.channel.isText() || msg.author.bot) {
+      if (!msg.guild || !msg.channel.isTextBased() || msg.author.bot) {
         return;
       }
 

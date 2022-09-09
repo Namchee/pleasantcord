@@ -1,3 +1,4 @@
+import { ActivityType } from 'discord.js';
 import { BotContext } from '../types';
 import { handleError } from './../utils';
 
@@ -18,7 +19,7 @@ export default {
         activities: [
           {
             name: 'for NSFW contents 👀',
-            type: 'WATCHING',
+            type: ActivityType.Watching,
           },
         ],
       });

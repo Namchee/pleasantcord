@@ -1,4 +1,4 @@
-import { Interaction, Message, MessageEmbed, TextChannel } from 'discord.js';
+import { Interaction, Message, EmbedBuilder, TextChannel } from 'discord.js';
 
 import { EMPTY_EMBED, UNKNOWN_COMMAND_EMBED } from './../../constants/embeds';
 import { BotContext, CommandHandlerParams } from '../types';
@@ -10,8 +10,8 @@ export default {
   fn: async (ctx: BotContext, interaction: Interaction) => {
     if (
       !interaction.guild ||
-      !interaction.channel?.isText() ||
-      !(interaction.isCommand() || interaction.isMessageContextMenu())
+      !interaction.channel ||
+      !(interaction.isCommand() || interaction.isContextMenuCommand())
     ) {
       return;
     }
@@ -19,7 +19,7 @@ export default {
     let message = undefined;
 
     if (
-      interaction.isMessageContextMenu() &&
+      interaction.isMessageContextMenuCommand() &&
       interaction.targetMessage instanceof Message
     ) {
       message = interaction.targetMessage;
@@ -29,7 +29,7 @@ export default {
       const commandMap = getCommands();
       const handler = commandMap[interaction.commandName].fn;
 
-      let embeds: MessageEmbed[] = [UNKNOWN_COMMAND_EMBED];
+      let embeds: EmbedBuilder[] = [UNKNOWN_COMMAND_EMBED];
 
       if (handler) {
         const params: CommandHandlerParams = {

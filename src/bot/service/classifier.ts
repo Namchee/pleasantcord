@@ -1,4 +1,4 @@
-import { Message, TextChannel, MessageEmbed } from 'discord.js';
+import { Message, TextChannel, EmbedBuilder } from 'discord.js';
 
 import { FunctionThread, Pool, spawn, Worker } from 'threads';
 import { QueuedTask } from 'threads/dist/master/pool-types';
@@ -150,7 +150,7 @@ export async function moderateContent(
         });
       }
 
-      const embed = new MessageEmbed({
+      const embed = new EmbedBuilder({
         author: {
           name: 'pleasantcord',
           iconURL: process.env.IMAGE_URL,
@@ -197,19 +197,19 @@ export async function moderateContent(
 }
 
 /**
- * Generate classification result log in form of `MessageEmbed`
+ * Generate classification result log in form of `EmbedBuilder`
  *
  * @param {Category[]} categories content categories
  * @param {Configuration} config configuration object
  * @param {number} time time needed to classify contents.
- * @returns {MessageEmbed} classification result log
+ * @returns {EmbedBuilder} classification result log
  */
 export function generateClassificationResultLog(
   categories: Category[],
   config: Configuration,
   time: number
-): MessageEmbed {
-  return new MessageEmbed({
+): EmbedBuilder {
+  return new EmbedBuilder({
     author: {
       name: 'pleasantcord',
       iconURL: process.env.IMAGE_URL,

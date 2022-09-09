@@ -1,4 +1,4 @@
-import { Guild, MessageEmbed, TextChannel } from 'discord.js';
+import { Guild, EmbedBuilder, TextChannel } from 'discord.js';
 
 import { Credentials, registerCommands } from '../service/command';
 
@@ -24,7 +24,7 @@ export default {
 
       return registerCommands(guild.id, creds);
     } catch (err) {
-      const embed = handleError(err as Error) as MessageEmbed;
+      const embed = handleError(err as Error) as EmbedBuilder;
 
       const defaultChannel = guild.channels.cache.find(
         chan => chan.name.toLowerCase() === DEFAULT_CHANNEL
