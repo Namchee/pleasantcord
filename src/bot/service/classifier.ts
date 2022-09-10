@@ -1,26 +1,28 @@
 import { Message, TextChannel, EmbedBuilder } from 'discord.js';
+import { performance } from 'node:perf_hooks';
 
-import { FunctionThread, Pool, spawn, Worker } from 'threads';
-import { QueuedTask } from 'threads/dist/master/pool-types';
-
-import { Classifier } from './../../service/workers';
+import Tinypool from 'tinypool';
 
 import {
   BASE_CONFIG,
   Configuration,
   getContentTypeFromConfig,
 } from './../../entity/config';
-import { Category, Content } from './../../entity/content';
+import {
+  Category,
+  Content,
+  ClassificationResult,
+} from './../../entity/content';
 
 import { BLUE, ORANGE } from './../../constants/color';
 
-import { BotContext, ClassificationResult } from '../types';
+import { BotContext } from '../types';
 
 import { getFilterableContents } from '../utils';
 
-export const workers = Pool(() =>
-  spawn<Classifier>(new Worker('../../service/workers'))
-);
+const pool = new Tinypool({
+  filename: new URL('../../service/workers', import.meta.url).href,
+});
 
 /**
  * Classify contents from a user message
@@ -28,13 +30,13 @@ export const workers = Pool(() =>
  * @param {Message} msg user message
  * @param {Configuration} config server configuration
  * @param {boolean} time determines if elapsed time should be logged or not
- * @returns {QueuedTask<FunctionThread, ClassificationResult>[]} classification tasks
+ * @returns {Promise<ClassificationResult>[]} classification tasks
  */
 export function classifyContent(
   msg: Message,
   config: Configuration,
   time = false
-): QueuedTask<FunctionThread, ClassificationResult>[] {
+): Promise<ClassificationResult>[] {
   const contents: Content[] = getFilterableContents(
     msg,
     config.contents.includes('Sticker')
@@ -45,34 +47,28 @@ export function classifyContent(
 
   const classifiableContent = getContentTypeFromConfig(config);
 
-  const tasks: QueuedTask<FunctionThread, ClassificationResult>[] = [];
+  const result = contents.map(async ({ name, url }) => {
+    let start = 0;
 
-  contents.forEach(({ name, url }) => {
-    const classification = workers.queue(async classifier => {
-      let start = 0;
+    if (time) {
+      start = performance.now();
+    }
 
-      if (time) {
-        start = performance.now();
-      }
-
-      const categories = await classifier(
-        url,
-        config.model,
-        classifiableContent
-      );
-
-      return {
-        name,
-        source: url,
-        categories,
-        time: time ? performance.now() - start : undefined,
-      };
+    const categories: Category[] = await pool.run({
+      source: url,
+      model: config.model,
+      contents: classifiableContent,
     });
 
-    tasks.push(classification);
+    return {
+      name,
+      source: url,
+      categories,
+      time: time ? performance.now() - start : undefined,
+    };
   });
 
-  return tasks;
+  return result;
 }
 
 /**
@@ -123,8 +119,6 @@ export async function moderateContent(
     const promises = [];
 
     if (nsfwCategory) {
-      results.forEach(result => result.cancel());
-
       const fields = [
         {
           name: 'Author',

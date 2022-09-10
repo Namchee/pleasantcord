@@ -1,5 +1,4 @@
 import { readdirSync } from 'fs';
-import { resolve } from 'path';
 
 import { Message, EmbedBuilder, RESTJSONErrorCodes } from 'discord.js';
 
@@ -31,20 +30,22 @@ let commands: Record<string, CommandHandler>;
  *
  * @returns {Record<string, CommandHandler>[]} list of command handlers.
  */
-export function getCommands(): Record<string, CommandHandler> {
+export async function getCommands(): Promise<Record<string, CommandHandler>> {
   if (!commands) {
-    const basePath = resolve(__dirname, 'commands');
+    const basePath = new URL('commands', import.meta.url);
     const commandFiles = readdirSync(basePath);
 
     commands = {};
 
-    commandFiles.forEach((commandFile: string) => {
-      const file = require(resolve(basePath, commandFile));
+    const loader = await Promise.all(
+      commandFiles.map(async (cmd: string) => {
+        const file = await import(new URL(`commands/${cmd}`, basePath).href);
 
-      const command = file.default as CommandHandler;
+        return file.default as CommandHandler;
+      })
+    );
 
-      commands[command.command] = command;
-    });
+    loader.forEach(val => (commands[val.command] = val));
   }
 
   return commands;
@@ -55,23 +56,23 @@ export function getCommands(): Record<string, CommandHandler> {
  *
  * @returns {EventHandler[]} list of event handlers.
  */
-export function getEvents(): EventHandler[] {
-  const basePath = resolve(__dirname, 'events');
-  const eventFiles = readdirSync(basePath);
+export function getEvents(): Promise<EventHandler[]> {
+  const base = new URL('events', import.meta.url);
+  const eventFiles = readdirSync(base);
 
-  const events = eventFiles.map((eventFile: string) => {
-    const file = require(resolve(basePath, eventFile));
+  return Promise.all(
+    eventFiles.map(async (ev: string) => {
+      const file = await import(new URL(`events/${ev}`, base).href);
 
-    const { event, once, fn } = file.default as EventHandler;
+      const { event, once, fn } = file.default as EventHandler;
 
-    return {
-      event,
-      once: once || false,
-      fn,
-    };
-  });
-
-  return events;
+      return {
+        event,
+        once: once || false,
+        fn,
+      };
+    })
+  );
 }
 
 /* c8 ignore end */

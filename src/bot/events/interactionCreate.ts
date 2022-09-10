@@ -26,7 +26,7 @@ export default {
     }
 
     try {
-      const commandMap = getCommands();
+      const commandMap = await getCommands();
       const handler = commandMap[interaction.commandName].fn;
 
       let embeds: EmbedBuilder[] = [UNKNOWN_COMMAND_EMBED];

@@ -1,4 +1,4 @@
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 
 import { getCommands } from '../utils';
 
@@ -8,8 +8,8 @@ export default {
   command: 'help',
   description: 'Show the help message',
   type: 'CHAT_INPUT',
-  fn: async (): Promise<MessageEmbed[]> => {
-    const rawCommands = getCommands();
+  fn: async (): Promise<EmbedBuilder[]> => {
+    const rawCommands = await getCommands();
     const commands = Object.keys(rawCommands)
       .map((name: string) => {
         const command = rawCommands[name];
@@ -23,7 +23,7 @@ export default {
       .filter(Boolean);
 
     return [
-      new MessageEmbed({
+      new EmbedBuilder({
         author: {
           name: 'pleasantcord',
           iconURL: process.env.IMAGE_URL,

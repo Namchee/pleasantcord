@@ -21,7 +21,7 @@ export default {
       }
 
       if (msg.content.startsWith(PREFIX)) {
-        const commandMap = getCommands();
+        const commandMap = await getCommands();
         const handler = commandMap[getCommandFromMessage(msg.content)].fn;
 
         let embeds: EmbedBuilder[] = [EMPTY_EMBED];

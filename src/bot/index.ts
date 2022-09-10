@@ -1,4 +1,4 @@
-import { Client, IntentsBitField } from 'discord.js';
+import { Client, GatewayIntentBits } from 'discord.js';
 
 import { ConfigurationService } from '../service/config';
 import { RateLimiter } from '../service/rate-limit';
@@ -20,8 +20,9 @@ export async function bootstrapBot(
 ): Promise<Client> {
   const client = new Client({
     intents: [
-      IntentsBitField.Flags.GuildMessages,
-      IntentsBitField.Flags.Guilds,
+      GatewayIntentBits.GuildMessages,
+      GatewayIntentBits.Guilds,
+      GatewayIntentBits.MessageContent,
     ],
   });
 
@@ -31,7 +32,7 @@ export async function bootstrapBot(
     rateLimiter,
   };
 
-  const eventHandlers = getEvents();
+  const eventHandlers = await getEvents();
 
   eventHandlers.forEach(({ event, once, fn }: EventHandler) => {
     // dependency injection

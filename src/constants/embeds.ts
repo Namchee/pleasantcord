@@ -1,9 +1,9 @@
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 
 import { RED } from './color';
 import { PREFIX } from './command';
 
-export const UNKNOWN_COMMAND_EMBED = new MessageEmbed({
+export const UNKNOWN_COMMAND_EMBED = new EmbedBuilder({
   author: {
     name: 'pleasantcord',
     iconURL: process.env.IMAGE_URL,
@@ -15,7 +15,7 @@ export const UNKNOWN_COMMAND_EMBED = new MessageEmbed({
     `**pleasantcord** doesn't recognize the command that have been just sent.\nPlease refer to **${PREFIX}help** to show all available **pleasantcords's** commands.`,
 });
 
-export const EMPTY_EMBED = new MessageEmbed({
+export const EMPTY_EMBED = new EmbedBuilder({
   author: {
     name: 'pleasantcord',
     iconURL: process.env.IMAGE_URL,

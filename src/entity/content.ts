@@ -1,3 +1,5 @@
+import { ModelType } from './config';
+
 // List of all content labels.
 export type Label = 'Drawing' | 'Hentai' | 'Porn' | 'Neutral' | 'Sexy';
 
@@ -16,6 +18,27 @@ export interface Content {
 export interface Category {
   name: Label;
   accuracy: number;
+}
+
+/**
+ * Classification parameters for processing
+ */
+export interface ClassificationParam {
+  source: string;
+  model: ModelType;
+  content: string[];
+}
+
+/**
+ * Classification result.
+ *
+ * Returned from classification result from thread
+ */
+export interface ClassificationResult {
+  name: string;
+  source: string;
+  categories: Category[];
+  time?: number;
 }
 
 /**

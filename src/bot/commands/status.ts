@@ -1,10 +1,7 @@
-import { resolve } from 'path';
-import { MessageEmbed } from 'discord.js';
+import { APIEmbedField, EmbedBuilder } from 'discord.js';
 
 import { BotContext, CommandHandlerParams } from '../types';
 import { BLUE, ORANGE } from '../../constants/color';
-
-const packageInfo = require(resolve(process.cwd(), 'package.json'));
 
 export default {
   command: 'status',
@@ -13,8 +10,12 @@ export default {
   fn: async (
     { client }: BotContext,
     { timestamp }: CommandHandlerParams
-  ): Promise<MessageEmbed[]> => {
+  ): Promise<EmbedBuilder[]> => {
     const time = Date.now() - timestamp;
+
+    const packageInfo = await import(
+      new URL('package.json', process.cwd()).href
+    );
 
     let packageVersion: string = packageInfo.dependencies['discord.js'];
 
@@ -23,7 +24,7 @@ export default {
       packageVersion = `v${packageVersion}`;
     }
 
-    const fields = [
+    const fields: APIEmbedField[] = [
       {
         name: 'Bot Environment',
         // eslint-disable-next-line max-len
@@ -44,7 +45,7 @@ export default {
     ];
 
     return [
-      new MessageEmbed({
+      new EmbedBuilder({
         author: {
           name: 'pleasantcord',
           iconURL: process.env.IMAGE_URL,

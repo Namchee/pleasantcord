@@ -1,4 +1,4 @@
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 import {
   classifyContent,
   generateClassificationResultLog,
@@ -15,7 +15,7 @@ export default {
   fn: async (
     ctx: BotContext,
     { guild, message }: CommandHandlerParams
-  ): Promise<MessageEmbed[] | undefined> => {
+  ): Promise<EmbedBuilder[] | undefined> => {
     if (!message) {
       return;
     }
@@ -29,7 +29,7 @@ export default {
     }
 
     const results = classifyContent(message, config, true);
-    const embeds: MessageEmbed[] = [];
+    const embeds: EmbedBuilder[] = [];
 
     for await (const result of results) {
       const embed = generateClassificationResultLog(

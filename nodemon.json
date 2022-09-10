@@ -12,6 +12,6 @@
   "env": {
     "NODE_ENV": "development"
   },
-  "exec": "node -r ts-node/register ./src/index.ts",
+  "exec": "esno ./src/index.ts",
   "ext": "ts, json"
 }

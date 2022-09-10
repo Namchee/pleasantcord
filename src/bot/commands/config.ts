@@ -1,4 +1,4 @@
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 
 import { BLUE, ORANGE } from '../../constants/color';
 
@@ -12,7 +12,7 @@ export default {
   fn: async (
     { service }: BotContext,
     { guild }: CommandHandlerParams
-  ): Promise<MessageEmbed[]> => {
+  ): Promise<EmbedBuilder[]> => {
     const config = await service.getConfig(guild.id);
 
     if (!config) {
@@ -22,7 +22,7 @@ export default {
     }
 
     return [
-      new MessageEmbed({
+      new EmbedBuilder({
         author: {
           name: 'pleasantcord',
           iconURL: process.env.IMAGE_URL,

@@ -3,7 +3,6 @@ import { config } from 'dotenv';
 import NodeCache from 'node-cache';
 
 import { bootstrapBot } from './bot';
-import { workers } from './bot/service/classifier';
 
 import { ConfigurationService } from './service/config';
 import { LocalRateLimiter } from './service/rate-limit';
@@ -51,7 +50,6 @@ if (process.env.NODE_ENV === 'development') {
 
   const cleanup = async (): Promise<void> => {
     client.destroy();
-    await workers.terminate(true);
     await Logger.getInstance().closeLogger();
   };
 

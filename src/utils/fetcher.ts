@@ -1,17 +1,15 @@
-import fetch from 'node-fetch';
+import fetch from 'isomorphic-unfetch';
 import cheerio from 'cheerio';
 import sharp from 'sharp';
 
 import { FFmpeg, createFFmpeg } from '@ffmpeg/ffmpeg';
-
-import type { Response } from 'node-fetch';
 
 export interface ContentData {
   mime: string;
   data: Buffer;
 }
 
-type Converter = (data: Response) => Promise<ContentData>;
+type Converter = (data: fetch.IsomorphicResponse) => Promise<ContentData>;
 
 const converterFunctions: Record<string, Converter> = {
   'video/mp4': convertVideoToGIF,
@@ -28,7 +26,9 @@ let mpeg: FFmpeg;
  * @param {Response} response raw response data
  * @returns {Promise<ContentData>} GIF buffer
  */
-async function convertVideoToGIF(response: Response): Promise<ContentData> {
+async function convertVideoToGIF(
+  response: fetch.IsomorphicResponse
+): Promise<ContentData> {
   if (!mpeg) {
     mpeg = createFFmpeg();
     await mpeg.load();
@@ -60,7 +60,9 @@ async function convertVideoToGIF(response: Response): Promise<ContentData> {
  * @param {Response} response raw response data
  * @returns {Promise<ContentData>} JPG buffer
  */
-async function convertWebPToJPG(response: Response): Promise<ContentData> {
+async function convertWebPToJPG(
+  response: fetch.IsomorphicResponse
+): Promise<ContentData> {
   const buffer = await response.buffer();
   const jpegBuffer = await sharp(buffer).jpeg().toBuffer();
 
@@ -76,7 +78,9 @@ async function convertWebPToJPG(response: Response): Promise<ContentData> {
  * @param {Response} response raw response data
  * @returns {Promise<ContentData>} image buffer
  */
-async function extractImageFromHTML(response: Response): Promise<ContentData> {
+async function extractImageFromHTML(
+  response: fetch.IsomorphicResponse
+): Promise<ContentData> {
   const body = await response.text();
 
   const $ = cheerio.load(body);

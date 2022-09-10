@@ -1,4 +1,4 @@
-import fetch from 'node-fetch';
+import fetch from 'isomorphic-unfetch';
 import NodeCache from 'node-cache';
 
 import { Logger } from './../utils/logger';
