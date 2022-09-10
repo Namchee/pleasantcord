@@ -128,7 +128,7 @@ async function classifyGIF(
  * @returns {Promise<Category[]>} content labels, sorted
  * by descending accuracy
  */
-export async function classify({
+export default async function classify({
   source,
   model,
   content,

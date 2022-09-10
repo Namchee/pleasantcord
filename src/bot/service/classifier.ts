@@ -18,7 +18,7 @@ import { BLUE, ORANGE } from './../../constants/color';
 
 import { BotContext } from '../types';
 
-import { getFilterableContents } from '../utils';
+import { getFilterableContents, handleError } from '../utils';
 
 const pool = new Tinypool({
   filename: new URL('../../service/workers', import.meta.url).href,
@@ -45,7 +45,7 @@ export function classifyContent(
     return [];
   }
 
-  const classifiableContent = getContentTypeFromConfig(config);
+  const targets = getContentTypeFromConfig(config);
 
   const result = contents.map(async ({ name, url }) => {
     let start = 0;
@@ -57,7 +57,7 @@ export function classifyContent(
     const categories: Category[] = await pool.run({
       source: url,
       model: config.model,
-      contents: classifiableContent,
+      content: targets,
     });
 
     return {
@@ -83,109 +83,118 @@ export async function moderateContent(
   { service, rateLimiter }: BotContext,
   msg: Message
 ): Promise<void> {
-  const channel = msg.channel as TextChannel;
+  try {
+    const channel = msg.channel as TextChannel;
 
-  if (channel.nsfw) {
-    return;
-  }
-
-  const isDev = process.env.NODE_ENV !== 'production';
-  const rateLimitKey = `${msg.guildId as string}:${msg.channelId}`;
-
-  if (rateLimiter.isRateLimited(rateLimitKey) && !isDev) {
-    return;
-  }
-  rateLimiter.rateLimit(rateLimitKey);
-
-  let config = BASE_CONFIG;
-  const realConfig = await service.getConfig(msg.guildId as string);
-  if (realConfig) {
-    config = realConfig;
-  }
-
-  const results = classifyContent(msg, config, isDev);
-
-  for await (const { name, source, categories, time } of results) {
-    if (!categories.length) {
-      continue;
+    if (channel.nsfw) {
+      return;
     }
 
-    const nsfwCategory = categories.find(cat => {
-      return (
-        config.categories.includes(cat.name) && cat.accuracy >= config.accuracy
-      );
-    });
+    const isDev = process.env.NODE_ENV !== 'production';
+    const rateLimitKey = `${msg.guildId as string}:${msg.channelId}`;
 
-    const promises = [];
+    if (rateLimiter.isRateLimited(rateLimitKey) && !isDev) {
+      return;
+    }
+    rateLimiter.rateLimit(rateLimitKey);
 
-    if (nsfwCategory) {
-      const fields = [
-        {
-          name: 'Author',
-          value: msg.author.toString(),
-        },
-        {
-          name: 'Category',
-          value: nsfwCategory.name,
-          inline: true,
-        },
-        {
-          name: 'Accuracy',
-          value: `${(nsfwCategory.accuracy * 100).toFixed(2)}%`,
-          inline: true,
-        },
-      ];
+    let config = BASE_CONFIG;
+    const realConfig = await service.getConfig(msg.guildId as string);
+    if (realConfig) {
+      config = realConfig;
+    }
 
-      if (msg.content) {
-        fields.push({
-          name: 'Contents',
-          value: msg.content,
-          inline: false,
-        });
+    const results = classifyContent(msg, config, isDev);
+
+    for await (const { name, source, categories, time } of results) {
+      if (!categories.length) {
+        continue;
       }
 
-      const embed = new EmbedBuilder({
-        author: {
-          name: 'pleasantcord',
-          iconURL: process.env.IMAGE_URL,
-        },
-        title: 'Possible NSFW Contents Detected',
-        fields,
-        color: process.env.NODE_ENV !== 'production' ? BLUE : ORANGE,
+      const nsfwCategory = categories.find(cat => {
+        return (
+          config.categories.includes(cat.name) &&
+          cat.accuracy >= config.accuracy
+        );
       });
 
-      promises.push(channel.send({ embeds: [embed] }));
+      const promises = [];
 
-      const files = [];
+      if (nsfwCategory) {
+        const fields = [
+          {
+            name: 'Author',
+            value: msg.author.toString(),
+          },
+          {
+            name: 'Category',
+            value: nsfwCategory.name,
+            inline: true,
+          },
+          {
+            name: 'Accuracy',
+            value: `${(nsfwCategory.accuracy * 100).toFixed(2)}%`,
+            inline: true,
+          },
+        ];
 
-      if (!config.delete) {
-        files.push({
-          attachment: source,
-          name: `SPOILER_${name}`,
+        if (msg.content) {
+          fields.push({
+            name: 'Contents',
+            value: msg.content,
+            inline: false,
+          });
+        }
+
+        const embed = new EmbedBuilder({
+          author: {
+            name: 'pleasantcord',
+            iconURL: process.env.IMAGE_URL,
+          },
+          title: 'Possible NSFW Contents Detected',
+          fields,
+          color: process.env.NODE_ENV !== 'production' ? BLUE : ORANGE,
         });
 
-        promises.push(channel.send({ files }));
+        promises.push(channel.send({ embeds: [embed] }));
+
+        const files = [];
+
+        if (!config.delete) {
+          files.push({
+            attachment: source,
+            name: `SPOILER_${name}`,
+          });
+
+          promises.push(channel.send({ files }));
+        }
+
+        if (msg.deletable) {
+          promises.push(msg.delete());
+        }
       }
 
-      if (msg.deletable) {
-        promises.push(msg.delete());
+      if (process.env.NODE_ENV !== 'production') {
+        const resultLog = generateClassificationResultLog(
+          categories,
+          config,
+          time || 0
+        );
+
+        promises.push(channel.send({ embeds: [resultLog] }));
+      }
+
+      await Promise.all(promises);
+
+      if (nsfwCategory) {
+        break;
       }
     }
+  } catch (err) {
+    const errorEmbed = handleError(err as Error);
 
-    if (process.env.NODE_ENV !== 'production') {
-      const resultLog = generateClassificationResultLog(
-        categories,
-        config,
-        time || 0
-      );
-
-      promises.push(channel.send({ embeds: [resultLog] }));
-    }
-
-    await Promise.all(promises);
-
-    if (nsfwCategory) {
-      break;
+    if (errorEmbed) {
+      await msg.channel.send({ embeds: [errorEmbed] });
     }
   }
 }

@@ -14,7 +14,7 @@ export default {
     const time = Date.now() - timestamp;
 
     const packageInfo = await import(
-      new URL('package.json', process.cwd()).href
+      new URL('../../../package.json', import.meta.url).href
     );
 
     let packageVersion: string = packageInfo.dependencies['discord.js'];

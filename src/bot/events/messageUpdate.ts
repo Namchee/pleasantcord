@@ -18,6 +18,10 @@ export default {
         return;
       }
 
+      if (msg.partial) {
+        await msg.fetch();
+      }
+
       return moderateContent(ctx, msg);
     } catch (err) {
       const errorEmbed = handleError(err as Error);

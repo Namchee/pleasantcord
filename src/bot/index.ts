@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits } from 'discord.js';
+import { Client, GatewayIntentBits, Partials } from 'discord.js';
 
 import { ConfigurationService } from '../service/config';
 import { RateLimiter } from '../service/rate-limit';
@@ -24,6 +24,7 @@ export async function bootstrapBot(
       GatewayIntentBits.Guilds,
       GatewayIntentBits.MessageContent,
     ],
+    partials: [Partials.Message],
   });
 
   const context: BotContext = {

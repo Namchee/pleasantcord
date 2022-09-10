@@ -20,6 +20,10 @@ export default {
         return;
       }
 
+      if (msg.partial) {
+        await msg.fetch();
+      }
+
       if (msg.content.startsWith(PREFIX)) {
         const commandMap = await getCommands();
         const handler = commandMap[getCommandFromMessage(msg.content)].fn;
