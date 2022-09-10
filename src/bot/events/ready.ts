@@ -1,6 +1,6 @@
 import { ActivityType } from 'discord.js';
-import { BotContext } from '../types';
-import { handleError } from './../utils';
+import { BotContext } from '../types.js';
+import { handleError } from './../utils.js';
 
 export default {
   event: 'ready',

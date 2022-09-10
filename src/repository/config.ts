@@ -1,12 +1,12 @@
 import fetch from 'isomorphic-unfetch';
 import NodeCache from 'node-cache';
 
-import { Logger } from './../utils/logger';
+import { Logger } from './../utils/logger.js';
 
-import { FIVE_MINUTES } from './../constants/time';
+import { FIVE_MINUTES } from './../constants/time.js';
 
-import type { APIResponse } from './../entity/api';
-import type { Configuration } from './../entity/config';
+import type { APIResponse } from './../entity/api.js';
+import type { Configuration } from './../entity/config.js';
 
 export interface ConfigurationCache {
   getConfig: (id: string) => Configuration | null;

@@ -5,13 +5,13 @@ import { NSFWJS, load } from 'nsfwjs';
 import {
   aggregatePrediction,
   mapClassificationsToCategories,
-} from './../utils/mapper';
-import { fetchContent } from './../utils/fetcher';
+} from './../utils/mapper.js';
+import { fetchContent } from './../utils/fetcher.js';
 
-import { ModelType } from './../entity/config';
+import { ModelType } from './../entity/config.js';
 
-import { ClassificationParam, sortCategories } from './../entity/content';
-import type { Category } from './../entity/content';
+import { ClassificationParam, sortCategories } from './../entity/content.js';
+import type { Category } from './../entity/content.js';
 
 let mobilenet: NSFWJS;
 let inception: NSFWJS;

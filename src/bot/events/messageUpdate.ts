@@ -1,10 +1,10 @@
 import { Message } from 'discord.js';
 
-import { moderateContent } from '../service/classifier';
+import { moderateContent } from '../service/classifier.js';
 
-import { handleError } from '../utils';
+import { handleError } from '../utils.js';
 
-import { BotContext } from '../types';
+import { BotContext } from '../types.js';
 
 export default {
   event: 'messageUpdate',

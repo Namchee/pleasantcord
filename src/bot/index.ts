@@ -1,9 +1,9 @@
 import { Client, GatewayIntentBits, Partials } from 'discord.js';
 
-import { ConfigurationService } from '../service/config';
-import { RateLimiter } from '../service/rate-limit';
-import { BotContext, EventHandler } from './types';
-import { getEvents } from './utils';
+import { ConfigurationService } from '../service/config.js';
+import { RateLimiter } from '../service/rate-limit.js';
+import { BotContext, EventHandler } from './types.js';
+import { getEvents } from './utils.js';
 
 /**
  * Bootstrap the bot client with all dependencies and

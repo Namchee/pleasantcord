@@ -1,7 +1,7 @@
 import { EmbedBuilder } from 'discord.js';
 
-import { RED } from './color';
-import { PREFIX } from './command';
+import { RED } from './color.js';
+import { PREFIX } from './command.js';
 
 export const UNKNOWN_COMMAND_EMBED = new EmbedBuilder({
   author: {

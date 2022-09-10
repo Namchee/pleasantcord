@@ -1,9 +1,9 @@
 import { EmbedBuilder } from 'discord.js';
 
-import { BLUE, ORANGE } from '../../constants/color';
+import { BLUE, ORANGE } from '../../constants/color.js';
 
-import { BotContext, CommandHandlerParams } from '../types';
-import { RecoverableError } from './../../exceptions/recoverable';
+import { BotContext, CommandHandlerParams } from '../types.js';
+import { RecoverableError } from './../../exceptions/recoverable.js';
 
 export default {
   command: 'config',

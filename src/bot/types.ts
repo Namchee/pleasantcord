@@ -7,8 +7,8 @@ import {
   TextChannel,
 } from 'discord.js';
 
-import { ConfigurationService } from '../service/config';
-import { RateLimiter } from '../service/rate-limit';
+import { ConfigurationService } from '../service/config.js';
+import { RateLimiter } from '../service/rate-limit.js';
 
 // Bot dependency object.
 export interface BotContext {

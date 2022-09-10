@@ -2,22 +2,22 @@ import { readdirSync } from 'fs';
 
 import { Message, EmbedBuilder, RESTJSONErrorCodes } from 'discord.js';
 
-import { Content } from '../entity/content';
+import { Content } from '../entity/content.js';
 
-import { RecoverableError } from '../exceptions/recoverable';
+import { RecoverableError } from '../exceptions/recoverable.js';
 
-import { CommandHandler, EventHandler } from './types';
+import { CommandHandler, EventHandler } from './types.js';
 
-import { PERMISSION_ERRORS } from '../constants/error';
-import { RED } from '../constants/color';
-import { PREFIX } from '../constants/command';
+import { PERMISSION_ERRORS } from '../constants/error.js';
+import { RED } from '../constants/color.js';
+import { PREFIX } from '../constants/command.js';
 import {
   CDN,
   PLACEHOLDER_NAME,
   SUPPORTED_CONTENTS,
-} from '../constants/content';
+} from '../constants/content.js';
 
-import { Logger } from '../utils/logger';
+import { Logger } from '../utils/logger.js';
 
 // this cannot be tested at the moment. Context: https://github.com/vitest-dev/vitest/issues/110
 /* c8 ignore start */

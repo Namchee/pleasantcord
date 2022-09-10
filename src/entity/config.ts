@@ -1,6 +1,6 @@
-import { CONTENT_TYPE_MAP } from '../constants/content';
+import { CONTENT_TYPE_MAP } from '../constants/content.js';
 
-import type { Label } from './content';
+import type { Label } from './content.js';
 
 export type ModelType = 'MobileNet' | 'Inception';
 export type ContentType = 'Image' | 'Video' | 'Sticker';

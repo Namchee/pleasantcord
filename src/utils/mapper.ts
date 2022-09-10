@@ -1,6 +1,6 @@
 import { predictionType } from 'nsfwjs';
 
-import type { Category, Label } from './../entity/content';
+import type { Category, Label } from './../entity/content.js';
 
 /**
  * Map predictions into categories

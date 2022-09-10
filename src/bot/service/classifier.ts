@@ -7,18 +7,18 @@ import {
   BASE_CONFIG,
   Configuration,
   getContentTypeFromConfig,
-} from './../../entity/config';
+} from './../../entity/config.js';
 import {
   Category,
   Content,
   ClassificationResult,
-} from './../../entity/content';
+} from './../../entity/content.js';
 
-import { BLUE, ORANGE } from './../../constants/color';
+import { BLUE, ORANGE } from './../../constants/color.js';
 
-import { BotContext } from '../types';
+import { BotContext } from '../types.js';
 
-import { getFilterableContents, handleError } from '../utils';
+import { getFilterableContents, handleError } from '../utils.js';
 
 const pool = new Tinypool({
   filename: new URL('../../service/workers', import.meta.url).href,

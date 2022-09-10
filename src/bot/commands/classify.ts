@@ -2,10 +2,10 @@ import { EmbedBuilder } from 'discord.js';
 import {
   classifyContent,
   generateClassificationResultLog,
-} from '../service/classifier';
+} from '../service/classifier.js';
 
-import { BotContext, CommandHandlerParams } from '../types';
-import { RecoverableError } from './../../exceptions/recoverable';
+import { BotContext, CommandHandlerParams } from '../types.js';
+import { RecoverableError } from './../../exceptions/recoverable.js';
 
 export default {
   command: 'Classify Content',

@@ -1,6 +1,6 @@
 import NodeCache from 'node-cache';
 
-import { THREE_SECONDS } from '../constants/time';
+import { THREE_SECONDS } from '../constants/time.js';
 
 export interface RateLimiter {
   isRateLimited(key: string): boolean;

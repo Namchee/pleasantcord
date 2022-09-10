@@ -1,4 +1,4 @@
-import { ModelType } from './config';
+import { ModelType } from './config.js';
 
 // List of all content labels.
 export type Label = 'Drawing' | 'Hentai' | 'Porn' | 'Neutral' | 'Sexy';

@@ -1,14 +1,14 @@
 import { Guild, EmbedBuilder, TextChannel } from 'discord.js';
 
-import { Credentials, registerCommands } from '../service/command';
+import { Credentials, registerCommands } from '../service/command.js';
 
-import { BASE_CONFIG } from './../../entity/config';
+import { BASE_CONFIG } from './../../entity/config.js';
 
-import { handleError } from './../utils';
+import { handleError } from './../utils.js';
 
-import type { BotContext } from './../types';
+import type { BotContext } from './../types.js';
 
-import { DEFAULT_CHANNEL } from './../../constants/channel';
+import { DEFAULT_CHANNEL } from './../../constants/channel.js';
 
 export default {
   event: 'guildCreate',

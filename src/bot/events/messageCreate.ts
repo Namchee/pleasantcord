@@ -1,13 +1,13 @@
 import { Message, EmbedBuilder, TextChannel } from 'discord.js';
 
-import { moderateContent } from '../service/classifier';
+import { moderateContent } from '../service/classifier.js';
 
-import { handleError, getCommandFromMessage, getCommands } from '../utils';
+import { handleError, getCommandFromMessage, getCommands } from '../utils.js';
 
-import { BotContext, CommandHandlerParams } from '../types';
+import { BotContext, CommandHandlerParams } from '../types.js';
 
-import { PREFIX } from '../../constants/command';
-import { EMPTY_EMBED } from '../../constants/embeds';
+import { PREFIX } from '../../constants/command.js';
+import { EMPTY_EMBED } from '../../constants/embeds.js';
 
 export default {
   event: 'messageCreate',

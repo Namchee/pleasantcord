@@ -1,8 +1,8 @@
 import { EmbedBuilder } from 'discord.js';
 
-import { getCommands } from '../utils';
+import { getCommands } from '../utils.js';
 
-import { BLUE, ORANGE } from '../../constants/color';
+import { BLUE, ORANGE } from '../../constants/color.js';
 
 export default {
   command: 'help',

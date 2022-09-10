@@ -1,7 +1,7 @@
 import { APIEmbedField, EmbedBuilder } from 'discord.js';
 
-import { BotContext, CommandHandlerParams } from '../types';
-import { BLUE, ORANGE } from '../../constants/color';
+import { BotContext, CommandHandlerParams } from '../types.js';
+import { BLUE, ORANGE } from '../../constants/color.js';
 
 export default {
   command: 'status',

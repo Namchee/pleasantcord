@@ -1,9 +1,12 @@
 import { Interaction, Message, EmbedBuilder, TextChannel } from 'discord.js';
 
-import { EMPTY_EMBED, UNKNOWN_COMMAND_EMBED } from './../../constants/embeds';
-import { BotContext, CommandHandlerParams } from '../types';
+import {
+  EMPTY_EMBED,
+  UNKNOWN_COMMAND_EMBED,
+} from './../../constants/embeds.js';
+import { BotContext, CommandHandlerParams } from '../types.js';
 
-import { getCommands, handleError } from '../utils';
+import { getCommands, handleError } from '../utils.js';
 
 export default {
   event: 'interactionCreate',
