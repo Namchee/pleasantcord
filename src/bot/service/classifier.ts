@@ -21,7 +21,7 @@ import { BotContext } from '../types.js';
 import { getFilterableContents, handleError } from '../utils.js';
 
 const pool = new Tinypool({
-  filename: new URL('../../service/workers', import.meta.url).href,
+  filename: new URL('../../service/workers.js', import.meta.url).href,
 });
 
 /**
