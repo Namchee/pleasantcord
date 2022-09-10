@@ -173,7 +173,8 @@ export function getFilterableContents(
     }
   });
 
-  msg.embeds.forEach(({ url, image, video, thumbnail }) => {
+  msg.embeds.forEach(({ data }) => {
+    const { url, image, video, thumbnail } = data;
     const contentUrl = video?.url || image?.url || thumbnail?.url || url || '';
 
     if (contentUrl) {

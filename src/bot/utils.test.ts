@@ -1,5 +1,10 @@
 import { describe, it, afterEach, beforeEach, vi, expect } from 'vitest';
-import { Collection, Constants, Message, EmbedBuilder } from 'discord.js';
+import {
+  Collection,
+  Message,
+  EmbedBuilder,
+  RESTJSONErrorCodes,
+} from 'discord.js';
 
 import {
   getCommandFromMessage,
@@ -45,14 +50,12 @@ describe('handleError', () => {
 
     const err = handleError(error);
 
-    const colorCode = parseInt(RED.slice(1), 16);
-
     expect(loggerSpy).toHaveBeenCalledTimes(1);
     expect(loggerSpy).toHaveBeenCalledWith(error);
     expect(err).toBeInstanceOf(EmbedBuilder);
     expect(err?.data.author?.name).toBe('pleasantcord');
     expect(err?.data.author?.icon_url).toBe(url);
-    expect(err?.data.color).toBe(colorCode);
+    expect(err?.data.color).toBe(RED);
     expect(err?.data.title).toBe('Ouch!');
     expect(err?.data.description).toBe(
       'Unfortunately, `pleasantcord` has encountered an unexpected error. The error has been reported to the system and will be resolved as soon as possible.\n\nIf this issue persists, please submit an issue to [GitHub](https://github.com/Namchee/pleasantcord/issues) or join [our support server](https://discord.gg/Pj4aGp8Aky) and submit your bug report on the appropriate channel.'
@@ -67,20 +70,18 @@ describe('handleError', () => {
 
     const err = handleError(error);
 
-    const colorCode = parseInt(RED.slice(1), 16);
-
     expect(loggerSpy).toHaveBeenCalledTimes(1);
     expect(loggerSpy).toHaveBeenCalledWith(error);
     expect(err).toBeInstanceOf(EmbedBuilder);
-    expect(err?.author?.name).toBe('pleasantcord');
-    expect(err?.author?.iconURL).toBe(url);
-    expect(err?.color).toBe(colorCode);
-    expect(err?.title).toBe('Ouch!');
-    expect(err?.description).toBe('Hey, this error can easily be solved!');
+    expect(err?.data.author?.name).toBe('pleasantcord');
+    expect(err?.data.author?.icon_url).toBe(url);
+    expect(err?.data.color).toBe(RED);
+    expect(err?.data.title).toBe('Ouch!');
+    expect(err?.data.description).toBe('Hey, this error can easily be solved!');
   });
 
   it('should ignore message deletion error', () => {
-    const error = new MockError('foo', Constants.APIErrors.UNKNOWN_MESSAGE);
+    const error = new MockError('foo', RESTJSONErrorCodes.UnknownMessage);
 
     const err = handleError(error);
 
@@ -88,57 +89,54 @@ describe('handleError', () => {
   });
 
   it('should handle missing access error', () => {
-    const error = new MockError('foo', Constants.APIErrors.MISSING_ACCESS);
+    const error = new MockError('foo', RESTJSONErrorCodes.MissingAccess);
 
     const err = handleError(error);
 
-    const colorCode = parseInt(RED.slice(1), 16);
-
     expect(err).toBeInstanceOf(EmbedBuilder);
-    expect(err?.author?.name).toBe('pleasantcord');
-    expect(err?.author?.iconURL).toBe(url);
-    expect(err?.color).toBe(colorCode);
-    expect(err?.title).toBe('Insufficient Permissions');
-    expect(err?.description).toBe(
+    expect(err?.data.author?.name).toBe('pleasantcord');
+    expect(err?.data.author?.icon_url).toBe(url);
+    expect(err?.data.color).toBe(RED);
+    expect(err?.data.title).toBe('Insufficient Permissions');
+    expect(err?.data.description).toBe(
       `\`pleasantcord\` lacks the required permissions to perform its duties`
     );
-    expect(err?.fields.length).toBe(1);
+    expect(err?.data.fields?.length).toBe(1);
   });
 
   it('should handle missing permissions error', () => {
-    const error = new MockError('foo', Constants.APIErrors.MISSING_PERMISSIONS);
+    const error = new MockError('foo', RESTJSONErrorCodes.MissingPermissions);
 
     const err = handleError(error);
 
-    const colorCode = parseInt(RED.slice(1), 16);
-
     expect(err).toBeInstanceOf(EmbedBuilder);
-    expect(err?.author?.name).toBe('pleasantcord');
-    expect(err?.author?.iconURL).toBe(url);
-    expect(err?.color).toBe(colorCode);
-    expect(err?.title).toBe('Insufficient Permissions');
-    expect(err?.description).toBe(
+    expect(err?.data.author?.name).toBe('pleasantcord');
+    expect(err?.data.author?.icon_url).toBe(url);
+    expect(err?.data.color).toBe(RED);
+    expect(err?.data.title).toBe('Insufficient Permissions');
+    expect(err?.data.description).toBe(
       `\`pleasantcord\` lacks the required permissions to perform its duties`
     );
-    expect(err?.fields.length).toBe(1);
+    expect(err?.data.fields?.length).toBe(1);
   });
 
   it('should handle OAuth', () => {
-    const error = new MockError('foo', Constants.APIErrors.MISSING_OAUTH_SCOPE);
+    const error = new MockError(
+      'foo',
+      RESTJSONErrorCodes.MissingRequiredOAuth2Scope
+    );
 
     const err = handleError(error);
 
-    const colorCode = parseInt(RED.slice(1), 16);
-
     expect(err).toBeInstanceOf(EmbedBuilder);
-    expect(err?.author?.name).toBe('pleasantcord');
-    expect(err?.author?.iconURL).toBe(url);
-    expect(err?.color).toBe(colorCode);
-    expect(err?.title).toBe('Insufficient Permissions');
-    expect(err?.description).toBe(
+    expect(err?.data.author?.name).toBe('pleasantcord');
+    expect(err?.data.author?.icon_url).toBe(url);
+    expect(err?.data.color).toBe(RED);
+    expect(err?.data.title).toBe('Insufficient Permissions');
+    expect(err?.data.description).toBe(
       `\`pleasantcord\` lacks the required permissions to perform its duties`
     );
-    expect(err?.fields.length).toBe(1);
+    expect(err?.data.fields?.length).toBe(1);
   });
 });
 
