@@ -44,6 +44,11 @@ export default {
             value: `You can configure \`pleasantcord\`'s behavior on your server from [our dashboard](https://pleasantcord.namchee.dev)`,
           },
           {
+            name: 'Issues?',
+            value:
+              'Feel free to join our support server by clicking [here](https://discord.gg/Pj4aGp8Aky)',
+          },
+          {
             name: 'Contribution',
             value: `You can contribute to \`pleasantcord\`'s development on [GitHub](https://github.com/Namchee/pleasantcord)`,
           },
