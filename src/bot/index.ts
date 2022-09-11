@@ -30,7 +30,7 @@ export async function bootstrapBot(
   });
 
   const pool = new Tinypool({
-    filename: new URL('../service/workers', import.meta.url).href,
+    filename: new URL('../service/workers.js', import.meta.url).href,
   });
 
   const context: BotContext = {
