@@ -7,6 +7,8 @@ import {
   TextChannel,
 } from 'discord.js';
 
+import Tinypool from 'tinypool';
+
 import { ConfigurationService } from '../service/config.js';
 import { RateLimiter } from '../service/rate-limit.js';
 
@@ -15,6 +17,7 @@ export interface BotContext {
   client: Client;
   service: ConfigurationService;
   rateLimiter: RateLimiter;
+  pool: Tinypool;
 }
 
 // Discord's event handler definition

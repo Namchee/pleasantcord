@@ -28,7 +28,12 @@ export default {
       );
     }
 
-    const results = classifyContent(message, config, true);
+    const results = classifyContent(
+      message,
+      config,
+      ctx.pool,
+      process.env.NODE_ENV === 'development'
+    );
     const embeds: EmbedBuilder[] = [];
 
     for await (const result of results) {

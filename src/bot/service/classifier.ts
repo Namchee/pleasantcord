@@ -1,8 +1,6 @@
 import { Message, TextChannel, EmbedBuilder } from 'discord.js';
 import { performance } from 'node:perf_hooks';
 
-import Tinypool from 'tinypool';
-
 import {
   BASE_CONFIG,
   Configuration,
@@ -19,22 +17,21 @@ import { BLUE, ORANGE } from './../../constants/color.js';
 import { BotContext } from '../types.js';
 
 import { getFilterableContents, handleError } from '../utils.js';
-
-const pool = new Tinypool({
-  filename: new URL('../../service/workers.js', import.meta.url).href,
-});
+import Tinypool from 'tinypool';
 
 /**
  * Classify contents from a user message
  *
  * @param {Message} msg user message
  * @param {Configuration} config server configuration
+ * @param {Tinypool} pool worker pool
  * @param {boolean} time determines if elapsed time should be logged or not
  * @returns {Promise<ClassificationResult>[]} classification tasks
  */
 export function classifyContent(
   msg: Message,
   config: Configuration,
+  pool: Tinypool,
   time = false
 ): Promise<ClassificationResult>[] {
   const contents: Content[] = getFilterableContents(
@@ -80,7 +77,7 @@ export function classifyContent(
  * @returns {Promise<void>}
  */
 export async function moderateContent(
-  { service, rateLimiter }: BotContext,
+  { service, rateLimiter, pool }: BotContext,
   msg: Message
 ): Promise<void> {
   try {
@@ -104,7 +101,7 @@ export async function moderateContent(
       config = realConfig;
     }
 
-    const results = classifyContent(msg, config, isDev);
+    const results = classifyContent(msg, config, pool, isDev);
 
     for await (const { name, source, categories, time } of results) {
       if (!categories.length) {

@@ -1,5 +1,7 @@
 import { Client, GatewayIntentBits, Partials } from 'discord.js';
 
+import Tinypool from 'tinypool';
+
 import { ConfigurationService } from '../service/config.js';
 import { RateLimiter } from '../service/rate-limit.js';
 import { BotContext, EventHandler } from './types.js';
@@ -27,10 +29,15 @@ export async function bootstrapBot(
     partials: [Partials.Message],
   });
 
+  const pool = new Tinypool({
+    filename: new URL('../service/workers', import.meta.url).href,
+  });
+
   const context: BotContext = {
     client,
     service,
     rateLimiter,
+    pool,
   };
 
   const eventHandlers = await getEvents();
