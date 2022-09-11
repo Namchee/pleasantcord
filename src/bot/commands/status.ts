@@ -1,5 +1,7 @@
 import { APIEmbedField, EmbedBuilder } from 'discord.js';
 
+import { readFile } from 'fs/promises';
+
 import { BotContext, CommandHandlerParams } from '../types.js';
 import { BLUE, ORANGE } from '../../constants/color.js';
 
@@ -13,9 +15,11 @@ export default {
   ): Promise<EmbedBuilder[]> => {
     const time = Date.now() - timestamp;
 
-    const packageInfo = await import(
-      new URL('../../../package.json', import.meta.url).href
+    const file = await readFile(
+      new URL('../../../package.json', import.meta.url)
     );
+
+    const packageInfo = JSON.parse(file.toString());
 
     let packageVersion: string = packageInfo.dependencies['discord.js'];
 
