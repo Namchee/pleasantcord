@@ -1,10 +1,10 @@
 import { Message } from 'discord.js';
 
-import { moderateContent } from '../service/classifier';
+import { moderateContent } from '../service/classifier.js';
 
-import { handleError } from '../utils';
+import { handleError } from '../utils.js';
 
-import { BotContext } from '../types';
+import { BotContext } from '../types.js';
 
 export default {
   event: 'messageUpdate',
@@ -14,8 +14,12 @@ export default {
     msg: Message
   ): Promise<Message<boolean> | void> => {
     try {
-      if (!msg.guild || !msg.channel.isText() || msg.author.bot) {
+      if (!msg.guild || !msg.channel.isTextBased() || msg.author.bot) {
         return;
+      }
+
+      if (msg.partial) {
+        await msg.fetch();
       }
 
       return moderateContent(ctx, msg);

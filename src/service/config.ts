@@ -1,9 +1,9 @@
 import {
   ConfigurationCache,
   ConfigurationRepository,
-} from './../repository/config';
+} from './../repository/config.js';
 
-import type { Configuration } from './../entity/config';
+import type { Configuration } from './../entity/config.js';
 
 export class ConfigurationService {
   public constructor(

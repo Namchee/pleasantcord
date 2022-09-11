@@ -1,40 +1,39 @@
-import { Message, TextChannel, MessageEmbed } from 'discord.js';
-
-import { FunctionThread, Pool, spawn, Worker } from 'threads';
-import { QueuedTask } from 'threads/dist/master/pool-types';
-
-import { Classifier } from './../../service/workers';
+import { Message, TextChannel, EmbedBuilder } from 'discord.js';
+import { performance } from 'node:perf_hooks';
 
 import {
   BASE_CONFIG,
   Configuration,
   getContentTypeFromConfig,
-} from './../../entity/config';
-import { Category, Content } from './../../entity/content';
+} from './../../entity/config.js';
+import {
+  Category,
+  Content,
+  ClassificationResult,
+} from './../../entity/content.js';
 
-import { BLUE, ORANGE } from './../../constants/color';
+import { BLUE, ORANGE } from './../../constants/color.js';
 
-import { BotContext, ClassificationResult } from '../types';
+import { BotContext } from '../types.js';
 
-import { getFilterableContents } from '../utils';
-
-export const workers = Pool(() =>
-  spawn<Classifier>(new Worker('../../service/workers'))
-);
+import { getFilterableContents, handleError } from '../utils.js';
+import Tinypool from 'tinypool';
 
 /**
  * Classify contents from a user message
  *
  * @param {Message} msg user message
  * @param {Configuration} config server configuration
+ * @param {Tinypool} pool worker pool
  * @param {boolean} time determines if elapsed time should be logged or not
- * @returns {QueuedTask<FunctionThread, ClassificationResult>[]} classification tasks
+ * @returns {Promise<ClassificationResult>[]} classification tasks
  */
 export function classifyContent(
   msg: Message,
   config: Configuration,
+  pool: Tinypool,
   time = false
-): QueuedTask<FunctionThread, ClassificationResult>[] {
+): Promise<ClassificationResult>[] {
   const contents: Content[] = getFilterableContents(
     msg,
     config.contents.includes('Sticker')
@@ -43,36 +42,30 @@ export function classifyContent(
     return [];
   }
 
-  const classifiableContent = getContentTypeFromConfig(config);
+  const targets = getContentTypeFromConfig(config);
 
-  const tasks: QueuedTask<FunctionThread, ClassificationResult>[] = [];
+  const result = contents.map(async ({ name, url }) => {
+    let start = 0;
 
-  contents.forEach(({ name, url }) => {
-    const classification = workers.queue(async classifier => {
-      let start = 0;
+    if (time) {
+      start = performance.now();
+    }
 
-      if (time) {
-        start = performance.now();
-      }
-
-      const categories = await classifier(
-        url,
-        config.model,
-        classifiableContent
-      );
-
-      return {
-        name,
-        source: url,
-        categories,
-        time: time ? performance.now() - start : undefined,
-      };
+    const categories: Category[] = await pool.run({
+      source: url,
+      model: config.model,
+      content: targets,
     });
 
-    tasks.push(classification);
+    return {
+      name,
+      source: url,
+      categories,
+      time: time ? performance.now() - start : undefined,
+    };
   });
 
-  return tasks;
+  return result;
 }
 
 /**
@@ -84,132 +77,139 @@ export function classifyContent(
  * @returns {Promise<void>}
  */
 export async function moderateContent(
-  { service, rateLimiter }: BotContext,
+  { service, rateLimiter, pool }: BotContext,
   msg: Message
 ): Promise<void> {
-  const channel = msg.channel as TextChannel;
+  try {
+    const channel = msg.channel as TextChannel;
 
-  if (channel.nsfw) {
-    return;
-  }
-
-  const isDev = process.env.NODE_ENV !== 'production';
-  const rateLimitKey = `${msg.guildId as string}:${msg.channelId}`;
-
-  if (rateLimiter.isRateLimited(rateLimitKey) && !isDev) {
-    return;
-  }
-  rateLimiter.rateLimit(rateLimitKey);
-
-  let config = BASE_CONFIG;
-  const realConfig = await service.getConfig(msg.guildId as string);
-  if (realConfig) {
-    config = realConfig;
-  }
-
-  const results = classifyContent(msg, config, isDev);
-
-  for await (const { name, source, categories, time } of results) {
-    if (!categories.length) {
-      continue;
+    if (channel.nsfw) {
+      return;
     }
 
-    const nsfwCategory = categories.find(cat => {
-      return (
-        config.categories.includes(cat.name) && cat.accuracy >= config.accuracy
-      );
-    });
+    const isDev = process.env.NODE_ENV !== 'production';
+    const rateLimitKey = `${msg.guildId as string}:${msg.channelId}`;
 
-    const promises = [];
+    if (rateLimiter.isRateLimited(rateLimitKey) && !isDev) {
+      return;
+    }
+    rateLimiter.rateLimit(rateLimitKey);
 
-    if (nsfwCategory) {
-      results.forEach(result => result.cancel());
+    let config = BASE_CONFIG;
+    const realConfig = await service.getConfig(msg.guildId as string);
+    if (realConfig) {
+      config = realConfig;
+    }
 
-      const fields = [
-        {
-          name: 'Author',
-          value: msg.author.toString(),
-        },
-        {
-          name: 'Category',
-          value: nsfwCategory.name,
-          inline: true,
-        },
-        {
-          name: 'Accuracy',
-          value: `${(nsfwCategory.accuracy * 100).toFixed(2)}%`,
-          inline: true,
-        },
-      ];
+    const results = classifyContent(msg, config, pool, isDev);
 
-      if (msg.content) {
-        fields.push({
-          name: 'Contents',
-          value: msg.content,
-          inline: false,
-        });
+    for await (const { name, source, categories, time } of results) {
+      if (!categories.length) {
+        continue;
       }
 
-      const embed = new MessageEmbed({
-        author: {
-          name: 'pleasantcord',
-          iconURL: process.env.IMAGE_URL,
-        },
-        title: 'Possible NSFW Contents Detected',
-        fields,
-        color: process.env.NODE_ENV !== 'production' ? BLUE : ORANGE,
+      const nsfwCategory = categories.find(cat => {
+        return (
+          config.categories.includes(cat.name) &&
+          cat.accuracy >= config.accuracy
+        );
       });
 
-      promises.push(channel.send({ embeds: [embed] }));
+      const promises = [];
 
-      const files = [];
+      if (nsfwCategory) {
+        const fields = [
+          {
+            name: 'Author',
+            value: msg.author.toString(),
+          },
+          {
+            name: 'Category',
+            value: nsfwCategory.name,
+            inline: true,
+          },
+          {
+            name: 'Accuracy',
+            value: `${(nsfwCategory.accuracy * 100).toFixed(2)}%`,
+            inline: true,
+          },
+        ];
 
-      if (!config.delete) {
-        files.push({
-          attachment: source,
-          name: `SPOILER_${name}`,
+        if (msg.content) {
+          fields.push({
+            name: 'Contents',
+            value: msg.content,
+            inline: false,
+          });
+        }
+
+        const embed = new EmbedBuilder({
+          author: {
+            name: 'pleasantcord',
+            iconURL: process.env.IMAGE_URL,
+          },
+          title: 'Possible NSFW Contents Detected',
+          fields,
+          color: process.env.NODE_ENV !== 'production' ? BLUE : ORANGE,
         });
 
-        promises.push(channel.send({ files }));
+        promises.push(channel.send({ embeds: [embed] }));
+
+        const files = [];
+
+        if (!config.delete) {
+          files.push({
+            attachment: source,
+            name: `SPOILER_${name}`,
+          });
+
+          promises.push(channel.send({ files }));
+        }
+
+        if (msg.deletable) {
+          promises.push(msg.delete());
+        }
       }
 
-      if (msg.deletable) {
-        promises.push(msg.delete());
+      if (process.env.NODE_ENV !== 'production') {
+        const resultLog = generateClassificationResultLog(
+          categories,
+          config,
+          time || 0
+        );
+
+        promises.push(channel.send({ embeds: [resultLog] }));
+      }
+
+      await Promise.all(promises);
+
+      if (nsfwCategory) {
+        break;
       }
     }
+  } catch (err) {
+    const errorEmbed = handleError(err as Error);
 
-    if (process.env.NODE_ENV !== 'production') {
-      const resultLog = generateClassificationResultLog(
-        categories,
-        config,
-        time || 0
-      );
-
-      promises.push(channel.send({ embeds: [resultLog] }));
-    }
-
-    await Promise.all(promises);
-
-    if (nsfwCategory) {
-      break;
+    if (errorEmbed) {
+      await msg.channel.send({ embeds: [errorEmbed] });
     }
   }
 }
 
 /**
- * Generate classification result log in form of `MessageEmbed`
+ * Generate classification result log in form of `EmbedBuilder`
  *
  * @param {Category[]} categories content categories
  * @param {Configuration} config configuration object
  * @param {number} time time needed to classify contents.
- * @returns {MessageEmbed} classification result log
+ * @returns {EmbedBuilder} classification result log
  */
 export function generateClassificationResultLog(
   categories: Category[],
   config: Configuration,
   time: number
-): MessageEmbed {
-  return new MessageEmbed({
+): EmbedBuilder {
+  return new EmbedBuilder({
     author: {
       name: 'pleasantcord',
       iconURL: process.env.IMAGE_URL,

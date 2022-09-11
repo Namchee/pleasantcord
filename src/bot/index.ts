@@ -1,9 +1,11 @@
-import { Client, Intents } from 'discord.js';
+import { Client, GatewayIntentBits, Partials } from 'discord.js';
 
-import { ConfigurationService } from '../service/config';
-import { RateLimiter } from '../service/rate-limit';
-import { BotContext, EventHandler } from './types';
-import { getEvents } from './utils';
+import Tinypool from 'tinypool';
+
+import { ConfigurationService } from '../service/config.js';
+import { RateLimiter } from '../service/rate-limit.js';
+import { BotContext, EventHandler } from './types.js';
+import { getEvents } from './utils.js';
 
 /**
  * Bootstrap the bot client with all dependencies and
@@ -19,17 +21,26 @@ export async function bootstrapBot(
   rateLimiter: RateLimiter
 ): Promise<Client> {
   const client = new Client({
-    // weirdly, both are required.
-    intents: [Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILDS],
+    intents: [
+      GatewayIntentBits.GuildMessages,
+      GatewayIntentBits.Guilds,
+      GatewayIntentBits.MessageContent,
+    ],
+    partials: [Partials.Message],
+  });
+
+  const pool = new Tinypool({
+    filename: new URL('../service/workers.js', import.meta.url).href,
   });
 
   const context: BotContext = {
     client,
     service,
     rateLimiter,
+    pool,
   };
 
-  const eventHandlers = getEvents();
+  const eventHandlers = await getEvents();
 
   eventHandlers.forEach(({ event, once, fn }: EventHandler) => {
     // dependency injection

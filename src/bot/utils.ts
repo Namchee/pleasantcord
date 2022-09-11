@@ -1,23 +1,23 @@
 import { readdirSync } from 'fs';
-import { resolve } from 'path';
-import { Constants, Message, MessageEmbed } from 'discord.js';
 
-import { Content } from '../entity/content';
+import { Message, EmbedBuilder, RESTJSONErrorCodes } from 'discord.js';
 
-import { RecoverableError } from '../exceptions/recoverable';
+import { Content } from '../entity/content.js';
 
-import { CommandHandler, EventHandler } from './types';
+import { RecoverableError } from '../exceptions/recoverable.js';
 
-import { PERMISSION_ERRORS } from '../constants/error';
-import { RED } from '../constants/color';
-import { PREFIX } from '../constants/command';
+import { CommandHandler, EventHandler } from './types.js';
+
+import { PERMISSION_ERRORS } from '../constants/error.js';
+import { RED } from '../constants/color.js';
+import { PREFIX } from '../constants/command.js';
 import {
   CDN,
   PLACEHOLDER_NAME,
   SUPPORTED_CONTENTS,
-} from '../constants/content';
+} from '../constants/content.js';
 
-import { Logger } from '../utils/logger';
+import { Logger } from '../utils/logger.js';
 
 // this cannot be tested at the moment. Context: https://github.com/vitest-dev/vitest/issues/110
 /* c8 ignore start */
@@ -30,20 +30,22 @@ let commands: Record<string, CommandHandler>;
  *
  * @returns {Record<string, CommandHandler>[]} list of command handlers.
  */
-export function getCommands(): Record<string, CommandHandler> {
+export async function getCommands(): Promise<Record<string, CommandHandler>> {
   if (!commands) {
-    const basePath = resolve(__dirname, 'commands');
+    const basePath = new URL('commands', import.meta.url);
     const commandFiles = readdirSync(basePath);
 
     commands = {};
 
-    commandFiles.forEach((commandFile: string) => {
-      const file = require(resolve(basePath, commandFile));
+    const loader = await Promise.all(
+      commandFiles.map(async (cmd: string) => {
+        const file = await import(new URL(`commands/${cmd}`, basePath).href);
 
-      const command = file.default as CommandHandler;
+        return file.default as CommandHandler;
+      })
+    );
 
-      commands[command.command] = command;
-    });
+    loader.forEach(val => (commands[val.command] = val));
   }
 
   return commands;
@@ -54,23 +56,23 @@ export function getCommands(): Record<string, CommandHandler> {
  *
  * @returns {EventHandler[]} list of event handlers.
  */
-export function getEvents(): EventHandler[] {
-  const basePath = resolve(__dirname, 'events');
-  const eventFiles = readdirSync(basePath);
+export function getEvents(): Promise<EventHandler[]> {
+  const base = new URL('events', import.meta.url);
+  const eventFiles = readdirSync(base);
 
-  const events = eventFiles.map((eventFile: string) => {
-    const file = require(resolve(basePath, eventFile));
+  return Promise.all(
+    eventFiles.map(async (ev: string) => {
+      const file = await import(new URL(`events/${ev}`, base).href);
 
-    const { event, once, fn } = file.default as EventHandler;
+      const { event, once, fn } = file.default as EventHandler;
 
-    return {
-      event,
-      once: once || false,
-      fn,
-    };
-  });
-
-  return events;
+      return {
+        event,
+        once: once || false,
+        fn,
+      };
+    })
+  );
 }
 
 /* c8 ignore end */
@@ -81,10 +83,10 @@ export function getEvents(): EventHandler[] {
  * are caught.
  *
  * @param {Error} err error object
- * @returns {MessageEmbed} error message.
+ * @returns {EmbedBuilder} error message.
  */
-export function handleError(err: Error): MessageEmbed | null {
-  const errorMessage = new MessageEmbed({
+export function handleError(err: Error): EmbedBuilder | null {
+  const errorMessage = new EmbedBuilder({
     author: {
       name: 'pleasantcord',
       iconURL: process.env.IMAGE_URL,
@@ -94,7 +96,7 @@ export function handleError(err: Error): MessageEmbed | null {
 
   const code: number = (err as any).code ? (err as any).code : 0;
 
-  if (code === Constants.APIErrors.UNKNOWN_MESSAGE) {
+  if (code === RESTJSONErrorCodes.UnknownMessage) {
     // this is caused by double deletion, kindly ignore this
     return null;
   }
@@ -105,10 +107,12 @@ export function handleError(err: Error): MessageEmbed | null {
       `\`pleasantcord\` lacks the required permissions to perform its duties`
     );
 
-    errorMessage.addField(
-      'Solution',
-      `Please make sure that \`pleasantcord\` has all the required permissions as stated in the documentation to manage this server and please make sure that \`pleasantcord\` has sufficient access rights to target channels`
-    );
+    errorMessage.addFields([
+      {
+        name: 'Solution',
+        value: `Please make sure that \`pleasantcord\` has all the required permissions as stated in the documentation to manage this server and please make sure that \`pleasantcord\` has sufficient access rights to target channels`,
+      },
+    ]);
   } else {
     Logger.getInstance().logBot(err);
 
@@ -170,7 +174,8 @@ export function getFilterableContents(
     }
   });
 
-  msg.embeds.forEach(({ url, image, video, thumbnail }) => {
+  msg.embeds.forEach(({ data }) => {
+    const { url, image, video, thumbnail } = data;
     const contentUrl = video?.url || image?.url || thumbnail?.url || url || '';
 
     if (contentUrl) {

@@ -1,11 +1,11 @@
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 import {
   classifyContent,
   generateClassificationResultLog,
-} from '../service/classifier';
+} from '../service/classifier.js';
 
-import { BotContext, CommandHandlerParams } from '../types';
-import { RecoverableError } from './../../exceptions/recoverable';
+import { BotContext, CommandHandlerParams } from '../types.js';
+import { RecoverableError } from './../../exceptions/recoverable.js';
 
 export default {
   command: 'Classify Content',
@@ -15,7 +15,7 @@ export default {
   fn: async (
     ctx: BotContext,
     { guild, message }: CommandHandlerParams
-  ): Promise<MessageEmbed[] | undefined> => {
+  ): Promise<EmbedBuilder[] | undefined> => {
     if (!message) {
       return;
     }
@@ -28,8 +28,13 @@ export default {
       );
     }
 
-    const results = classifyContent(message, config, true);
-    const embeds: MessageEmbed[] = [];
+    const results = classifyContent(
+      message,
+      config,
+      ctx.pool,
+      process.env.NODE_ENV === 'development'
+    );
+    const embeds: EmbedBuilder[] = [];
 
     for await (const result of results) {
       const embed = generateClassificationResultLog(

@@ -25,19 +25,13 @@
   </a>
 </p>
 
-Pleasantcord is a simple NSFW image auto moderation bot 🤖 for Discord powered by [TensorFlow JS](https://www.npmjs.com/package/@tensorflow/tfjs-node). On the inside, it uses a pretrained [Inception V3 model](https://keras.io/api/applications/inceptionv3/) provided by [nsfw.js](https://github.com/infinitered/nsfwjs) that is able to distinguish image category to several categories.
+Pleasantcord is a simple NSFW image auto moderation bot 🤖 for Discord powered by [TensorFlow JS](https://www.npmjs.com/package/@tensorflow/tfjs-node). On the inside, it uses a pretrained model provided by [nsfw.js](https://github.com/infinitered/nsfwjs) that is able to distinguish image category to several categories.
 
 <p align="center">
   <img src="./docs/demo.gif" />
 </p>
 
 > This is just a demo. Of course Pleasantcord won't remove Cuphead images!
-
-## Motivation
-
-Discord has [NSFW Channel System](https://support.discord.com/hc/en-us/articles/115000084051-NSFW-Channels-and-Content). Unfortunately, the system cannot prevent NSFW contents from being posted on SFW channels and content moderation must still be done manually by server administrator.
-
-This bot aims to fix that by automatically detecting potential NSFW images and administer correct response to the posted content either by blurring the image (coming soon!) or removing it altogether.
 
 ## Installation
 
@@ -60,17 +54,14 @@ All commands are prefixed with `pc!`
 Command | Description
 ------- | -----------
 `status` | Show the bot status (ping, environment, etc).
+`config` | View server config
 `help` | Show the bot help menu.
 
 ## FAQ
 
 ### What's the default behavior of `pleasantcord`?
 
-By default, `pleasantcord` will classify any image contents as NSFW when it has `Hentai` or `Porn` label with more than 75% accuracy and delete it from any **text channel** that isn't configured to be a NSFW channel.
-
-### The GIF classification is so slow!
-
-We are aware of this issue. We are looking to enhance the performance in future release.
+By default, `pleasantcord` will classify any image contents as NSFW when it has `Hentai` or `Porn` label with more than 70% accuracy and delete it from any **text channel** that isn't configured to be a NSFW channel.
 
 ### Animated `webp` and `png` throw errors!
 
@@ -90,6 +81,7 @@ When the issue has been detected, acknowledged, and analyzed, your personal data
 
 - [infinitered](https://github.com/infinitered) — Provides an easy-to-use pretrained model for NSFW detection.
 - [Namchee](https://github.com/Namchee/pleasantcord) — (me) For working on the project!
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE)

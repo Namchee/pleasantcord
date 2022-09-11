@@ -1,9 +1,9 @@
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 
-import { BLUE, ORANGE } from '../../constants/color';
+import { BLUE, ORANGE } from '../../constants/color.js';
 
-import { BotContext, CommandHandlerParams } from '../types';
-import { RecoverableError } from './../../exceptions/recoverable';
+import { BotContext, CommandHandlerParams } from '../types.js';
+import { RecoverableError } from './../../exceptions/recoverable.js';
 
 export default {
   command: 'config',
@@ -12,7 +12,7 @@ export default {
   fn: async (
     { service }: BotContext,
     { guild }: CommandHandlerParams
-  ): Promise<MessageEmbed[]> => {
+  ): Promise<EmbedBuilder[]> => {
     const config = await service.getConfig(guild.id);
 
     if (!config) {
@@ -22,7 +22,7 @@ export default {
     }
 
     return [
-      new MessageEmbed({
+      new EmbedBuilder({
         author: {
           name: 'pleasantcord',
           iconURL: process.env.IMAGE_URL,

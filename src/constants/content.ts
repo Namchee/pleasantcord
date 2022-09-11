@@ -1,4 +1,4 @@
-import { ContentType } from '../entity/config';
+import { ContentType } from '../entity/config.js';
 
 export const CDN = `https://cdn.discordapp.com/emojis`;
 

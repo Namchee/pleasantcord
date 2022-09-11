@@ -2,9 +2,9 @@ import fetch from 'node-fetch';
 import cheerio from 'cheerio';
 import sharp from 'sharp';
 
-import { FFmpeg, createFFmpeg } from '@ffmpeg/ffmpeg';
-
 import type { Response } from 'node-fetch';
+
+import { FFmpeg, createFFmpeg } from '@ffmpeg/ffmpeg';
 
 export interface ContentData {
   mime: string;

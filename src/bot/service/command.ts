@@ -1,9 +1,7 @@
-import {
-  ContextMenuCommandBuilder,
-  SlashCommandBuilder,
-} from '@discordjs/builders';
+import { ContextMenuCommandBuilder, SlashCommandBuilder } from 'discord.js';
+
 import { REST } from '@discordjs/rest';
-import { Routes } from 'discord-api-types/v9';
+import { Routes } from 'discord-api-types/v10';
 
 export interface Credentials {
   clientID: string;
@@ -36,7 +34,7 @@ export async function registerCommands(
       new ContextMenuCommandBuilder().setName('Classify Content').setType(3),
     ].map(cmd => cmd.toJSON());
 
-    const rest = new REST({ version: '9' }).setToken(token);
+    const rest = new REST().setToken(token);
 
     await rest.put(Routes.applicationGuildCommands(clientID, guildID), {
       body: commands,

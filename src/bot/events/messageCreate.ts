@@ -1,13 +1,13 @@
-import { Message, MessageEmbed, TextChannel } from 'discord.js';
+import { Message, EmbedBuilder, TextChannel } from 'discord.js';
 
-import { moderateContent } from '../service/classifier';
+import { moderateContent } from '../service/classifier.js';
 
-import { handleError, getCommandFromMessage, getCommands } from '../utils';
+import { handleError, getCommandFromMessage, getCommands } from '../utils.js';
 
-import { BotContext, CommandHandlerParams } from '../types';
+import { BotContext, CommandHandlerParams } from '../types.js';
 
-import { PREFIX } from '../../constants/command';
-import { EMPTY_EMBED } from '../../constants/embeds';
+import { PREFIX } from '../../constants/command.js';
+import { EMPTY_EMBED } from '../../constants/embeds.js';
 
 export default {
   event: 'messageCreate',
@@ -16,15 +16,19 @@ export default {
     msg: Message
   ): Promise<Message<boolean> | void> => {
     try {
-      if (!msg.guild || !msg.channel.isText() || msg.author.bot) {
+      if (!msg.guild || !msg.channel.isTextBased() || msg.author.bot) {
         return;
       }
 
+      if (msg.partial) {
+        await msg.fetch();
+      }
+
       if (msg.content.startsWith(PREFIX)) {
-        const commandMap = getCommands();
+        const commandMap = await getCommands();
         const handler = commandMap[getCommandFromMessage(msg.content)].fn;
 
-        let embeds: MessageEmbed[] = [EMPTY_EMBED];
+        let embeds: EmbedBuilder[] = [EMPTY_EMBED];
 
         if (handler) {
           const params: CommandHandlerParams = {

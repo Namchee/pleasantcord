@@ -3,19 +3,21 @@ import {
   ClientEvents,
   Guild,
   Message,
-  MessageEmbed,
+  EmbedBuilder,
   TextChannel,
 } from 'discord.js';
 
-import { ConfigurationService } from '../service/config';
-import { RateLimiter } from '../service/rate-limit';
-import { Category } from '../entity/content';
+import Tinypool from 'tinypool';
+
+import { ConfigurationService } from '../service/config.js';
+import { RateLimiter } from '../service/rate-limit.js';
 
 // Bot dependency object.
 export interface BotContext {
   client: Client;
   service: ConfigurationService;
   rateLimiter: RateLimiter;
+  pool: Tinypool;
 }
 
 // Discord's event handler definition
@@ -42,7 +44,7 @@ export interface CommandHandlerParams {
 export type CommandHandlerFunction = (
   ctx: BotContext,
   params: CommandHandlerParams
-) => Promise<MessageEmbed[]>;
+) => Promise<EmbedBuilder[]>;
 
 /**
  * Command handler.
@@ -54,16 +56,4 @@ export interface CommandHandler {
   description: string;
   type: 'MESSAGE' | 'CHAT_INPUT';
   fn: CommandHandlerFunction;
-}
-
-/**
- * Classification result.
- *
- * Returned from classification result from thread
- */
-export interface ClassificationResult {
-  name: string;
-  source: string;
-  categories: Category[];
-  time?: number;
 }

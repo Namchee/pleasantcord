@@ -1,14 +1,14 @@
-import { Guild, MessageEmbed, TextChannel } from 'discord.js';
+import { Guild, EmbedBuilder, TextChannel } from 'discord.js';
 
-import { Credentials, registerCommands } from '../service/command';
+import { Credentials, registerCommands } from '../service/command.js';
 
-import { BASE_CONFIG } from './../../entity/config';
+import { BASE_CONFIG } from './../../entity/config.js';
 
-import { handleError } from './../utils';
+import { handleError } from './../utils.js';
 
-import type { BotContext } from './../types';
+import type { BotContext } from './../types.js';
 
-import { DEFAULT_CHANNEL } from './../../constants/channel';
+import { DEFAULT_CHANNEL } from './../../constants/channel.js';
 
 export default {
   event: 'guildCreate',
@@ -24,7 +24,7 @@ export default {
 
       return registerCommands(guild.id, creds);
     } catch (err) {
-      const embed = handleError(err as Error) as MessageEmbed;
+      const embed = handleError(err as Error) as EmbedBuilder;
 
       const defaultChannel = guild.channels.cache.find(
         chan => chan.name.toLowerCase() === DEFAULT_CHANNEL

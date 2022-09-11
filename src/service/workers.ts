@@ -1,18 +1,17 @@
 import * as tf from '@tensorflow/tfjs-node';
 
 import { NSFWJS, load } from 'nsfwjs';
-import { expose } from 'threads/worker';
 
 import {
   aggregatePrediction,
   mapClassificationsToCategories,
-} from './../utils/mapper';
-import { fetchContent } from './../utils/fetcher';
+} from './../utils/mapper.js';
+import { fetchContent } from './../utils/fetcher.js';
 
-import { ModelType } from './../entity/config';
+import { ModelType } from './../entity/config.js';
 
-import { sortCategories } from './../entity/content';
-import type { Category } from './../entity/content';
+import { ClassificationParam, sortCategories } from './../entity/content.js';
+import type { Category } from './../entity/content.js';
 
 let mobilenet: NSFWJS;
 let inception: NSFWJS;
@@ -125,17 +124,15 @@ async function classifyGIF(
 /**
  * Classify supported contents into multiple labels
  *
- * @param {string} source content URL
- * @param {ModelType} model NSFW model to be used
- * @param {string[]} content targeted content MIME types
+ * @param {ClassificationParam} param classification param
  * @returns {Promise<Category[]>} content labels, sorted
  * by descending accuracy
  */
-const classify = async (
-  source: string,
-  model: ModelType,
-  content: string[]
-): Promise<Category[]> => {
+export default async function classify({
+  source,
+  model,
+  content,
+}: ClassificationParam): Promise<Category[]> {
   const { mime, data } = await fetchContent(source);
 
   if (!content.includes(mime)) {
@@ -145,12 +142,4 @@ const classify = async (
   return mime === 'image/gif'
     ? classifyGIF(data, model)
     : classifyImage(data, model);
-};
-
-export type Classifier = (
-  source: string,
-  model: ModelType,
-  content: string[]
-) => Promise<Category[]>;
-
-expose(classify);
+}
