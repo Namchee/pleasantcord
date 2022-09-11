@@ -81,6 +81,7 @@ When the issue has been detected, acknowledged, and analyzed, your personal data
 
 - [infinitered](https://github.com/infinitered) — Provides an easy-to-use pretrained model for NSFW detection.
 - [Namchee](https://github.com/Namchee/pleasantcord) — (me) For working on the project!
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE)

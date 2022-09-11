@@ -18,7 +18,7 @@ export default {
         status: 'online',
         activities: [
           {
-            name: 'for NSFW contents 👀',
+            name: 'for graphical contents 👀',
             type: ActivityType.Watching,
           },
         ],
