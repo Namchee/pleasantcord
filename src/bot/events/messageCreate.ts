@@ -26,7 +26,7 @@ export default {
 
       if (msg.content.startsWith(PREFIX)) {
         const commandMap = await getCommands();
-        const handler = commandMap[getCommandFromMessage(msg.content)].fn;
+        const handler = commandMap[getCommandFromMessage(msg.content)];
 
         let embeds: EmbedBuilder[] = [EMPTY_EMBED];
 
@@ -36,7 +36,7 @@ export default {
             channel: msg.channel as TextChannel,
             timestamp: msg.createdTimestamp,
           };
-          embeds = await handler(ctx, params);
+          embeds = await handler.fn(ctx, params);
         }
 
         return msg.channel.send({ embeds });

@@ -30,7 +30,7 @@ export default {
 
     try {
       const commandMap = await getCommands();
-      const handler = commandMap[interaction.commandName].fn;
+      const handler = commandMap[interaction.commandName];
 
       let embeds: EmbedBuilder[] = [UNKNOWN_COMMAND_EMBED];
 
@@ -42,7 +42,7 @@ export default {
           message,
         };
 
-        const handlerEmbeds = await handler(ctx, params);
+        const handlerEmbeds = await handler.fn(ctx, params);
 
         if (handlerEmbeds.length) {
           embeds = handlerEmbeds;
